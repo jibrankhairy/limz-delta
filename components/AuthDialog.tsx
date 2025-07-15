@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import React from "react";
 import { toast } from "sonner";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 type Props = {
   mode: "signin" | "signup";
@@ -20,6 +21,8 @@ type Props = {
 
 export const AuthDialog = ({ mode }: Props) => {
   const [open, setOpen] = React.useState(false);
+
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -41,9 +44,7 @@ export const AuthDialog = ({ mode }: Props) => {
 
     try {
       const endpoint =
-        mode === "signup"
-          ? "http://localhost:5000/api/auth/register"
-          : "http://localhost:5000/api/auth/login";
+        mode === "signup" ? "/api/auth/register" : "/api/auth/login";
 
       const payload =
         mode === "signup"
@@ -56,6 +57,7 @@ export const AuthDialog = ({ mode }: Props) => {
 
       if (mode === "signin") {
         localStorage.setItem("token", res.data.token);
+        router.push("/dashboard");
       }
 
       setOpen(false);
