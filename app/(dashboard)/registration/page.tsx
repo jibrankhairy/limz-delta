@@ -120,6 +120,46 @@ export default function RegistrationPage() {
           }}
         />
       </div>
+
+      <style>
+        {`
+          @media print {
+            @page {
+              size: A4 landscape;
+              margin: 0;
+            }
+
+            body {
+              margin: 0;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+
+            .print-only {
+              display: block;
+            }
+
+            body * {
+              visibility: hidden;
+            }
+
+            .print-only, .print-only * {
+              visibility: visible;
+            }
+
+            .print-only {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100%;
+            }
+
+            button, [data-no-print] {
+              display: none !important;
+            }
+          }
+        `}
+      </style>
     </div>
   );
 }

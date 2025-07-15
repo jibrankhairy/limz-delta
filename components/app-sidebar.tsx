@@ -38,13 +38,13 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: "Registration Form",
+      title: "Form Pendaftaran",
       url: "/registration",
       icon: IconListDetails,
     },
     {
-      title: "Analytics",
-      url: "#",
+      title: "Surat Tugas",
+      url: "/surat",
       icon: IconChartBar,
     },
     {

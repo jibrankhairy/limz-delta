@@ -138,3 +138,8 @@
     width: 100%;
   }
 }
+
+@page {
+  margin: 0;
+  size: A4;
+}
