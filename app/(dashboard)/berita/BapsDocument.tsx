@@ -34,7 +34,10 @@ interface BapsDocumentProps {
 export const BapsDocument = React.forwardRef<HTMLDivElement, BapsDocumentProps>(
   ({ data }, ref) => {
     return (
-      <div ref={ref} className="p-10 font-sans text-xs text-black bg-white">
+      <div
+        ref={ref}
+        className="p-10 font-[Times_New_Roman] text-xs text-black bg-white"
+      >
         <header className="flex items-start justify-between border-b-4 border-black pb-2">
           <div className="w-24">
             <Logo />
@@ -54,7 +57,28 @@ export const BapsDocument = React.forwardRef<HTMLDivElement, BapsDocumentProps>(
           <h1 className="text-sm font-bold underline">
             Berita Acara Pengambilan Sampel
           </h1>
-          <p>Nomor: {data.nomorFpps}/BAPS/.../...</p>
+          {(() => {
+            const bulanRomawi = [
+              "I",
+              "II",
+              "III",
+              "IV",
+              "V",
+              "VI",
+              "VII",
+              "VIII",
+              "IX",
+              "X",
+              "XI",
+              "XII",
+            ];
+            const bulan = new Date().getMonth();
+            const tahun = new Date().getFullYear();
+            const suffix = data.nomorFpps.slice(-3).padStart(3, "0");
+            const nomorLengkap = `${suffix}/DIL/${bulanRomawi[bulan]}/${tahun}/BA`;
+
+            return <p>Nomor: {nomorLengkap}</p>;
+          })()}
         </div>
 
         <main>
@@ -136,7 +160,7 @@ export const BapsDocument = React.forwardRef<HTMLDivElement, BapsDocumentProps>(
             {data.rincianUji.map((item, index) => (
               <div
                 key={item.id}
-                className="flex border-b border-black last:border-b-0"
+                className="flex border-b border-black last:border-b-0 break-inside-avoid"
               >
                 <div className="w-8 p-1 border-r border-black text-center">
                   {index + 1}

@@ -24,15 +24,23 @@ export function BapsPreviewDialog({
 }: BapsPreviewDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="bg-white">
+      <DialogContent className="bg-background text-foreground border border-border p-6">
         <DialogHeader>
-          <DialogTitle>Siap Mencetak Berita Acara?</DialogTitle>
-          <DialogDescription>
-            Pastikan semua data sudah benar. Klik 'Print' untuk melanjutkan.
+          <DialogTitle className="text-base font-semibold text-foreground">
+            Siap Mencetak Berita Acara?
+          </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground mt-1">
+            Pastikan semua data sudah benar. Klik <strong>'Print'</strong> untuk
+            melanjutkan.
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+
+        <DialogFooter className="mt-4 space-x-2">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            className="bg-transparent border border-input text-foreground"
+          >
             Batal
           </Button>
           <Button onClick={onPrint}>

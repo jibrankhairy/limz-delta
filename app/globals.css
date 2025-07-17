@@ -137,6 +137,16 @@
     top: 0;
     width: 100%;
   }
+
+  .page-break {
+    break-after: always;
+  }
+  
+  table,
+  tr,
+  td {
+    page-break-inside: avoid;
+  }
 }
 
 @page {

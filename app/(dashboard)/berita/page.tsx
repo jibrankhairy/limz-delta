@@ -118,106 +118,116 @@ export default function BeritaPage() {
   };
 
   return (
-    <div className="px-4 md:px-6 lg:px-10 py-6 max-w-5xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-semibold text-foreground leading-tight">
+    <div className="space-y-8 px-4 md:px-8 lg:px-6 pt-6">
+      <div>
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-foreground leading-tight">
           Berita Acara Pengambilan Sampel
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-sm md:text-base text-muted-foreground mt-2 max-w-2xl">
           Cari data berdasarkan Nomor FPPS untuk mengisi Berita Acara.
         </p>
       </div>
 
-      <Card className="border border-border shadow-none">
-        <CardHeader>
-          <CardTitle className="text-base font-medium">
-            Cari Data FPPS
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CariForm
-            value={fppsInput}
-            loading={isLoading}
-            onChange={setFppsInput}
-            onSubmit={handleCariFpps}
-          />
-        </CardContent>
-      </Card>
-
-      {bapsData && (
-        <Card className="mt-6 border border-border shadow-none">
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label className="text-sm font-medium text-foreground">
-                  Perusahaan
-                </Label>
-                <p className="text-base font-semibold mt-1">
-                  {bapsData.perusahaan}
-                </p>
-              </div>
-              <div>
-                <Label className="text-sm font-medium text-foreground">
-                  No. Telp
-                </Label>
-                <p className="text-base font-semibold mt-1">
-                  {bapsData.noTelp}
-                </p>
-              </div>
-              <div className="md:col-span-2">
-                <Label className="text-sm font-medium text-foreground">
-                  Alamat
-                </Label>
-                <p className="text-base font-semibold mt-1">
-                  {bapsData.alamat}
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <Label
-                htmlFor="hariTanggal"
-                className="text-sm font-medium text-foreground"
-              >
-                Hari, Tanggal Pengambilan Sampel
-              </Label>
-              <Input
-                id="hariTanggal"
-                name="hariTanggal"
-                value={bapsData.hariTanggal}
-                onChange={handleBapsChange}
-                className="bg-transparent border border-input text-foreground mt-1"
-              />
-            </div>
-
-            <TitikPengujianForm
-              data={bapsData.titikPengujian}
-              onChange={handleBapsChange}
+      <div className="grid grid-cols-1 lg:grid-cols-2 items-start gap-6">
+        {/* ✅ FORM DI KIRI */}
+        <div className="space-y-6">
+          {/* Form cari */}
+          <div className="border border-border rounded-lg p-4">
+            <h2 className="text-base font-medium mb-2">Cari Data FPPS</h2>
+            <CariForm
+              value={fppsInput}
+              loading={isLoading}
+              onChange={setFppsInput}
+              onSubmit={handleCariFpps}
             />
-            <RincianForm
-              rincianUji={bapsData.rincianUji}
-              onChange={handleRincianChange}
-            />
-          </CardContent>
-          <CardFooter className="justify-end">
-            <Button onClick={() => setIsPreviewOpen(true)}>
-              Simpan & Cetak
-            </Button>
-          </CardFooter>
-        </Card>
-      )}
+          </div>
 
+          {/* Form isi data jika sudah ada bapsData */}
+          {bapsData && (
+            <>
+              <div className="border border-border rounded-lg p-4 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium text-foreground">
+                      Perusahaan
+                    </Label>
+                    <p className="text-base font-semibold mt-1">
+                      {bapsData.perusahaan}
+                    </p>
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-foreground">
+                      No. Telp
+                    </Label>
+                    <p className="text-base font-semibold mt-1">
+                      {bapsData.noTelp}
+                    </p>
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label className="text-sm font-medium text-foreground">
+                      Alamat
+                    </Label>
+                    <p className="text-base font-semibold mt-1">
+                      {bapsData.alamat}
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <Label
+                    htmlFor="hariTanggal"
+                    className="text-sm font-medium text-foreground"
+                  >
+                    Hari, Tanggal Pengambilan Sampel
+                  </Label>
+                  <Input
+                    id="hariTanggal"
+                    name="hariTanggal"
+                    value={bapsData.hariTanggal}
+                    onChange={handleBapsChange}
+                    className="bg-transparent border border-input text-foreground mt-1"
+                  />
+                </div>
+              </div>
+
+              {/* Titik Pengujian Form */}
+              <div className="border border-border rounded-lg p-4">
+                <TitikPengujianForm
+                  data={bapsData.titikPengujian}
+                  onChange={handleBapsChange}
+                />
+              </div>
+
+              {/* Rincian Form */}
+              <div className="border border-border rounded-lg p-4">
+                <RincianForm
+                  rincianUji={bapsData.rincianUji}
+                  onChange={handleRincianChange}
+                />
+              </div>
+
+              <div className="flex justify-end">
+                <Button onClick={() => setIsPreviewOpen(true)}>
+                  Simpan & Cetak
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+
+        {bapsData && (
+          <div className="print-only max-h-[90vh] overflow-auto sticky top-20">
+            <BapsDocument data={bapsData} />
+          </div>
+        )}
+      </div>
+
+      {/* PREVIEW CETAK */}
       <BapsPreviewDialog
         open={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
         onPrint={() => window.print()}
       />
-
-      {bapsData && (
-        <div className="print-only">
-          <BapsDocument data={bapsData} />
-        </div>
-      )}
     </div>
   );
 }
