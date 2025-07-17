@@ -42,11 +42,48 @@ export default function SuratPage() {
       ];
       const bulan = new Date().getMonth();
       const tahun = new Date().getFullYear();
+
+      const last3 = nomorSurat.nomorFpps.slice(-3);
+      const formattedNomor = `${last3[0]}.${last3.slice(1)}`; // misalnya "095" → "0.95"
+
       setNomorSurat((prev) => ({
         ...prev,
-        nomorStpsLengkap: `${prev.nomorFpps}/DIL/${bulanRomawi[bulan]}/${tahun}/STPS`,
+        nomorStpsLengkap: `${formattedNomor}/DIL/${bulanRomawi[bulan]}/${tahun}/STPS`,
       }));
     }
+  }, [nomorSurat.nomorFpps]);
+
+  useEffect(() => {
+    if (!nomorSurat.nomorFpps) return;
+
+    const fetchFppsData = async () => {
+      try {
+        const res = await fetch(`/api/fpps/${nomorSurat.nomorFpps}`);
+        if (!res.ok) throw new Error("Nomor FPPS tidak ditemukan");
+
+        const result = await res.json();
+
+        setCustomerData({
+          hariTanggal: result.formData.tanggalMasuk || "",
+          namaPelanggan: result.formData.namaPelanggan || "",
+          alamat: result.formData.alamatPelanggan || "",
+          contactPerson: "",
+        });
+
+        setPetugas(result.formData.petugas || [""]);
+      } catch (error) {
+        console.error("Gagal mengambil data FPPS:", error);
+        setCustomerData({
+          hariTanggal: "",
+          namaPelanggan: "",
+          alamat: "",
+          contactPerson: "",
+        });
+        setPetugas([""]);
+      }
+    };
+
+    fetchFppsData();
   }, [nomorSurat.nomorFpps]);
 
   const handlePreview = (e: React.FormEvent) => {
@@ -69,7 +106,7 @@ export default function SuratPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 items-start min-h-screen">
         <FormSurat
           nomorSurat={nomorSurat}
           setNomorSurat={setNomorSurat}

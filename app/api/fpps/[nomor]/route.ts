@@ -4,14 +4,12 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Fpps from "@/models/Fpps";
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { nomor: string } }
-) {
+export async function GET(req: NextRequest) {
   await connectDB();
 
   try {
-    const nomor = params.nomor;
+    const url = new URL(req.url);
+    const nomor = url.pathname.split("/").pop(); // ambil terakhir dari path
 
     const data = await Fpps.findOne({ nomorFpps: nomor });
 
@@ -29,6 +27,8 @@ export async function GET(
           namaPelanggan: data.namaPelanggan,
           alamatPelanggan: data.alamatPelanggan,
           noTelp: data.noTelp,
+          tanggalMasuk: data.tanggalMasuk,
+          petugas: data.petugas,
         },
         rincian: data.rincian,
       },

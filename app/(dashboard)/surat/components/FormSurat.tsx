@@ -64,7 +64,7 @@ export default function FormSurat({
         {/* Nomor Surat */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <InputField
-            label="Nomor FPPS"
+            label="Nomor FPPS (DIL - XXXX)"
             name="nomorFpps"
             value={nomorSurat.nomorFpps}
             onChange={(e: any) =>
