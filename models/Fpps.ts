@@ -13,7 +13,7 @@ const fppsSchema = new mongoose.Schema(
   {
     nomorFpps: { type: String, required: true, unique: true },
     nomorQuotation: String,
-    petugas: String,
+    petugas: { type: [String], required: true },
     namaPelanggan: String,
     alamatPelanggan: String,
     noTelp: String,

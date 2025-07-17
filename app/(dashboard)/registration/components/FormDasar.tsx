@@ -1,13 +1,18 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
+import { PlusCircle, XCircle } from "lucide-react";
 
 export default function FormDasar({ formData, setFormData, goToStep2 }) {
+  const [petugasList, setPetugasList] = useState<string[]>(
+    formData.petugas || [""]
+  );
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "nomorFpps") {
@@ -15,9 +20,26 @@ export default function FormDasar({ formData, setFormData, goToStep2 }) {
       if (/^\d*$/.test(onlyNumber)) {
         setFormData((prev) => ({ ...prev, [name]: onlyNumber }));
       }
-    } else {
+    } else if (!["petugas"].includes(name)) {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
+  };
+
+  const handlePetugasChange = (index: number, value: string) => {
+    const updated = [...petugasList];
+    updated[index] = value;
+    setPetugasList(updated);
+    setFormData((prev) => ({ ...prev, petugas: updated }));
+  };
+
+  const addPetugas = () => {
+    setPetugasList([...petugasList, ""]);
+  };
+
+  const removePetugas = (index: number) => {
+    const filtered = petugasList.filter((_, i) => i !== index);
+    setPetugasList(filtered);
+    setFormData((prev) => ({ ...prev, petugas: filtered }));
   };
 
   return (
@@ -59,20 +81,49 @@ export default function FormDasar({ formData, setFormData, goToStep2 }) {
               className="bg-transparent border border-input text-foreground mt-1"
             />
           </div>
+
           <div>
-            <Label
-              htmlFor="petugas"
-              className="text-sm font-medium text-foreground"
-            >
+            <Label className="text-sm font-medium text-foreground mb-2">
               Petugas
             </Label>
-            <Input
-              name="petugas"
-              value={formData.petugas}
-              onChange={handleChange}
-              className="bg-transparent border border-input text-foreground mt-1"
-            />
+            <div className="space-y-3">
+              {petugasList.map((nama, index) => (
+                <div key={index} className="flex items-center gap-3">
+                  <Label className="w-5 text-sm font-medium text-foreground">
+                    {index + 1}.
+                  </Label>
+                  <Input
+                    type="text"
+                    placeholder={`Nama Petugas ${index + 1}`}
+                    value={nama}
+                    onChange={(e) => handlePetugasChange(index, e.target.value)}
+                    required
+                    className="flex-1 bg-transparent border border-input text-foreground mt-1"
+                  />
+                  {petugasList.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removePetugas(index)}
+                      className="text-red-500 hover:bg-red-500/10"
+                    >
+                      <XCircle size={20} />
+                    </Button>
+                  )}
+                </div>
+              ))}
+              <Button
+                type="button"
+                onClick={addPetugas}
+                variant="outline"
+                className="mt-2 ml-8 flex items-center gap-2"
+              >
+                <PlusCircle size={18} /> Tambah Petugas
+              </Button>
+            </div>
           </div>
+
           <div>
             <Label
               htmlFor="tanggalMasuk"

@@ -25,6 +25,17 @@ interface FppsDocumentProps {
 
 export const FppsDocument = React.forwardRef<HTMLDivElement, FppsDocumentProps>(
   ({ data }, ref) => {
+    const formatTanggalIndo = (tanggalISO: string) => {
+      if (!tanggalISO) return "";
+      const date = new Date(tanggalISO);
+      if (isNaN(date.getTime())) return "";
+      return date.toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    };
+
     return (
       <div ref={ref} className="bg-white p-8 text-black text-xs font-sans">
         <div className="text-center mb-6">
@@ -41,21 +52,33 @@ export const FppsDocument = React.forwardRef<HTMLDivElement, FppsDocumentProps>(
               <p>1) Nama Pelanggan: {data.namaPelanggan}</p>
               <p>2) Alamat Pelanggan: {data.alamatPelanggan}</p>
               <p>3) No. Telp/HP: {data.noTelp}</p>
-              <p>4) Tanggal Masuk Contoh Uji: {data.tanggalMasuk}</p>
+              <p>
+                4) Tanggal Masuk Contoh Uji:{" "}
+                {formatTanggalIndo(data.tanggalMasuk)}
+              </p>
+
               <p>5) Kegiatan/Paket Pekerjaan: {data.kegiatan}</p>
             </div>
             <div>
               <p>Nomor FPPS: {data.nomorFpps}</p>
               <p>Nomor Quotation: {data.nomorQuotation}</p>
-              <p>Petugas: {data.petugas}</p>
+              <div className="flex items-start">
+                <span className="whitespace-nowrap mr-2">Petugas:</span>
+                <div className="flex flex-col">
+                  {Array.isArray(data.petugas) &&
+                    data.petugas.map((nama, i) => (
+                      <span key={i}>
+                        {i + 1}. {nama}
+                      </span>
+                    ))}
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Tabel Rincian */}
         <h2 className="font-bold mb-2">II. Rincian Pengujian</h2>
         <div className="border border-black">
-          {/* Header Table */}
           <div className="flex font-bold bg-gray-200 border-b border-black">
             <div className="w-8 p-1 border-r border-black text-center">No.</div>
             <div className="w-28 p-1 border-r border-black text-center">
