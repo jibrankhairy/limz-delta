@@ -8,12 +8,34 @@ import { Button } from "@/components/ui/button";
 import { CardContent, CardFooter } from "@/components/ui/card";
 import { PlusCircle, XCircle } from "lucide-react";
 
-export default function FormDasar({ formData, setFormData, goToStep2 }) {
+type FormDasarProps = {
+  formData: {
+    nomorFpps: string;
+    nomorQuotation: string;
+    namaPelanggan: string;
+    noTelp: string;
+    alamatPelanggan: string;
+    kegiatan: string;
+    tanggalMasuk: string;
+    petugas: string[];
+  };
+  setFormData: React.Dispatch<React.SetStateAction<FormDasarProps["formData"]>>;
+  goToStep2: () => void;
+};
+
+export default function FormDasar({
+  formData,
+  setFormData,
+  goToStep2,
+}: FormDasarProps) {
   const [petugasList, setPetugasList] = useState<string[]>(
     formData.petugas || [""]
   );
 
-  const handleChange = (e) => {
+  // ✅ Kasih typing untuk e
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     if (name === "nomorFpps") {
       const onlyNumber = value.startsWith("DIL-") ? value.slice(4) : value;

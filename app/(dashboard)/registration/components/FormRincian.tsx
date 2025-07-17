@@ -8,6 +8,38 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PlusCircle, Printer, Trash2 } from "lucide-react";
 
+type FormRincianProps = {
+  formData: {
+    nomorFpps: string;
+    namaPelanggan: string;
+    nomorQuotation: string;
+    kegiatan: string;
+  };
+  rincian: {
+    id: string;
+    area: string;
+    matriks: string;
+    parameter: string;
+    regulasi: string;
+    metode: string;
+  }[];
+  setRincian: React.Dispatch<
+    React.SetStateAction<
+      {
+        id: string;
+        area: string;
+        matriks: string;
+        parameter: string;
+        regulasi: string;
+        metode: string;
+      }[]
+    >
+  >;
+  goBack: () => void;
+  onSubmit: () => void;
+  onPrint: () => void;
+};
+
 export default function FormRincian({
   formData,
   rincian,
@@ -15,7 +47,7 @@ export default function FormRincian({
   goBack,
   onSubmit,
   onPrint,
-}) {
+}: FormRincianProps) {
   const generateId = (index: number) => {
     const date = new Date();
     const y = String(date.getFullYear()).slice(-2);
