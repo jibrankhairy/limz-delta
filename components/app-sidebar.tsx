@@ -6,8 +6,8 @@ import {
   IconChartBar,
   IconDashboard,
   IconDatabase,
-  IconFolder,
   IconListDetails,
+  IconNews,
   IconUsers,
 } from "@tabler/icons-react";
 
@@ -48,9 +48,9 @@ const data = {
       icon: IconChartBar,
     },
     {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
+      title: "Berita Acara",
+      url: "/berita",
+      icon: IconNews,
     },
     {
       title: "Team",

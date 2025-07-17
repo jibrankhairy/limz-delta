@@ -138,7 +138,7 @@ export default function FormDasar({ formData, setFormData, goToStep2 }) {
               htmlFor="kegiatan"
               className="text-sm font-medium text-foreground"
             >
-              Kegiatan
+              Kegiatan/Paket Pekerjaan
             </Label>
             <Input
               name="kegiatan"

@@ -190,7 +190,7 @@ export default function FormSurat({
       </CardContent>
 
       <CardFooter className="flex justify-end pt-6">
-        <Button variant="secondary" onClick={onPrint}>
+        <Button onClick={onPrint}>
           <Printer />
           Print
         </Button>
@@ -199,7 +199,6 @@ export default function FormSurat({
   );
 }
 
-// Reusable input field
 const InputField = ({ label, ...props }: any) => (
   <div>
     <Label className="block mb-1 text-foreground">{label}</Label>
@@ -210,7 +209,6 @@ const InputField = ({ label, ...props }: any) => (
   </div>
 );
 
-// Reusable textarea field
 const TextareaField = ({ label, ...props }: any) => (
   <div>
     <Label className="block mb-1 text-foreground">{label}</Label>

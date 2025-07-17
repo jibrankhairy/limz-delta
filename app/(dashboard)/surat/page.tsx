@@ -44,7 +44,7 @@ export default function SuratPage() {
       const tahun = new Date().getFullYear();
       setNomorSurat((prev) => ({
         ...prev,
-        nomorStpsLengkap: `${prev.nomorFpps}/STPS/DIL/${bulanRomawi[bulan]}/${tahun}`,
+        nomorStpsLengkap: `${prev.nomorFpps}/DIL/${bulanRomawi[bulan]}/${tahun}/STPS`,
       }));
     }
   }, [nomorSurat.nomorFpps]);

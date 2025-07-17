@@ -49,7 +49,7 @@ export const StpsDocument = React.forwardRef<HTMLDivElement, StpsDocumentProps>(
             SURAT TUGAS PENGAMBILAN SAMPEL
           </h1>
           <p className="text-center text-sm">
-            No: {nomorSurat || "___/STPS/DIL/___/____"}
+            No: {nomorSurat || "___/DIL/DIL/___/____"}
           </p>
 
           <div className="mt-8">
