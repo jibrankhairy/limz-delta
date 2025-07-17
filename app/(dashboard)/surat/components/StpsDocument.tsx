@@ -27,7 +27,7 @@ export const StpsDocument = React.forwardRef<HTMLDivElement, StpsDocumentProps>(
     return (
       <div
         ref={ref}
-        className="bg-white p-12 font-serif text-black"
+        className="bg-white p-12 font-[Times_New_Roman] text-black"
         style={{ width: "794px", height: "1123px" }}
       >
         <header className="flex items-start justify-between border-b-2 border-black pb-4">

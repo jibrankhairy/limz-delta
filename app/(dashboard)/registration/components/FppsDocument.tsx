@@ -37,7 +37,10 @@ export const FppsDocument = React.forwardRef<HTMLDivElement, FppsDocumentProps>(
     };
 
     return (
-      <div ref={ref} className="bg-white p-8 text-black text-xs font-sans">
+      <div
+        ref={ref}
+        className="bg-white p-8 text-black text-xs font-[Times_New_Roman]"
+      >
         <div className="text-center mb-6">
           <h1 className="text-sm font-bold uppercase">
             Permintaan Contoh Uji dan Atau Ulang Permintaan Pengujian

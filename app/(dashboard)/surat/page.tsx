@@ -106,7 +106,7 @@ export default function SuratPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 items-start min-h-screen">
+      <div className="grid grid-cols-1 lg:grid-cols-2 items-start">
         <FormSurat
           nomorSurat={nomorSurat}
           setNomorSurat={setNomorSurat}
