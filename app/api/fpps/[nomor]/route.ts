@@ -29,6 +29,8 @@ export async function GET(req: NextRequest) {
           noTelp: data.noTelp,
           tanggalMasuk: data.tanggalMasuk,
           petugas: data.petugas,
+          emailPpic: data.emailPpic,
+          namaPpic: data.namaPpic,
         },
         rincian: data.rincian,
       },
