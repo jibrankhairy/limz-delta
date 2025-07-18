@@ -21,12 +21,14 @@ export default function RegistrationPage() {
   const [formData, setFormData] = useState({
     nomorFpps: "",
     nomorQuotation: "",
-    petugas: "",
+    petugas: [""],
     namaPelanggan: "",
     alamatPelanggan: "",
     noTelp: "",
     tanggalMasuk: "",
     kegiatan: "",
+    namaPpic: "", 
+    emailPpic: "",
   });
   const [rincian, setRincian] = useState([]);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);

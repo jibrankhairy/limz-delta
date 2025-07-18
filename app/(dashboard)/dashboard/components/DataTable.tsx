@@ -119,11 +119,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
   {
     accessorKey: "ppic",
     header: "Nama PPIC",
-    cell: ({ row }) => (
-      <Badge variant="outline" className="text-muted-foreground px-1.5">
-        {row.original.ppic}
-      </Badge>
-    ),
+    cell: ({ row }) => row.original.ppic,
   },
   {
     accessorKey: "email",
