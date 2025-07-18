@@ -2,12 +2,14 @@
 import Link from "next/link";
 import * as React from "react";
 import {
+  IconAnalyze,
   IconCertificate2,
   IconChartBar,
   IconDashboard,
   IconDatabase,
   IconListDetails,
   IconNews,
+  IconTableSpark,
   IconUsers,
 } from "@tabler/icons-react";
 
@@ -45,7 +47,7 @@ const data = {
     {
       title: "Surat Tugas",
       url: "/surat",
-      icon: IconChartBar,
+      icon: IconTableSpark,
     },
     {
       title: "Berita Acara",
@@ -53,9 +55,9 @@ const data = {
       icon: IconNews,
     },
     {
-      title: "Team",
+      title: "Hasil Analiisa",
       url: "#",
-      icon: IconUsers,
+      icon: IconAnalyze,
     },
   ],
   documents: [
@@ -66,7 +68,7 @@ const data = {
     },
     {
       name: "Certificates Of Analysys",
-      url: "#",
+      url: "/coa",
       icon: IconCertificate2,
     },
   ],

@@ -18,6 +18,8 @@ type FormDasarProps = {
     kegiatan: string;
     tanggalMasuk: string;
     petugas: string[];
+    namaPpic: string;
+    emailPpic: string;
   };
   setFormData: React.Dispatch<React.SetStateAction<FormDasarProps["formData"]>>;
   goToStep2: () => void;
@@ -32,7 +34,6 @@ export default function FormDasar({
     formData.petugas || [""]
   );
 
-  // ✅ Kasih typing untuk e
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -145,7 +146,20 @@ export default function FormDasar({
               </Button>
             </div>
           </div>
-
+          <div>
+            <Label
+              htmlFor="kegiatan"
+              className="text-sm font-medium text-foreground"
+            >
+              Kegiatan/Paket Pekerjaan
+            </Label>
+            <Input
+              name="kegiatan"
+              value={formData.kegiatan}
+              onChange={handleChange}
+              className="bg-transparent border border-input text-foreground mt-1"
+            />
+          </div>
           <div>
             <Label
               htmlFor="tanggalMasuk"
@@ -180,6 +194,37 @@ export default function FormDasar({
           </div>
           <div>
             <Label
+              htmlFor="namaPpic"
+              className="text-sm font-medium text-foreground"
+            >
+              Nama PPIC
+            </Label>
+            <Input
+              name="namaPpic"
+              value={formData.namaPpic}
+              onChange={handleChange}
+              className="bg-transparent border border-input text-foreground mt-1"
+            />
+          </div>
+
+          <div>
+            <Label
+              htmlFor="emailPpic"
+              className="text-sm font-medium text-foreground"
+            >
+              Email PPIC
+            </Label>
+            <Input
+              type="email"
+              name="emailPpic"
+              value={formData.emailPpic}
+              onChange={handleChange}
+              className="bg-transparent border border-input text-foreground mt-1"
+            />
+          </div>
+
+          <div>
+            <Label
               htmlFor="noTelp"
               className="text-sm font-medium text-foreground"
             >
@@ -202,20 +247,6 @@ export default function FormDasar({
             <Textarea
               name="alamatPelanggan"
               value={formData.alamatPelanggan}
-              onChange={handleChange}
-              className="bg-transparent border border-input text-foreground mt-1"
-            />
-          </div>
-          <div>
-            <Label
-              htmlFor="kegiatan"
-              className="text-sm font-medium text-foreground"
-            >
-              Kegiatan/Paket Pekerjaan
-            </Label>
-            <Input
-              name="kegiatan"
-              value={formData.kegiatan}
               onChange={handleChange}
               className="bg-transparent border border-input text-foreground mt-1"
             />
