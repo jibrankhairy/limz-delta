@@ -1,16 +1,15 @@
 "use client";
+
 import Link from "next/link";
 import * as React from "react";
 import {
   IconAnalyze,
   IconCertificate2,
-  IconChartBar,
   IconDashboard,
   IconDatabase,
   IconListDetails,
   IconNews,
   IconTableSpark,
-  IconUsers,
 } from "@tabler/icons-react";
 
 import { NavDocuments } from "@/components/nav-documents";
@@ -27,13 +26,32 @@ import {
 } from "@/components/ui/sidebar";
 import Image from "next/image";
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
+const defaultUser = {
+  name: "shadcn",
+  email: "m@example.com",
+  avatar: "/avatars/shadcn.jpg",
+};
+
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const [user, setUser] = React.useState(defaultUser);
+
+  React.useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const parsed = JSON.parse(storedUser);
+        setUser({
+          name: parsed.fullName || "User",
+          email: parsed.email || "email@example.com",
+          avatar: "/images/avatars/user.png",
+        });
+      } catch (e) {
+        console.error("Failed to parse user data:", e);
+      }
+    }
+  }, []);
+
+  const navMain = [
     {
       title: "Dashboard",
       url: "/dashboard",
@@ -59,8 +77,9 @@ const data = {
       url: "#",
       icon: IconAnalyze,
     },
-  ],
-  documents: [
+  ];
+
+  const documents = [
     {
       name: "Data Library",
       url: "#",
@@ -71,10 +90,8 @@ const data = {
       url: "/coa",
       icon: IconCertificate2,
     },
-  ],
-};
+  ];
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -100,13 +117,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
+
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={navMain} />
         <div className="my-2 border-t border-border" />
-        <NavDocuments items={data.documents} />
+        <NavDocuments items={documents} />
       </SidebarContent>
+
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>
   );

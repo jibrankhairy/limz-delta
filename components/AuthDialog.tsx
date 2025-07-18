@@ -57,6 +57,7 @@ export const AuthDialog = ({ mode }: Props) => {
 
       if (mode === "signin") {
         localStorage.setItem("token", res.data.token);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
         router.push("/dashboard");
       }
 
