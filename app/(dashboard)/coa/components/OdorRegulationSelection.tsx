@@ -1,8 +1,15 @@
 // app/dashboard/coa/components/OdorRegulationSelection.tsx
-'use client';
+"use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ChevronLeft, BookCheck } from "lucide-react"; // 1. Impor ikon
 
 interface Props {
   onSelect: (regulationId: string) => void;
@@ -11,38 +18,68 @@ interface Props {
 
 export function OdorRegulationSelection({ onSelect, onBack }: Props) {
   return (
-    <Card className="w-full max-w-2xl bg-slate-900 border-slate-800">
+    // 2. Class hardcode dihapus, menggunakan style default dari Card
+    <Card className="w-full max-w-2xl">
       <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle>Langkah 3a: Pilih Standar Baku Mutu Odor</CardTitle>
-          <Button variant="outline" onClick={onBack}>Kembali</Button>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <CardTitle>Langkah 3 a: Pilih Standar Baku Mutu Odor</CardTitle>
+          {/* 3. Tombol kembali diberi ikon agar lebih jelas */}
+          <Button variant="outline" onClick={onBack}>
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Kembali
+          </Button>
         </div>
-        <CardDescription>
-          Pilih standar peraturan yang akan digunakan sebagai acuan pada sertifikat analisis.
+        <CardDescription className="pt-1">
+          Pilih standar peraturan yang akan digunakan sebagai acuan pada
+          sertifikat analisis.
         </CardDescription>
       </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <button
-          onClick={() => onSelect('permenaker_a')}
-          className="p-4 border border-slate-700 rounded-lg hover:bg-slate-800 text-left space-y-1"
+        {/* 4. Mengubah tombol biasa menjadi kartu yang lebih interaktif */}
+        <div
+          onClick={() => onSelect("permenaker_a")}
+          className="group flex cursor-pointer flex-col rounded-lg border bg-card p-4 text-left transition-all hover:border-primary hover:bg-muted/50"
         >
-          <h4 className="font-semibold text-white">Permenaker No. 05 Thn 2018 (Set A)</h4>
-          <p className="text-xs text-slate-400">Parameter: Ethyl Acetate, Benzene, Toluene, Xylene.</p>
-        </button>
-        <button
-          onClick={() => onSelect('permenaker_b')}
-          className="p-4 border border-slate-700 rounded-lg hover:bg-slate-800 text-left space-y-1"
+          <div className="flex items-start gap-3 mb-1">
+            <BookCheck className="h-6 w-6 flex-shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
+            <h4 className="font-semibold text-foreground">
+              Permenaker No. 05 Thn 2018 (Set A)
+            </h4>
+          </div>
+          <p className="text-xs text-muted-foreground pl-9">
+            Ethyl Acetate, Benzene, Toluene, Xylene.
+          </p>
+        </div>
+
+        <div
+          onClick={() => onSelect("permenaker_b")}
+          className="group flex cursor-pointer flex-col rounded-lg border bg-card p-4 text-left transition-all hover:border-primary hover:bg-muted/50"
         >
-          <h4 className="font-semibold text-white">Permenaker No. 05 Thn 2018 (Set B)</h4>
-          <p className="text-xs text-slate-400">Parameter: Methyl Ethyl Ketone, Aceton, Toluene.</p>
-        </button>
-        <button
-          onClick={() => onSelect('kepmenlh')}
-          className="p-4 border border-slate-700 rounded-lg hover:bg-slate-800 text-left space-y-1 md:col-span-2"
+          <div className="flex items-start gap-3 mb-1">
+            <BookCheck className="h-6 w-6 flex-shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
+            <h4 className="font-semibold text-foreground">
+              Permenaker No. 05 Thn 2018 (Set B)
+            </h4>
+          </div>
+          <p className="text-xs text-muted-foreground pl-9">
+            Methyl Ethyl Ketone, Aceton, Toluene.
+          </p>
+        </div>
+
+        <div
+          onClick={() => onSelect("kepmenlh")}
+          className="group flex cursor-pointer flex-col rounded-lg border bg-card p-4 text-left transition-all hover:border-primary hover:bg-muted/50 md:col-span-2"
         >
-          <h4 className="font-semibold text-white">Kepmen LH No. 50 Thn 1996</h4>
-          <p className="text-xs text-slate-400">Parameter: Ammonia, Methyl Mercaptan, H2S, Methyl Sulfide, Styrene.</p>
-        </button>
+          <div className="flex items-start gap-3 mb-1">
+            <BookCheck className="h-6 w-6 flex-shrink-0 text-muted-foreground transition-colors group-hover:text-primary" />
+            <h4 className="font-semibold text-foreground">
+              Kepmen LH No. 50 Thn 1996
+            </h4>
+          </div>
+          <p className="text-xs text-muted-foreground pl-9">
+            Ammonia, Methyl Mercaptan, H2S, Methyl Sulfide, Styrene.
+          </p>
+        </div>
       </CardContent>
     </Card>
   );

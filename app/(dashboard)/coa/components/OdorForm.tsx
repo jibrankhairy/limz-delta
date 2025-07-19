@@ -1,30 +1,19 @@
-'use client';
+"use client";
 
-import React, { useMemo } from 'react';
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch"; // Import Switch
-import { Pencil, Settings } from 'lucide-react'; // Import Settings
-
-const WorkplaceConditionFields = ({ sampleInfo, onChange }) => (
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-    <div><Label htmlFor="temperatureWorkplace">Temperature</Label><Input id="temperatureWorkplace" name="temperatureWorkplace" value={sampleInfo.temperatureWorkplace} onChange={onChange} className="mt-1 bg-slate-800" placeholder="... °C"/></div>
-    <div><Label htmlFor="humidityWorkplace">Humidity</Label><Input id="humidityWorkplace" name="humidityWorkplace" value={sampleInfo.humidityWorkplace} onChange={onChange} className="mt-1 bg-slate-800" placeholder="... %RH"/></div>
-  </div>
-);
-const AmbientConditionFields = ({ sampleInfo, onChange }) => (
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-    <div><Label htmlFor="coordinate">Coordinate</Label><Input id="coordinate" name="coordinate" value={sampleInfo.coordinate} onChange={onChange} className="mt-1 bg-slate-800"/></div>
-    <div><Label htmlFor="temperatureAmbient">Temperature</Label><Input id="temperatureAmbient" name="temperatureAmbient" value={sampleInfo.temperatureAmbient} onChange={onChange} className="mt-1 bg-slate-800" placeholder="... °C"/></div>
-    <div><Label htmlFor="pressure">Pressure</Label><Input id="pressure" name="pressure" value={sampleInfo.pressure} onChange={onChange} className="mt-1 bg-slate-800" placeholder="... mmHg"/></div>
-    <div><Label htmlFor="humidityAmbient">Humidity</Label><Input id="humidityAmbient" name="humidityAmbient" value={sampleInfo.humidityAmbient} onChange={onChange} className="mt-1 bg-slate-800" placeholder="... %RH"/></div>
-    <div><Label htmlFor="windSpeed">Wind Speed</Label><Input id="windSpeed" name="windSpeed" value={sampleInfo.windSpeed} onChange={onChange} className="mt-1 bg-slate-800" placeholder="... m/s"/></div>
-    <div><Label htmlFor="windDirection">Wind Direction</Label><Input id="windDirection" name="windDirection" value={sampleInfo.windDirection} onChange={onChange} className="mt-1 bg-slate-800"/></div>
-    <div><Label htmlFor="weather">Weather</Label><Input id="weather" name="weather" value={sampleInfo.weather} onChange={onChange} className="mt-1 bg-slate-800"/></div>
-  </div>
-);
+import { Switch } from "@/components/ui/switch";
+import { Pencil, Settings, ChevronLeft, Save, FileSearch } from "lucide-react";
 
 export function OdorForm({
   template,
@@ -33,96 +22,280 @@ export function OdorForm({
   onBack,
   onPreview,
 }) {
-
-  const regulationTitle = useMemo(() => {
-    if (template.regulation.startsWith('permenaker')) return 'Permenaker No. 05 Tahun 2018';
-    if (template.regulation === 'kepmenlh') return 'Kepmen LH No. 50 Tahun 1996';
-    return 'Template Odor';
+  // Judul dinamis berdasarkan regulasi yang dipilih
+  const regulationTitle = React.useMemo(() => {
+    if (template.regulation.startsWith("permenaker"))
+      return "Permenaker No. 05 Tahun 2018";
+    if (template.regulation === "kepmenlh")
+      return "Kepmen LH No. 50 Tahun 1996";
+    return "Template Odor";
   }, [template.regulation]);
 
-  const handleParameterChange = (index: number, field: string, value: string) => {
+  const handleParameterChange = (index, field, value) => {
     const newResults = [...template.results];
-    newResults[index][field] = value;
+    newResults[index] = { ...newResults[index], [field]: value };
     onTemplateChange({ ...template, results: newResults });
   };
 
-  const handleSampleInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSampleInfoChange = (e) => {
     const { name, value } = e.target;
-    onTemplateChange({ ...template, sampleInfo: { ...template.sampleInfo, [name]: value } });
+    onTemplateChange({
+      ...template,
+      sampleInfo: { ...template.sampleInfo, [name]: value },
+    });
   };
 
+  // Helper untuk mempersingkat pemanggilan input dan label
+  const renderField = (
+    label,
+    id,
+    value,
+    onChange,
+    placeholder = "",
+    isEditable = false
+  ) => (
+    <div>
+      <Label
+        htmlFor={id}
+        className="text-sm font-medium text-foreground flex items-center"
+      >
+        {label}
+        {isEditable && (
+          <Pencil className="w-3 h-3 ml-1.5 text-muted-foreground" />
+        )}
+      </Label>
+      <Input
+        id={id}
+        name={id}
+        value={value || ""}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="bg-transparent border border-input text-foreground mt-1"
+      />
+    </div>
+  );
+
   return (
-    <Card className="w-full max-w-6xl bg-slate-900 border-slate-800">
+    <Card className="w-full max-w-6xl">
       <CardHeader>
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle>Isi Detail & Hasil Tes Odor</CardTitle>
-            <p className="text-sm text-slate-400 mt-1">Menggunakan standar: {regulationTitle}</p>
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <div className="flex-grow">
+            <CardTitle>Detail & Hasil Tes Odor</CardTitle>
+            <CardDescription className="mt-1">
+              Menggunakan standar: {regulationTitle}
+            </CardDescription>
           </div>
-          <Button variant="outline" onClick={onBack}>Batal</Button>
+          <Button variant="outline" onClick={onBack}>
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Kembali
+          </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-8">
-        <div>
-          <h3 className="text-xl font-semibold text-slate-200 border-b border-slate-700 pb-2 mb-4">Informasi Sampel Umum</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <div><Label htmlFor="sampleNo">Sampel No.</Label><Input id="sampleNo" name="sampleNo" value={template.sampleInfo.sampleNo || ''} onChange={handleSampleInfoChange} className="mt-1 bg-slate-800"/></div>
-            <div><Label htmlFor="samplingLocation">Sampling Location</Label><Input id="samplingLocation" name="samplingLocation" value={template.sampleInfo.samplingLocation || ''} onChange={handleSampleInfoChange} className="mt-1 bg-slate-800" placeholder="(See Table)"/></div>
-            <div><Label htmlFor="samplingTime">Sampling Time</Label><Input id="samplingTime" name="samplingTime" value={template.sampleInfo.samplingTime || ''} onChange={handleSampleInfoChange} className="mt-1 bg-slate-800" placeholder="(See Table)"/></div>
+        {/* === Bagian Informasi Sampel === */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-foreground border-b pb-3">
+            Informasi Sampel Umum
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+            {renderField(
+              "Sampel No.",
+              "sampleNo",
+              template.sampleInfo.sampleNo,
+              handleSampleInfoChange
+            )}
+            {renderField(
+              "Lokasi Sampling",
+              "samplingLocation",
+              template.sampleInfo.samplingLocation,
+              handleSampleInfoChange,
+              "(See Table)"
+            )}
+            {renderField(
+              "Waktu Sampling",
+              "samplingTime",
+              template.sampleInfo.samplingTime,
+              handleSampleInfoChange,
+              "(See Table)"
+            )}
           </div>
         </div>
-        <div>
-          <h3 className="text-xl font-semibold text-slate-200 border-b border-slate-700 pb-2 mb-4">Hasil Pengujian Parameter</h3>
-          <div className="space-y-4">
-            {template.results.map((param: any, index: number) => (
-              <div key={param.id} className="p-4 rounded-lg bg-slate-950 border border-slate-800 space-y-4">
-                <p className="font-semibold text-white">{param.name}</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><Label>Testing Result</Label><Input value={param.testingResult} onChange={(e) => handleParameterChange(index, 'testingResult', e.target.value)} className="mt-1 bg-slate-800"/></div>
-                    <div><Label className="flex items-center">Unit <Pencil className="w-3 h-3 ml-1" /></Label><Input value={param.unit} onChange={(e) => handleParameterChange(index, 'unit', e.target.value)} className="mt-1 bg-slate-800"/></div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><Label className="flex items-center">Regulatory Standard <Pencil className="w-3 h-3 ml-1" /></Label><Input value={param.standard} onChange={(e) => handleParameterChange(index, 'standard', e.target.value)} className="mt-1 bg-slate-800"/></div>
-                    <div><Label className="flex items-center">Methods <Pencil className="w-3 h-3 ml-1" /></Label><Input value={param.method} onChange={(e) => handleParameterChange(index, 'method', e.target.value)} className="mt-1 bg-slate-800"/></div>
+
+        {/* === Bagian Hasil Pengujian === */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-foreground border-b pb-3">
+            Hasil Pengujian Parameter
+          </h3>
+          <div className="space-y-4 pt-2">
+            {template.results.map((param, index) => (
+              <div
+                key={param.id}
+                className="border rounded-lg p-4 space-y-4 bg-muted/20"
+              >
+                <p className="font-semibold text-foreground">{param.name}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {renderField(
+                    "Hasil Tes",
+                    `testingResult-${index}`,
+                    param.testingResult,
+                    (e) =>
+                      handleParameterChange(
+                        index,
+                        "testingResult",
+                        e.target.value
+                      )
+                  )}
+                  {renderField(
+                    "Unit",
+                    `unit-${index}`,
+                    param.unit,
+                    (e) => handleParameterChange(index, "unit", e.target.value),
+                    "",
+                    true
+                  )}
+                  {renderField(
+                    "Standar Baku Mutu",
+                    `standard-${index}`,
+                    param.standard,
+                    (e) =>
+                      handleParameterChange(index, "standard", e.target.value),
+                    "",
+                    true
+                  )}
+                  {renderField(
+                    "Metode",
+                    `method-${index}`,
+                    param.method,
+                    (e) =>
+                      handleParameterChange(index, "method", e.target.value),
+                    "",
+                    true
+                  )}
                 </div>
               </div>
             ))}
           </div>
         </div>
-        <div>
-          <h3 className="text-xl font-semibold text-slate-200 border-b border-slate-700 pb-2 mb-4">
-            {template.regulation.startsWith('permenaker') ? 'Kondisi Lingkungan Kerja' : 'Kondisi Lingkungan Ambien'}
-          </h3>
-          {template.regulation.startsWith('permenaker') ? (
-            <WorkplaceConditionFields sampleInfo={template.sampleInfo} onChange={handleSampleInfoChange} />
-          ) : (
-            <AmbientConditionFields sampleInfo={template.sampleInfo} onChange={handleSampleInfoChange} />
-          )}
-        </div>
 
-        {/* == KODE BARU DIMASUKKAN DI SINI == */}
+        {/* === Bagian Kondisi Lingkungan === */}
         <div className="space-y-4">
-          <h3 className="text-lg font-medium text-slate-200 border-b border-slate-700 pb-2 flex items-center"><Settings className="w-4 h-4 mr-2"/>Pengaturan Halaman</h3>
-          <div className="flex items-center justify-between rounded-lg border border-slate-800 bg-slate-950 p-4">
-              <div className="space-y-0.5">
-                  <Label htmlFor="kan-logo-switch" className="text-base">Tampilkan Logo KAN</Label>
-                  <p className="text-sm text-slate-400">
-                      Aktifkan untuk menampilkan logo KAN di header halaman ini.
-                  </p>
-              </div>
-              <Switch
-                  id="kan-logo-switch"
-                  checked={template.showKanLogo}
-                  onCheckedChange={(value) => onTemplateChange({ ...template, showKanLogo: value })}
-              />
+          <h3 className="text-lg font-semibold text-foreground border-b pb-3">
+            {template.regulation.startsWith("permenaker")
+              ? "Kondisi Lingkungan Kerja"
+              : "Kondisi Lingkugan Ambien"}
+          </h3>
+          <div className={`grid grid-cols-2 md:grid-cols-4 gap-6 pt-2`}>
+            {template.regulation.startsWith("permenaker") ? (
+              <>
+                {renderField(
+                  "Suhu",
+                  "temperatureWorkplace",
+                  template.sampleInfo.temperatureWorkplace,
+                  handleSampleInfoChange,
+                  "... °C"
+                )}
+                {renderField(
+                  "Kelembapan",
+                  "humidityWorkplace",
+                  template.sampleInfo.humidityWorkplace,
+                  handleSampleInfoChange,
+                  "... %RH"
+                )}
+              </>
+            ) : (
+              <>
+                {renderField(
+                  "Koordinat",
+                  "coordinate",
+                  template.sampleInfo.coordinate,
+                  handleSampleInfoChange
+                )}
+                {renderField(
+                  "Suhu",
+                  "temperatureAmbient",
+                  template.sampleInfo.temperatureAmbient,
+                  handleSampleInfoChange,
+                  "... °C"
+                )}
+                {renderField(
+                  "Tekanan",
+                  "pressure",
+                  template.sampleInfo.pressure,
+                  handleSampleInfoChange,
+                  "... mmHg"
+                )}
+                {renderField(
+                  "Kelembapan",
+                  "humidityAmbient",
+                  template.sampleInfo.humidityAmbient,
+                  handleSampleInfoChange,
+                  "... %RH"
+                )}
+                {renderField(
+                  "Kecepatan Angin",
+                  "windSpeed",
+                  template.sampleInfo.windSpeed,
+                  handleSampleInfoChange,
+                  "... m/s"
+                )}
+                {renderField(
+                  "Arah Angin",
+                  "windDirection",
+                  template.sampleInfo.windDirection,
+                  handleSampleInfoChange
+                )}
+                {renderField(
+                  "Cuaca",
+                  "weather",
+                  template.sampleInfo.weather,
+                  handleSampleInfoChange
+                )}
+              </>
+            )}
           </div>
         </div>
-        {/* == AKHIR DARI KODE BARU == */}
-        
+
+        {/* === Bagian Pengaturan Halaman === */}
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold text-foreground border-b pb-3 flex items-center">
+            <Settings className="w-5 h-5 mr-3" />
+            Pengaturan Halaman
+          </h3>
+          <div className="flex items-center justify-between rounded-lg border bg-card p-4 mt-2">
+            <div>
+              <Label
+                htmlFor="kan-logo-switch"
+                className="text-sm font-medium text-foreground"
+              >
+                Tampilkan Logo KAN
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Aktifkan untuk menampilkan logo KAN di header halaman ini.
+              </p>
+            </div>
+            <Switch
+              id="kan-logo-switch"
+              checked={template.showKanLogo}
+              onCheckedChange={(value) =>
+                onTemplateChange({ ...template, showKanLogo: value })
+              }
+            />
+          </div>
+        </div>
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button variant="ghost" onClick={onPreview}>Preview Halaman</Button>
-        <Button onClick={() => onSave(template)}>Simpan Perubahan</Button>
+      <CardFooter className="flex flex-col-reverse sm:flex-row items-center justify-between gap-4">
+        <Button
+          variant="ghost"
+          onClick={onPreview}
+          className="w-full sm:w-auto"
+        >
+          <FileSearch className="mr-2 h-4 w-4" />
+          Preview Halaman
+        </Button>
+        <Button onClick={() => onSave(template)} className="w-full sm:w-auto">
+          <Save className="mr-2 h-4 w-4" />
+          Simpan Perubahan
+        </Button>
       </CardFooter>
     </Card>
   );

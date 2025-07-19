@@ -18,7 +18,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
-import { CalendarIcon } from "lucide-react";
+// 1. Impor ikon untuk tombol kembali
+import { CalendarIcon, ChevronLeft } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import Image from "next/image";
@@ -44,6 +45,7 @@ export function CoverForm({
   handleCoaChange,
   handleSignatureUpload,
   onNextStep,
+  onPrevStep, // 2. Tambahkan prop onPrevStep untuk fungsi kembali
 }) {
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -58,6 +60,7 @@ export function CoverForm({
         <CardTitle>Lengkapi Data COA (Halaman 1)</CardTitle>
       </CardHeader>
       <CardContent className="space-y-8">
+        {/* Konten form tetap sama */}
         <div className="p-4 rounded-md border border-border">
           <p>
             Customer: <span className="font-semibold">{coaData.customer}</span>
@@ -237,7 +240,7 @@ export function CoverForm({
                   type="file"
                   accept="image/png"
                   onChange={onFileChange}
-                  className="flex-1 file:text-white"
+                  className="flex-1 file:text-foreground"
                 />
 
                 {coaData.signatureUrl && (
@@ -271,7 +274,11 @@ export function CoverForm({
           </div>
         </div>
       </CardContent>
-      <CardFooter className="flex justify-end">
+      {/* 3. Tambahkan tombol baru di dalam CardFooter */}
+      <CardFooter className="flex justify-end gap-2">
+        <Button variant="outline" onClick={onPrevStep}>
+          Kembali
+        </Button>
         <Button onClick={onNextStep}>Selanjutnya</Button>
       </CardFooter>
     </Card>

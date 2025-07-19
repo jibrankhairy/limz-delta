@@ -436,7 +436,7 @@ export default function CoaPage() {
       case "loading":
         return (
           <div className="flex justify-center items-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-white" />
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         );
       case "search":
@@ -457,6 +457,7 @@ export default function CoaPage() {
               handleCheckboxChange={handleCheckboxChange}
               handleSignatureUpload={handleSignatureUpload}
               onNextStep={() => setView("dashboard")}
+              onPrevStep={() => setView("search")}
               onPreview={() =>
                 handlePreview(
                   <CoaCoverDocument
@@ -947,17 +948,24 @@ export default function CoaPage() {
         {renderCurrentView()}
       </div>
 
+      {/* === DIALOG PRATINJAU DENGAN UKURAN YANG BENAR === */}
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="max-w-4xl h-[90vh] flex flex-col bg-gray-200">
-          <DialogHeader className="bg-white px-6 pt-6 rounded-t-lg">
+        <DialogContent className="max-w-6xl w-[95vw] h-[95vh] flex flex-col p-0">
+          <DialogHeader className="p-6 border-b">
             <DialogTitle>Pratinjau Dokumen</DialogTitle>
             <DialogDescription>
-              Ini adalah pratinjau halaman yang sedang Anda kerjakan. Tombol
-              "Print" akan mencetak keseluruhan dokumen.
+              Ini adalah pratinjau halaman. Gunakan tombol "Print" untuk
+              mencetak keseluruhan dokumen.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex-grow overflow-auto p-4">{previewNode}</div>
-          <DialogFooter className="bg-white px-6 pb-6 rounded-b-lg">
+
+          <div className="flex-grow overflow-auto p-4 sm:p-8 bg-muted/50 flex justify-center">
+            <div className="w-full max-w-[210mm] aspect-[210/297] bg-white shadow-lg">
+              {previewNode}
+            </div>
+          </div>
+
+          <DialogFooter className="p-6 border-t flex-wrap">
             <Button variant="outline" onClick={() => setIsPreviewOpen(false)}>
               Tutup
             </Button>

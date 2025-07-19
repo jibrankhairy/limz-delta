@@ -9,7 +9,8 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Search, Loader2 } from "lucide-react";
 
 interface SearchCardProps {
   fppsInput: string;
@@ -24,45 +25,56 @@ export function SearchCard({
   handleCariFpps,
   isLoading,
 }: SearchCardProps) {
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!isLoading) {
+      handleCariFpps();
+    }
+  };
+
   return (
-    <Card className="w-full max-w-lg border border-border bg-background text-foreground">
+    <Card className="w-full max-w-lg">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold text-foreground">
-          Cari Data FPPS
-        </CardTitle>
-        <CardDescription className="text-sm text-muted-foreground mt-1">
+        <CardTitle>Cari Data FPPS</CardTitle>
+        <CardDescription>
           Masukkan nomor FPPS untuk mengambil data customer.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <div className="flex-1 w-full">
-            <label
-              htmlFor="search-fpps"
-              className="block text-sm font-medium text-foreground mb-1"
-            >
-              Nomor FPPS
-            </label>
-            <Input
-              id="search-fpps"
-              type="text"
-              placeholder="Ketik nomornya saja, cth: 001"
-              value={fppsInput}
-              onChange={(e) => setFppsInput(e.target.value)}
-              className="bg-transparent border border-input text-foreground mt-1 w-full"
-            />
-          </div>
-          <div className="w-full sm:w-auto">
+        <form onSubmit={handleSubmit} className="w-full">
+          <div className="flex flex-wrap items-end gap-2">
+            <div className="flex-grow">
+              <Label
+                htmlFor="search-fpps"
+                className="text-sm font-medium text-foreground"
+              >
+                Nomor FPPS
+              </Label>
+              <Input
+                id="search-fpps"
+                type="text"
+                placeholder="Ketik nomornya saja, cth: 001"
+                value={fppsInput}
+                onChange={(e) => setFppsInput(e.target.value)}
+                className="bg-transparent border border-input text-foreground mt-1 w-full"
+                disabled={isLoading}
+              />
+            </div>
+
             <Button
-              onClick={handleCariFpps}
-              disabled={isLoading}
-              className="w-full sm:w-auto"
+              type="submit"
+              disabled={isLoading || !fppsInput}
+              className="flex-shrink-0"
             >
-              <Search className="mr-2 h-4 w-4" />
+              {isLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Search className="h-4 w-4" />
+              )}
               {isLoading ? "Mencari..." : "Cari"}
             </Button>
           </div>
-        </div>
+        </form>
       </CardContent>
     </Card>
   );
