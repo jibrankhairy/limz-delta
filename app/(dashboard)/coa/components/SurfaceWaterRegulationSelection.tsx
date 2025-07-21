@@ -35,7 +35,6 @@ export function SurfaceWaterRegulationSelection({ onSelect, onBack }: Props) {
   ];
 
   return (
-    // Card utama, class warna dihapus agar otomatis mengikuti tema
     <Card className="w-full max-w-2xl">
       <CardHeader>
         <div className="flex justify-between items-center">
@@ -51,7 +50,6 @@ export function SurfaceWaterRegulationSelection({ onSelect, onBack }: Props) {
       </CardHeader>
       <CardContent className="grid grid-cols-1 gap-3">
         {regulations.map((reg) => (
-          // Mengganti <button> biasa dengan komponen Button agar lebih interaktif
           <Button
             key={reg.id}
             variant="outline"

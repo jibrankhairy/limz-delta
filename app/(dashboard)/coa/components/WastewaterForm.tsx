@@ -23,20 +23,69 @@ import {
   FileSearch,
 } from "lucide-react";
 
+interface ParameterResult {
+  name: string;
+  category?: string;
+  testingResult: string;
+  unit: string;
+  standard: string;
+  method: string;
+  isVisible: boolean;
+}
+
+interface SampleInfo {
+  sampleNo: string;
+  samplingLocation: string;
+  samplingTime: string;
+  notes: string;
+}
+
+interface Template {
+  results: ParameterResult[];
+  sampleInfo: SampleInfo;
+  showKanLogo: boolean;
+}
+
+interface WastewaterFormProps {
+  template: Template;
+  onTemplateChange: (template: Template) => void;
+  onSave: (template: Template) => void;
+  onBack: () => void;
+  onPreview: () => void;
+}
+
+interface RenderFieldProps {
+  label: string;
+  id: string;
+  value: string;
+  onChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void;
+  placeholder?: string;
+  isEditable?: boolean;
+  type?: "input" | "textarea";
+}
+
 export function WastewaterForm({
   template,
   onTemplateChange,
   onSave,
   onBack,
   onPreview,
-}) {
-  const handleParameterChange = (index, field, value) => {
+}: WastewaterFormProps) {
+  const handleParameterChange = (
+    index: number,
+    field: keyof ParameterResult,
+    value: string | boolean
+  ) => {
     const newResults = [...template.results];
-    newResults[index] = { ...newResults[index], [field]: value };
+    (newResults[index] as any)[field] = value;
     onTemplateChange({ ...template, results: newResults });
   };
 
-  const handleSampleInfoChange = (e) => {
+  const handleSampleInfoChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     onTemplateChange({
       ...template,
@@ -44,7 +93,6 @@ export function WastewaterForm({
     });
   };
 
-  // Helper untuk mempersingkat pemanggilan input dan label
   const renderField = ({
     label,
     id,
@@ -53,7 +101,7 @@ export function WastewaterForm({
     placeholder = "",
     isEditable = false,
     type = "input",
-  }) => {
+  }: RenderFieldProps) => {
     const Component = type === "textarea" ? Textarea : Input;
     return (
       <div>
@@ -91,7 +139,6 @@ export function WastewaterForm({
         </div>
       </CardHeader>
       <CardContent className="space-y-8">
-        {/* === Bagian Informasi Sampel & Catatan === */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-foreground border-b pb-3">
             Informasi Sampel & Catatan
@@ -128,13 +175,12 @@ export function WastewaterForm({
           </div>
         </div>
 
-        {/* === Bagian Hasil Pengujian === */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-foreground border-b pb-3">
             Hasil Pengujian Parameter
           </h3>
           <div className="space-y-2 pt-2">
-            {template.results.map((param, index) => (
+            {template.results.map((param: ParameterResult, index: number) => (
               <React.Fragment key={`${param.name}-${index}`}>
                 {param.category && (
                   <h4 className="font-semibold text-foreground pt-4 pb-2">
@@ -218,7 +264,6 @@ export function WastewaterForm({
           </div>
         </div>
 
-        {/* === Bagian Pengaturan Halaman === */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-foreground border-b pb-3 flex items-center">
             <Settings className="w-5 h-5 mr-3" />
@@ -239,7 +284,7 @@ export function WastewaterForm({
             <Switch
               id="kan-logo-switch"
               checked={template.showKanLogo}
-              onCheckedChange={(value) =>
+              onCheckedChange={(value: boolean) =>
                 onTemplateChange({ ...template, showKanLogo: value })
               }
             />

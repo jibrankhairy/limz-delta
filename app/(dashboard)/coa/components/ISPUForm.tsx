@@ -1,5 +1,3 @@
-// components/ISPUForm.tsx
-
 "use client";
 
 import React from "react";
@@ -14,12 +12,49 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge"; // Import Badge untuk tampilan kategori
-import { ChevronLeft, Eye, EyeOff } from "lucide-react";
-import { cn } from "@/lib/utils"; // Import cn untuk class conditional
+import { Badge } from "@/components/ui/badge";
+import { ChevronLeft, Eye, EyeOff, Save, FileSearch } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-// Batas konsentrasi untuk perhitungan ISPU (berdasarkan PermenLHK P.14/2020)
-const ispuBoundaries = {
+interface IspuBoundary {
+  Ib: number;
+  Ia: number;
+  Xb: number;
+  Xa: number;
+}
+
+type PollutantKey = "PM10" | "PM2.5";
+
+interface ISPUResult {
+  name: string;
+  unit: string;
+  testingResult: string | number;
+  ispuCalculationResult: string | number;
+  ispuCategory: string;
+  isVisible: boolean;
+}
+
+interface SampleInfo {
+  sampleNo: string;
+  samplingLocation: string;
+  samplingTime: string;
+  notes: string;
+}
+
+interface ISPUTemplate {
+  sampleInfo: SampleInfo;
+  results: ISPUResult[];
+}
+
+interface ISPUFormProps {
+  template: ISPUTemplate;
+  onTemplateChange: (template: ISPUTemplate) => void;
+  onSave: (template: ISPUTemplate) => void;
+  onBack: () => void;
+  onPreview: () => void;
+}
+
+const ispuBoundaries: Record<PollutantKey, IspuBoundary[]> = {
   PM10: [
     { Ib: 0, Ia: 50, Xb: 0, Xa: 50 },
     { Ib: 51, Ia: 100, Xb: 51, Xa: 150 },
@@ -36,7 +71,7 @@ const ispuBoundaries = {
   ],
 };
 
-const getCategory = (ispu: number) => {
+const getCategory = (ispu: number): string => {
   if (ispu >= 0 && ispu <= 50) return "Baik";
   if (ispu >= 51 && ispu <= 100) return "Sedang";
   if (ispu >= 101 && ispu <= 200) return "Tidak Sehat";
@@ -45,8 +80,7 @@ const getCategory = (ispu: number) => {
   return "";
 };
 
-// Fungsi untuk memberikan warna pada Badge berdasarkan kategori
-const getCategoryBadgeClass = (category: string) => {
+const getCategoryBadgeClass = (category: string): string => {
   switch (category) {
     case "Baik":
       return "bg-green-500 hover:bg-green-500/80";
@@ -69,14 +103,24 @@ export function ISPUForm({
   onSave,
   onBack,
   onPreview,
-}) {
-  const calculateISPU = (pollutantName, concentrationStr) => {
-    const concentration = parseFloat(concentrationStr);
+}: ISPUFormProps) {
+  const calculateISPU = (
+    pollutantName: string,
+    concentrationStr: string | number
+  ): { ispu: string | number; category: string } => {
+    const concentration = parseFloat(String(concentrationStr));
     if (isNaN(concentration)) {
       return { ispu: "", category: "" };
     }
 
-    const key = pollutantName.includes("PM10") ? "PM10" : "PM2.5";
+    const key: PollutantKey | undefined = pollutantName.includes("PM10")
+      ? "PM10"
+      : pollutantName.includes("PM2.5")
+      ? "PM2.5"
+      : undefined;
+
+    if (!key) return { ispu: "", category: "" };
+
     const boundaries = ispuBoundaries[key];
     const boundary = boundaries.find(
       (b) => concentration >= b.Xb && concentration <= b.Xa
@@ -99,13 +143,21 @@ export function ISPUForm({
     };
   };
 
-  const handleParameterChange = (index: number, field: string, value: any) => {
+  const handleParameterChange = (
+    index: number,
+    field: keyof ISPUResult,
+    value: string | number | boolean
+  ) => {
     const newResults = [...template.results];
     const currentParam = { ...newResults[index] };
-    currentParam[field] = value;
+
+    (currentParam as any)[field] = value;
 
     if (field === "testingResult") {
-      const { ispu, category } = calculateISPU(currentParam.name, value);
+      const { ispu, category } = calculateISPU(
+        currentParam.name,
+        value as string | number
+      );
       currentParam.ispuCalculationResult = ispu;
       currentParam.ispuCategory = category;
     }
@@ -125,7 +177,6 @@ export function ISPUForm({
   };
 
   return (
-    // Card utama, class warna dihapus agar otomatis mengikuti tema
     <Card className="w-full max-w-6xl">
       <CardHeader>
         <div className="flex justify-between items-center">
@@ -137,7 +188,6 @@ export function ISPUForm({
         </div>
       </CardHeader>
       <CardContent className="space-y-8">
-        {/* === SEKSI INFORMASI SAMPEL === */}
         <div className="space-y-6">
           <h3 className="text-xl font-semibold border-b pb-3">
             Informasi Sampel & Catatan
@@ -183,13 +233,12 @@ export function ISPUForm({
           </div>
         </div>
 
-        {/* === SEKSI HASIL PENGUJIAN === */}
         <div className="space-y-6">
           <h3 className="text-xl font-semibold border-b pb-3">
             Hasil Pengujian & Perhitungan
           </h3>
           <div className="space-y-4">
-            {template.results.map((param: any, index: number) => (
+            {template.results.map((param: ISPUResult, index: number) => (
               <div
                 key={`${param.name}-${index}`}
                 className="p-4 rounded-lg border bg-muted/30 space-y-4"
@@ -209,9 +258,9 @@ export function ISPUForm({
                     className="text-muted-foreground hover:text-foreground h-8 w-8"
                   >
                     {param.isVisible ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
                       <Eye className="w-4 h-4" />
+                    ) : (
+                      <EyeOff className="w-4 h-4" />
                     )}
                   </Button>
                 </div>
@@ -244,7 +293,7 @@ export function ISPUForm({
                       {param.ispuCategory ? (
                         <Badge
                           className={cn(
-                            "text-base",
+                            "text-base w-full flex justify-center py-2",
                             getCategoryBadgeClass(param.ispuCategory)
                           )}
                         >
@@ -267,9 +316,13 @@ export function ISPUForm({
       </CardContent>
       <CardFooter className="flex justify-between">
         <Button variant="ghost" onClick={onPreview}>
+          <FileSearch className="mr-2 h-4 w-4" />
           Preview Halaman
         </Button>
-        <Button onClick={() => onSave(template)}>Simpan Perubahan</Button>
+        <Button onClick={() => onSave(template)}>
+          <Save className="mr-2 h-4 w-4" />
+          Simpan Perubahan
+        </Button>
       </CardFooter>
     </Card>
   );

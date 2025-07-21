@@ -1,5 +1,3 @@
-// components/AirAmbientForm.tsx
-
 "use client";
 
 import React from "react";
@@ -17,21 +15,64 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Pencil, Eye, EyeOff, Settings, ChevronLeft } from "lucide-react";
 
+interface ParameterResult {
+  name: string;
+  testingResult: string | number;
+  unit: string;
+  standard: string | number;
+  method: string;
+  isVisible: boolean;
+}
+
+interface SampleInfo {
+  sampleNo: string;
+  samplingLocation: string;
+  samplingTime: string;
+  samplingMethod: string;
+  notes: string;
+  coordinate: string;
+  temperature: string;
+  pressure: string;
+  humidity: string;
+  windSpeed: string;
+  windDirection: string;
+  weather: string;
+}
+
+interface AirAmbientTemplate {
+  sampleInfo: SampleInfo;
+  results: ParameterResult[];
+  showKanLogo: boolean;
+}
+
+interface AirAmbientFormProps {
+  template: AirAmbientTemplate;
+  onTemplateChange: (template: AirAmbientTemplate) => void;
+  onSave: (template: AirAmbientTemplate) => void;
+  onBack: () => void;
+  onPreview: () => void;
+}
+
 export function AirAmbientForm({
   template,
   onTemplateChange,
   onSave,
   onBack,
   onPreview,
-}) {
-  // Fungsi untuk menangani perubahan pada setiap parameter
-  const handleParameterChange = (index: number, field: string, value: any) => {
+}: AirAmbientFormProps) {
+  const handleParameterChange = (
+    index: number,
+    field: keyof ParameterResult,
+    value: any
+  ) => {
     const newResults = [...template.results];
-    newResults[index] = { ...newResults[index], [field]: value };
-    onTemplateChange({ ...template, results: newResults });
+    // Pastikan kita tidak mencoba mengubah properti yang tidak ada
+    if (index >= 0 && index < newResults.length) {
+      newResults[index] = { ...newResults[index], [field]: value };
+      onTemplateChange({ ...template, results: newResults });
+    }
   };
 
-  // Fungsi untuk menangani perubahan pada informasi sampel umum
   const handleSampleInfoChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -43,7 +84,6 @@ export function AirAmbientForm({
   };
 
   return (
-    // Card utama, class warna dihapus agar otomatis mengikuti tema
     <Card className="w-full max-w-6xl">
       <CardHeader>
         <div className="flex justify-between items-center">
@@ -55,7 +95,6 @@ export function AirAmbientForm({
         </div>
       </CardHeader>
       <CardContent className="space-y-8">
-        {/* === SEKSI INFORMASI SAMPEL === */}
         <div className="space-y-6">
           <h3 className="text-xl font-semibold border-b pb-3">
             Informasi Sampel & Catatan
@@ -111,7 +150,6 @@ export function AirAmbientForm({
           </div>
         </div>
 
-        {/* === SEKSI KONDISI LINGKUNGAN === */}
         <div className="space-y-6">
           <h3 className="text-xl font-semibold border-b pb-3">
             Kondisi Lingkungan Ambien
@@ -187,13 +225,12 @@ export function AirAmbientForm({
           </div>
         </div>
 
-        {/* === SEKSI HASIL PENGUJIAN PARAMETER === */}
         <div className="space-y-6">
           <h3 className="text-xl font-semibold border-b pb-3">
             Hasil Pengujian Parameter
           </h3>
           <div className="space-y-4">
-            {template.results.map((param, index) => (
+            {template.results.map((param: ParameterResult, index: number) => (
               <div
                 key={`${param.name}-${index}`}
                 className="p-4 rounded-lg border bg-muted/30 space-y-4"
@@ -213,9 +250,9 @@ export function AirAmbientForm({
                     className="text-muted-foreground hover:text-foreground h-8 w-8"
                   >
                     {param.isVisible ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
                       <Eye className="w-4 h-4" />
+                    ) : (
+                      <EyeOff className="w-4 h-4" />
                     )}
                   </Button>
                 </div>
@@ -278,7 +315,6 @@ export function AirAmbientForm({
           </div>
         </div>
 
-        {/* === SEKSI PENGATURAN HALAMAN === */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium border-b pb-3 flex items-center">
             <Settings className="w-4 h-4 mr-2" />

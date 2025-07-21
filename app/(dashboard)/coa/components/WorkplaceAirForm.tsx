@@ -15,21 +15,59 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Pencil, Eye, EyeOff, Settings, ChevronLeft } from "lucide-react";
 
+interface ParameterResult {
+  name: string;
+  testingResult: string;
+  unit: string;
+  standard: string;
+  method: string;
+  isVisible: boolean;
+}
+
+interface SampleInfo {
+  sampleNo: string;
+  samplingLocation: string;
+  samplingTime: string;
+  notes: string;
+  temperature?: string; // Opsional
+  humidity?: string; // Opsional
+}
+
+interface Template {
+  regulation: string;
+  results: ParameterResult[];
+  sampleInfo: SampleInfo;
+  showKanLogo: boolean;
+}
+
+interface WorkplaceAirFormProps {
+  template: Template;
+  onTemplateChange: (template: Template) => void;
+  onSave: (template: Template) => void;
+  onBack: () => void;
+  onPreview: () => void;
+}
+
 export function WorkplaceAirForm({
   template,
   onTemplateChange,
   onSave,
   onBack,
   onPreview,
-}) {
-  const handleParameterChange = (index, field, value) => {
+}: WorkplaceAirFormProps) {
+  const handleParameterChange = (
+    index: number,
+    field: keyof ParameterResult,
+    value: string | boolean
+  ) => {
     const newResults = [...template.results];
-    // Pastikan kita membuat salinan objek sebelum mengubahnya
     newResults[index] = { ...newResults[index], [field]: value };
     onTemplateChange({ ...template, results: newResults });
   };
 
-  const handleSampleInfoChange = (e) => {
+  const handleSampleInfoChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     onTemplateChange({
       ...template,
@@ -38,7 +76,6 @@ export function WorkplaceAirForm({
   };
 
   return (
-    // Card utama, class warna dihapus agar otomatis adaptif
     <Card className="w-full max-w-6xl">
       <CardHeader>
         <div className="flex justify-between items-center">
@@ -50,9 +87,7 @@ export function WorkplaceAirForm({
         </div>
       </CardHeader>
 
-      {/* Konten dengan spacing vertikal yang konsisten */}
       <CardContent className="space-y-8">
-        {/* === SEKSI INFORMASI SAMPEL === */}
         <div className="space-y-6">
           <h3 className="text-xl font-semibold border-b pb-3">
             Informasi Sampel & Catatan
@@ -98,7 +133,6 @@ export function WorkplaceAirForm({
           </div>
         </div>
 
-        {/* === SEKSI KONDISI LINGKUNGAN (Hanya jika Permenaker A) === */}
         {template.regulation === "permenaker_a" && (
           <div className="space-y-6">
             <h3 className="text-xl font-semibold border-b pb-3">
@@ -129,13 +163,12 @@ export function WorkplaceAirForm({
           </div>
         )}
 
-        {/* === SEKSI HASIL PENGUJIAN PARAMETER === */}
         <div className="space-y-6">
           <h3 className="text-xl font-semibold border-b pb-3">
             Hasil Pengujian Parameter
           </h3>
           <div className="space-y-4">
-            {template.results.map((param, index) => (
+            {template.results.map((param: ParameterResult, index: number) => (
               <div
                 key={`${param.name}-${index}`}
                 className="p-4 rounded-lg border bg-muted/30 space-y-4"
@@ -223,7 +256,6 @@ export function WorkplaceAirForm({
           </div>
         </div>
 
-        {/* === SEKSI PENGATURAN HALAMAN === */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium border-b pb-3 flex items-center">
             <Settings className="w-4 h-4 mr-2" />
@@ -241,7 +273,7 @@ export function WorkplaceAirForm({
             <Switch
               id="kan-logo-switch"
               checked={template.showKanLogo}
-              onCheckedChange={(value) =>
+              onCheckedChange={(value: boolean) =>
                 onTemplateChange({ ...template, showKanLogo: value })
               }
             />
@@ -249,7 +281,6 @@ export function WorkplaceAirForm({
         </div>
       </CardContent>
 
-      {/* Footer dengan posisi tombol seperti semula */}
       <CardFooter className="flex justify-between">
         <Button variant="ghost" onClick={onPreview}>
           Preview Halaman

@@ -23,20 +23,71 @@ import {
   FileSearch,
 } from "lucide-react";
 
+interface ParameterResult {
+  name: string;
+  category?: string;
+  testingResult: string | number;
+  unit: string;
+  standard: string | number;
+  method: string;
+  isVisible: boolean;
+}
+
+interface SampleInfo {
+  sampleNo: string;
+  samplingLocation: string;
+  samplingTime: string;
+  notes: string;
+}
+
+interface CleanWaterTemplate {
+  sampleInfo: SampleInfo;
+  results: ParameterResult[];
+  showKanLogo: boolean;
+}
+
+interface CleanWaterFormProps {
+  template: CleanWaterTemplate;
+  onTemplateChange: (template: CleanWaterTemplate) => void;
+  onSave: (template: CleanWaterTemplate) => void;
+  onBack: () => void;
+  onPreview: () => void;
+}
+
+interface RenderFieldProps {
+  label: string;
+  id: string;
+  value: string | number;
+  onChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void;
+  placeholder?: string;
+  isEditable?: boolean;
+  type?: "input" | "textarea";
+}
+
 export function CleanWaterForm({
   template,
   onTemplateChange,
   onSave,
   onBack,
   onPreview,
-}) {
-  const handleParameterChange = (index, field, value) => {
+}: CleanWaterFormProps) {
+  const handleParameterChange = (
+    index: number,
+    field: keyof ParameterResult,
+    value: string | number | boolean
+  ) => {
     const newResults = [...template.results];
-    newResults[index] = { ...newResults[index], [field]: value };
-    onTemplateChange({ ...template, results: newResults });
+    if (index >= 0 && index < newResults.length) {
+      newResults[index] = { ...newResults[index], [field]: value };
+      onTemplateChange({ ...template, results: newResults });
+    }
   };
 
-  const handleSampleInfoChange = (e) => {
+  const handleSampleInfoChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     onTemplateChange({
       ...template,
@@ -44,7 +95,6 @@ export function CleanWaterForm({
     });
   };
 
-  // Helper untuk mempersingkat pemanggilan input dan label
   const renderField = ({
     label,
     id,
@@ -53,7 +103,7 @@ export function CleanWaterForm({
     placeholder = "",
     isEditable = false,
     type = "input",
-  }) => {
+  }: RenderFieldProps) => {
     const Component = type === "textarea" ? Textarea : Input;
     return (
       <div>
@@ -134,9 +184,8 @@ export function CleanWaterForm({
             Hasil Pengujian Parameter
           </h3>
           <div className="space-y-2 pt-2">
-            {template.results.map((param, index) => (
+            {template.results.map((param: ParameterResult, index: number) => (
               <React.Fragment key={`${param.name}-${index}`}>
-                {/* Menampilkan header kategori hanya jika berbeda dari sebelumnya */}
                 {param.category &&
                   (index === 0 ||
                     template.results[index - 1]?.category !==
@@ -163,9 +212,9 @@ export function CleanWaterForm({
                       className="h-8 w-8 text-muted-foreground hover:text-foreground"
                     >
                       {param.isVisible ? (
-                        <EyeOff className="w-4 h-4" />
-                      ) : (
                         <Eye className="w-4 h-4" />
+                      ) : (
+                        <EyeOff className="w-4 h-4" />
                       )}
                     </Button>
                   </div>
@@ -222,7 +271,6 @@ export function CleanWaterForm({
           </div>
         </div>
 
-        {/* === Bagian Pengaturan Halaman === */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-foreground border-b pb-3 flex items-center">
             <Settings className="w-5 h-5 mr-3" />

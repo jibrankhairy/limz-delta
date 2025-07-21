@@ -21,7 +21,37 @@ import {
   Save,
   FileSearch,
 } from "lucide-react";
-import { defaultIlluminationRow } from "../data/illumination-data"; // Impor di luar fungsi
+import { defaultIlluminationRow } from "../data/illumination-data";
+
+interface IlluminationResultRow {
+  id: number;
+  location: string;
+  result: string | number;
+  time: string;
+  unit: string;
+  standard: string | number;
+  method: string;
+  isVisible: boolean;
+}
+
+interface SampleInfo {
+  sampleNo: string;
+  samplingLocation: string;
+  samplingTime: string;
+}
+
+interface IlluminationTemplate {
+  sampleInfo: SampleInfo;
+  results: IlluminationResultRow[];
+}
+
+interface IlluminationFormProps {
+  template: IlluminationTemplate;
+  onTemplateChange: (template: IlluminationTemplate) => void;
+  onSave: (template: IlluminationTemplate) => void;
+  onBack: () => void;
+  onPreview: () => void;
+}
 
 export function IlluminationForm({
   template,
@@ -29,29 +59,35 @@ export function IlluminationForm({
   onSave,
   onBack,
   onPreview,
-}) {
-  const handleChange = (index, field, value) => {
+}: IlluminationFormProps) {
+  const handleChange = (
+    index: number,
+    field: keyof Omit<IlluminationResultRow, "id">,
+    value: string | number | boolean
+  ) => {
     const newResults = [...template.results];
-    newResults[index] = { ...newResults[index], [field]: value };
-    onTemplateChange({ ...template, results: newResults });
+    if (index >= 0 && index < newResults.length) {
+      newResults[index] = { ...newResults[index], [field]: value };
+      onTemplateChange({ ...template, results: newResults });
+    }
   };
 
   const handleAddRow = () => {
-    const newRow = {
+    const newRow: IlluminationResultRow = {
       ...defaultIlluminationRow,
-      id: Date.now(),
+      id: Date.now(), // Unique ID
       isVisible: true,
     };
     const newResults = [...template.results, newRow];
     onTemplateChange({ ...template, results: newResults });
   };
 
-  const handleRemoveRow = (index) => {
+  const handleRemoveRow = (index: number) => {
     const newResults = template.results.filter((_, i) => i !== index);
     onTemplateChange({ ...template, results: newResults });
   };
 
-  const handleSampleInfoChange = (e) => {
+  const handleSampleInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     onTemplateChange({
       ...template,
@@ -59,17 +95,25 @@ export function IlluminationForm({
     });
   };
 
-  // Helper untuk mempersingkat pemanggilan input
-  const renderInput = (value, onChange) => (
+  const renderInput = (
+    value: string | number,
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
+    id: string
+  ) => (
     <Input
+      id={id}
+      name={id}
       value={value || ""}
       onChange={onChange}
       className="bg-transparent border border-input text-foreground mt-1"
     />
   );
 
-  // Helper untuk mempersingkat pemanggilan label
-  const renderLabel = (text, htmlFor, isEditable = false) => (
+  const renderLabel = (
+    text: string,
+    htmlFor: string,
+    isEditable: boolean = false
+  ) => (
     <Label
       htmlFor={htmlFor}
       className="text-sm font-medium text-foreground flex items-center"
@@ -93,7 +137,6 @@ export function IlluminationForm({
         </div>
       </CardHeader>
       <CardContent className="space-y-8">
-        {/* === Bagian Informasi Sampel === */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-foreground border-b pb-3">
             Informasi Sampel Umum
@@ -103,119 +146,139 @@ export function IlluminationForm({
               {renderLabel("Sampel No.", "sampleNo")}
               {renderInput(
                 template.sampleInfo.sampleNo,
-                handleSampleInfoChange
+                handleSampleInfoChange,
+                "sampleNo"
               )}
             </div>
             <div>
               {renderLabel("Lokasi Sampling", "samplingLocation")}
               {renderInput(
                 template.sampleInfo.samplingLocation,
-                handleSampleInfoChange
+                handleSampleInfoChange,
+                "samplingLocation"
               )}
             </div>
             <div>
               {renderLabel("Waktu Sampling", "samplingTime")}
               {renderInput(
                 template.sampleInfo.samplingTime,
-                handleSampleInfoChange
+                handleSampleInfoChange,
+                "samplingTime"
               )}
             </div>
           </div>
         </div>
 
-        {/* === Bagian Hasil Pengujian === */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-foreground border-b pb-3">
             Hasil Pengujian per Lokasi
           </h3>
           <div className="space-y-4 pt-2">
-            {template.results.map((row, index) => (
-              <div
-                key={row.id}
-                className="border rounded-lg p-4 space-y-4 bg-muted/20"
-              >
-                <div className="flex justify-between items-center">
-                  <p className="font-semibold text-foreground">
-                    Lokasi #{index + 1}
-                  </p>
-                  <div className="flex items-center gap-x-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() =>
-                        handleChange(index, "isVisible", !row.isVisible)
-                      }
-                      className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                    >
-                      {row.isVisible ? (
-                        <EyeOff className="w-4 h-4" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
-                    </Button>
-                    {template.results.length > 1 && (
+            {template.results.map(
+              (row: IlluminationResultRow, index: number) => (
+                <div
+                  key={row.id}
+                  className="border rounded-lg p-4 space-y-4 bg-muted/20"
+                >
+                  <div className="flex justify-between items-center">
+                    <p className="font-semibold text-foreground">
+                      Lokasi #{index + 1}
+                    </p>
+                    <div className="flex items-center gap-x-1">
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleRemoveRow(index)}
-                        className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                        onClick={() =>
+                          handleChange(index, "isVisible", !row.isVisible)
+                        }
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        {row.isVisible ? (
+                          <Eye className="w-4 h-4" />
+                        ) : (
+                          <EyeOff className="w-4 h-4" />
+                        )}
                       </Button>
-                    )}
+                      {template.results.length > 1 && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRemoveRow(index)}
+                          className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                {row.isVisible && (
-                  <div className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                      <div>
-                        {renderLabel("Lokasi Sampling", `location-${index}`)}
-                        {renderInput(row.location, (e) =>
-                          handleChange(index, "location", e.target.value)
-                        )}
+                  {row.isVisible && (
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div>
+                          {renderLabel("Lokasi Sampling", `location-${index}`)}
+                          {renderInput(
+                            row.location,
+                            (e) =>
+                              handleChange(index, "location", e.target.value),
+                            `location-${index}`
+                          )}
+                        </div>
+                        <div>
+                          {renderLabel("Hasil Tes", `result-${index}`)}
+                          {renderInput(
+                            row.result,
+                            (e) =>
+                              handleChange(index, "result", e.target.value),
+                            `result-${index}`
+                          )}
+                        </div>
+                        <div>
+                          {renderLabel("Waktu", `time-${index}`)}
+                          {renderInput(
+                            row.time,
+                            (e) => handleChange(index, "time", e.target.value),
+                            `time-${index}`
+                          )}
+                        </div>
+                        <div>
+                          {renderLabel("Unit", `unit-${index}`)}
+                          {renderInput(
+                            row.unit,
+                            (e) => handleChange(index, "unit", e.target.value),
+                            `unit-${index}`
+                          )}
+                        </div>
                       </div>
-                      <div>
-                        {renderLabel("Hasil Tes", `result-${index}`)}
-                        {renderInput(row.result, (e) =>
-                          handleChange(index, "result", e.target.value)
-                        )}
-                      </div>
-                      <div>
-                        {renderLabel("Waktu", `time-${index}`)}
-                        {renderInput(row.time, (e) =>
-                          handleChange(index, "time", e.target.value)
-                        )}
-                      </div>
-                      <div>
-                        {renderLabel("Unit", `unit-${index}`)}
-                        {renderInput(row.unit, (e) =>
-                          handleChange(index, "unit", e.target.value)
-                        )}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          {renderLabel(
+                            "Standar Baku Mutu",
+                            `standard-${index}`,
+                            true
+                          )}
+                          {renderInput(
+                            row.standard,
+                            (e) =>
+                              handleChange(index, "standard", e.target.value),
+                            `standard-${index}`
+                          )}
+                        </div>
+                        <div>
+                          {renderLabel("Metode", `method-${index}`, true)}
+                          {renderInput(
+                            row.method,
+                            (e) =>
+                              handleChange(index, "method", e.target.value),
+                            `method-${index}`
+                          )}
+                        </div>
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        {renderLabel(
-                          "Standar Baku Mutu",
-                          `standard-${index}`,
-                          true
-                        )}
-                        {renderInput(row.standard, (e) =>
-                          handleChange(index, "standard", e.target.value)
-                        )}
-                      </div>
-                      <div>
-                        {renderLabel("Metode", `method-${index}`, true)}
-                        {renderInput(row.method, (e) =>
-                          handleChange(index, "method", e.target.value)
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              )
+            )}
             <Button
               variant="outline"
               onClick={handleAddRow}

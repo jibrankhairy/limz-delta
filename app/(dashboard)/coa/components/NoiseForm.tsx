@@ -1,5 +1,3 @@
-// components/NoiseForm.tsx
-
 "use client";
 
 import React from "react";
@@ -15,8 +13,65 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { PlusCircle, Trash2, Settings, ChevronLeft } from "lucide-react";
+import {
+  PlusCircle,
+  Trash2,
+  Settings,
+  ChevronLeft,
+  Save,
+  FileSearch,
+} from "lucide-react";
 import { defaultNoiseSimpleRow } from "../data/noise-data";
+
+interface NoiseMeasurement {
+  id: string;
+  point: string;
+  leq: string | number;
+  ls: string | number;
+  lm: string | number;
+  lsm: string | number;
+}
+
+interface NoiseComplexResult {
+  id: string;
+  locationName: string;
+  measurements: NoiseMeasurement[];
+}
+
+interface NoiseSimpleResult {
+  id: string;
+  location: string;
+  time: string;
+  testingResult: string | number;
+  standard: string | number;
+  unit: string;
+  method: string;
+}
+
+type NoiseResult = NoiseSimpleResult | NoiseComplexResult;
+
+interface SampleInfo {
+  sampleNo: string;
+  samplingLocation: string;
+  samplingTime: string;
+  samplingMethod: string;
+  notes: string;
+}
+
+interface NoiseTemplate {
+  regulation: "kepmen_lh_48" | "kepgub_dki_551" | string;
+  sampleInfo: SampleInfo;
+  results: NoiseResult[];
+  showKanLogo: boolean;
+}
+
+interface NoiseFormProps {
+  template: NoiseTemplate;
+  onTemplateChange: (template: NoiseTemplate) => void;
+  onSave: (template: NoiseTemplate) => void;
+  onBack: () => void;
+  onPreview: () => void;
+}
 
 export function NoiseForm({
   template,
@@ -24,7 +79,7 @@ export function NoiseForm({
   onSave,
   onBack,
   onPreview,
-}) {
+}: NoiseFormProps) {
   const handleSampleInfoChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -35,37 +90,44 @@ export function NoiseForm({
     });
   };
 
-  const handleSimpleRowChange = (index, field, value) => {
-    const newResults = [...template.results];
-    newResults[index][field] = value;
-    onTemplateChange({ ...template, results: newResults });
+  const handleSimpleRowChange = (
+    index: number,
+    field: keyof NoiseSimpleResult,
+    value: string | number
+  ) => {
+    const newResults = [...template.results] as NoiseSimpleResult[];
+    if (index >= 0 && index < newResults.length) {
+      newResults[index] = { ...newResults[index], [field]: value };
+      onTemplateChange({ ...template, results: newResults });
+    }
   };
 
   const handleAddSimpleRow = () => {
-    const newResults = [
-      ...template.results,
-      {
-        ...defaultNoiseSimpleRow,
-        standard: template.results[0].standard,
-        unit: template.results[0].unit,
-        method: template.results[0].method,
-      },
-    ];
+    const newRow: NoiseSimpleResult = {
+      ...defaultNoiseSimpleRow,
+      id: `noise-${Date.now()}`,
+      standard: (template.results[0] as NoiseSimpleResult)?.standard || "",
+      unit: (template.results[0] as NoiseSimpleResult)?.unit || "dBA",
+      method: (template.results[0] as NoiseSimpleResult)?.method || "",
+    };
+    const newResults = [...template.results, newRow];
     onTemplateChange({ ...template, results: newResults });
   };
 
-  const handleRemoveSimpleRow = (id) => {
-    const newResults = template.results.filter((row) => row.id !== id);
+  const handleRemoveSimpleRow = (id: string) => {
+    const newResults = template.results.filter(
+      (row) => (row as NoiseSimpleResult).id !== id
+    );
     onTemplateChange({ ...template, results: newResults });
   };
 
   const handleComplexChange = (
-    locationIndex,
-    measurementIndex,
-    field,
-    value
+    locationIndex: number,
+    measurementIndex: number,
+    field: keyof NoiseMeasurement,
+    value: string | number
   ) => {
-    const newResults = [...template.results];
+    const newResults = [...template.results] as NoiseComplexResult[];
     const newMeasurements = [...newResults[locationIndex].measurements];
     newMeasurements[measurementIndex] = {
       ...newMeasurements[measurementIndex],
@@ -80,7 +142,7 @@ export function NoiseForm({
 
   const renderSimpleForm = () => (
     <div className="space-y-4">
-      {template.results.map((row, index) => (
+      {(template.results as NoiseSimpleResult[]).map((row, index) => (
         <div
           key={row.id}
           className="p-4 rounded-lg border bg-muted/30 space-y-4"
@@ -145,86 +207,87 @@ export function NoiseForm({
 
   const renderComplexForm = () => (
     <div className="space-y-6">
-      {template.results.map((location, locationIndex) => (
-        <div key={location.id} className="p-4 rounded-lg border bg-muted/30">
-          <h4 className="text-lg font-semibold mb-4">
-            {location.locationName}
-          </h4>
-          <div className="space-y-2">
-            {location.measurements.map((m, measurementIndex) => (
-              <div
-                key={m.id}
-                className="p-3 rounded-lg border bg-background/50 grid grid-cols-2 md:grid-cols-5 gap-4 items-end"
-              >
-                <div className="font-medium self-center col-span-2 md:col-span-1">
-                  {m.point}
+      {(template.results as NoiseComplexResult[]).map(
+        (location, locationIndex) => (
+          <div key={location.id} className="p-4 rounded-lg border bg-muted/30">
+            <h4 className="text-lg font-semibold mb-4">
+              {location.locationName}
+            </h4>
+            <div className="space-y-2">
+              {location.measurements.map((m, measurementIndex) => (
+                <div
+                  key={m.id}
+                  className="p-3 rounded-lg border bg-background/50 grid grid-cols-2 md:grid-cols-5 gap-4 items-end"
+                >
+                  <div className="font-medium self-center col-span-2 md:col-span-1">
+                    {m.point}
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Leq</Label>
+                    <Input
+                      value={m.leq}
+                      onChange={(e) =>
+                        handleComplexChange(
+                          locationIndex,
+                          measurementIndex,
+                          "leq",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Ls</Label>
+                    <Input
+                      value={m.ls}
+                      onChange={(e) =>
+                        handleComplexChange(
+                          locationIndex,
+                          measurementIndex,
+                          "ls",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Lm</Label>
+                    <Input
+                      value={m.lm}
+                      onChange={(e) =>
+                        handleComplexChange(
+                          locationIndex,
+                          measurementIndex,
+                          "lm",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Lsm</Label>
+                    <Input
+                      value={m.lsm}
+                      onChange={(e) =>
+                        handleComplexChange(
+                          locationIndex,
+                          measurementIndex,
+                          "lsm",
+                          e.target.value
+                        )
+                      }
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label>Leq</Label>
-                  <Input
-                    value={m.leq}
-                    onChange={(e) =>
-                      handleComplexChange(
-                        locationIndex,
-                        measurementIndex,
-                        "leq",
-                        e.target.value
-                      )
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Ls</Label>
-                  <Input
-                    value={m.ls}
-                    onChange={(e) =>
-                      handleComplexChange(
-                        locationIndex,
-                        measurementIndex,
-                        "ls",
-                        e.target.value
-                      )
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Lm</Label>
-                  <Input
-                    value={m.lm}
-                    onChange={(e) =>
-                      handleComplexChange(
-                        locationIndex,
-                        measurementIndex,
-                        "lm",
-                        e.target.value
-                      )
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Lsm</Label>
-                  <Input
-                    value={m.lsm}
-                    onChange={(e) =>
-                      handleComplexChange(
-                        locationIndex,
-                        measurementIndex,
-                        "lsm",
-                        e.target.value
-                      )
-                    }
-                  />
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      )}
     </div>
   );
 
   return (
-    // Card utama, class warna dihapus agar otomatis mengikuti tema
     <Card className="w-full max-w-6xl">
       <CardHeader>
         <div className="flex justify-between items-center">
@@ -236,7 +299,6 @@ export function NoiseForm({
         </div>
       </CardHeader>
       <CardContent className="space-y-8">
-        {/* === SEKSI INFORMASI SAMPEL === */}
         <div className="space-y-6">
           <h3 className="text-xl font-semibold border-b pb-3">
             Informasi Sampel
@@ -286,7 +348,6 @@ export function NoiseForm({
           </div>
         </div>
 
-        {/* === SEKSI HASIL PENGUJIAN (KONDISIONAL) === */}
         <div className="space-y-6">
           <h3 className="text-xl font-semibold border-b pb-3">
             Hasil Pengujian
@@ -296,7 +357,6 @@ export function NoiseForm({
             : renderSimpleForm()}
         </div>
 
-        {/* === SEKSI PENGATURAN HALAMAN === */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium border-b pb-3 flex items-center">
             <Settings className="w-4 h-4 mr-2" />
@@ -323,9 +383,13 @@ export function NoiseForm({
       </CardContent>
       <CardFooter className="flex justify-between">
         <Button variant="ghost" onClick={onPreview}>
+          <FileSearch className="mr-2 h-4 w-4" />
           Preview Halaman
         </Button>
-        <Button onClick={() => onSave(template)}>Simpan Perubahan</Button>
+        <Button onClick={() => onSave(template)}>
+          <Save className="mr-2 h-4 w-4" />
+          Simpan Perubahan
+        </Button>
       </CardFooter>
     </Card>
   );

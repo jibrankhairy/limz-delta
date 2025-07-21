@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,11 +19,37 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
-// 1. Impor ikon untuk tombol kembali
 import { CalendarIcon, ChevronLeft } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import Image from "next/image";
+
+interface CoaData {
+  customer: string;
+  address: string;
+  phone: string;
+  subjects: string[];
+  sampleTakenBy: string[];
+  receiveDate: Date | undefined;
+  analysisDateStart: Date | undefined;
+  analysisDateEnd: string;
+  reportDate: string;
+  directorName: string;
+  signatureUrl: string;
+  showKanLogo: boolean;
+}
+
+interface CoverFormProps {
+  coaData: CoaData;
+  handleCheckboxChange: (
+    key: "subjects" | "sampleTakenBy",
+    value: string
+  ) => void;
+  handleCoaChange: (key: keyof CoaData, value: any) => void;
+  handleSignatureUpload: (file: File) => void;
+  onNextStep: () => void;
+  onPrevStep: () => void;
+}
 
 const allSubjects = [
   "Ambient Outdoor Air Quality",
@@ -32,6 +59,7 @@ const allSubjects = [
   "Illumination",
   "Heat Stress",
   "Wastewater",
+  "Clean Water",
 ];
 const sampleTakenByOptions = [
   "PT. Delta Indonesia Laboratory",
@@ -45,8 +73,8 @@ export function CoverForm({
   handleCoaChange,
   handleSignatureUpload,
   onNextStep,
-  onPrevStep, // 2. Tambahkan prop onPrevStep untuk fungsi kembali
-}) {
+  onPrevStep,
+}: CoverFormProps) {
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -60,7 +88,6 @@ export function CoverForm({
         <CardTitle>Lengkapi Data COA (Halaman 1)</CardTitle>
       </CardHeader>
       <CardContent className="space-y-8">
-        {/* Konten form tetap sama */}
         <div className="p-4 rounded-md border border-border">
           <p>
             Customer: <span className="font-semibold">{coaData.customer}</span>
@@ -274,9 +301,9 @@ export function CoverForm({
           </div>
         </div>
       </CardContent>
-      {/* 3. Tambahkan tombol baru di dalam CardFooter */}
       <CardFooter className="flex justify-end gap-2">
         <Button variant="outline" onClick={onPrevStep}>
+          <ChevronLeft className="mr-2 h-4 w-4" />
           Kembali
         </Button>
         <Button onClick={onNextStep}>Selanjutnya</Button>

@@ -15,20 +15,53 @@ import { Switch } from "@/components/ui/switch";
 import { PlusCircle, Trash2, Settings, ChevronLeft } from "lucide-react";
 import { nanoid } from "nanoid";
 
+interface ParameterResult {
+  id: string;
+  location: string;
+  time: string;
+  testingResult: string;
+  unit: string;
+}
+
+interface SampleInfo {
+  sampleNo: string;
+  samplingLocation: string;
+  samplingTime: string;
+}
+
+interface Template {
+  regulation: string;
+  results: ParameterResult[];
+  sampleInfo: SampleInfo;
+  showKanLogo: boolean;
+}
+
+interface VibrationFormProps {
+  template: Template;
+  onTemplateChange: (template: Template) => void;
+  onSave: (template: Template) => void;
+  onBack: () => void;
+  onPreview: () => void;
+}
+
 export function VibrationForm({
   template,
   onTemplateChange,
   onSave,
   onBack,
   onPreview,
-}) {
-  const handleParameterChange = (index, field, value) => {
+}: VibrationFormProps) {
+  const handleParameterChange = (
+    index: number,
+    field: keyof ParameterResult,
+    value: string
+  ) => {
     const newResults = [...template.results];
-    newResults[index][field] = value;
+    (newResults[index] as any)[field] = value;
     onTemplateChange({ ...template, results: newResults });
   };
 
-  const handleSampleInfoChange = (e) => {
+  const handleSampleInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     onTemplateChange({
       ...template,
@@ -38,7 +71,11 @@ export function VibrationForm({
 
   const handleAddRow = () => {
     if (template.regulation === "permenaker_5") {
-      const { vibrationParamsPermenaker5 } = require("../data/vibration-data");
+      const {
+        vibrationParamsPermenaker5,
+      }: {
+        vibrationParamsPermenaker5: Omit<ParameterResult, "id">[];
+      } = require("../data/vibration-data");
       const newResults = [
         ...template.results,
         { ...vibrationParamsPermenaker5[0], id: nanoid() },
@@ -47,8 +84,10 @@ export function VibrationForm({
     }
   };
 
-  const handleRemoveRow = (index) => {
-    const newResults = template.results.filter((_, i) => i !== index);
+  const handleRemoveRow = (indexToRemove: number) => {
+    const newResults = template.results.filter(
+      (_, index) => index !== indexToRemove
+    );
     onTemplateChange({ ...template, results: newResults });
   };
 
@@ -57,9 +96,9 @@ export function VibrationForm({
       case "permenaker_5":
         return (
           <div className="space-y-4">
-            {template.results.map((row, index) => (
+            {template.results.map((row: ParameterResult, index: number) => (
               <div
-                key={row.id || index}
+                key={row.id}
                 className="p-4 rounded-lg border bg-muted/30 space-y-4"
               >
                 <div className="flex justify-between items-center">
@@ -124,7 +163,6 @@ export function VibrationForm({
           </div>
         );
 
-      // Form untuk regulasi lain bisa ditambahkan di sini jika perlu
       default:
         return (
           <p className="text-muted-foreground">
@@ -135,7 +173,6 @@ export function VibrationForm({
   };
 
   return (
-    // Card utama, class warna dihapus agar otomatis mengikuti tema
     <Card className="w-full max-w-6xl">
       <CardHeader>
         <div className="flex justify-between items-center">
@@ -147,7 +184,6 @@ export function VibrationForm({
         </div>
       </CardHeader>
       <CardContent className="space-y-8">
-        {/* === SEKSI INFORMASI SAMPEL === */}
         <div className="space-y-6">
           <h3 className="text-xl font-semibold border-b pb-3">
             Informasi Sampel
@@ -185,7 +221,6 @@ export function VibrationForm({
           </div>
         </div>
 
-        {/* === SEKSI HASIL PENGUJIAN === */}
         <div className="space-y-6">
           <h3 className="text-xl font-semibold border-b pb-3">
             Hasil Pengujian
@@ -193,7 +228,6 @@ export function VibrationForm({
           {renderFormContent()}
         </div>
 
-        {/* === SEKSI PENGATURAN HALAMAN === */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium border-b pb-3 flex items-center">
             <Settings className="w-4 h-4 mr-2" />
@@ -211,7 +245,7 @@ export function VibrationForm({
             <Switch
               id="kan-logo-switch"
               checked={template.showKanLogo}
-              onCheckedChange={(value) =>
+              onCheckedChange={(value: boolean) =>
                 onTemplateChange({ ...template, showKanLogo: value })
               }
             />

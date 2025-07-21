@@ -1,5 +1,3 @@
-// components/NonSSEForm.tsx
-
 "use client";
 
 import React from "react";
@@ -20,9 +18,43 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"; // Import Select
+} from "@/components/ui/select";
 import { ChevronLeft, PlusCircle, Trash2 } from "lucide-react";
 import { defaultNonSSERow } from "../data/non-sse-data";
+
+interface NonSSERow {
+  id: string;
+  location: string;
+  vehicleBrand: string;
+  year: string;
+  capacity: string;
+  fuel: string;
+  parameter: string;
+  testingResult: string;
+  standard: string;
+  unit: string;
+  method: string;
+}
+
+interface SampleInfo {
+  sampleNo: string;
+  samplingLocation: string;
+  samplingTime: string;
+  notes: string;
+}
+
+interface NonSSETemplate {
+  sampleInfo: SampleInfo;
+  results: NonSSERow[];
+}
+
+interface NonSSEFormProps {
+  template: NonSSETemplate;
+  onTemplateChange: (template: NonSSETemplate) => void;
+  onSave: (template: NonSSETemplate) => void;
+  onBack: () => void;
+  onPreview: () => void;
+}
 
 export function NonSSEForm({
   template,
@@ -30,12 +62,15 @@ export function NonSSEForm({
   onSave,
   onBack,
   onPreview,
-}) {
-  const handleRowChange = (index: number, field: string, value: any) => {
+}: NonSSEFormProps) {
+  const handleRowChange = (
+    index: number,
+    field: keyof NonSSERow,
+    value: any
+  ) => {
     const newResults = [...template.results];
     const newRow = { ...newResults[index], [field]: value };
 
-    // Otomatisasi standar berdasarkan parameter dan tahun
     if (field === "parameter" || field === "year") {
       const year =
         field === "year" ? parseInt(value, 10) : parseInt(newRow.year, 10);
@@ -72,12 +107,11 @@ export function NonSSEForm({
   };
 
   const handleRemoveRow = (id: string) => {
-    const newResults = template.results.filter((row: any) => row.id !== id);
+    const newResults = template.results.filter((row) => row.id !== id);
     onTemplateChange({ ...template, results: newResults });
   };
 
   return (
-    // Card utama, class warna dihapus agar otomatis mengikuti tema
     <Card className="w-full max-w-6xl">
       <CardHeader>
         <div className="flex justify-between items-center">
@@ -89,7 +123,6 @@ export function NonSSEForm({
         </div>
       </CardHeader>
       <CardContent className="space-y-8">
-        {/* === SEKSI INFORMASI SAMPEL === */}
         <div className="space-y-6">
           <h3 className="text-xl font-semibold border-b pb-3">
             Informasi Sampel & Catatan
@@ -137,13 +170,12 @@ export function NonSSEForm({
           </div>
         </div>
 
-        {/* === SEKSI DATA KENDARAAN === */}
         <div>
           <h3 className="text-xl font-semibold border-b pb-3 mb-6">
             Data Kendaraan & Hasil Pengujian
           </h3>
           <div className="space-y-4">
-            {template.results.map((row: any, index: number) => (
+            {template.results.map((row, index) => (
               <div
                 key={row.id}
                 className="p-4 rounded-lg border bg-muted/30 space-y-4"
@@ -160,7 +192,6 @@ export function NonSSEForm({
                     </Button>
                   )}
                 </div>
-                {/* Grup input pertama */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                   <div className="space-y-2">
                     <Label>Lokasi</Label>
@@ -201,7 +232,6 @@ export function NonSSEForm({
                     />
                   </div>
                 </div>
-                {/* Grup input kedua */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                   <div className="space-y-2">
                     <Label>Bahan Bakar</Label>

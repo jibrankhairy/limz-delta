@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ChevronLeft, Droplets } from "lucide-react"; // 1. Impor ikon
+import { ChevronLeft, Droplets } from "lucide-react";
 
 interface Props {
   onSelect: (regulationId: string) => void;
@@ -32,12 +32,10 @@ export function WastewaterRegulationSelection({ onSelect, onBack }: Props) {
   ];
 
   return (
-    // 2. Class hardcode dihapus, menggunakan style default dari Card
     <Card className="w-full max-w-4xl">
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <CardTitle>Pilih Standar Baku Mutu Air Limbah</CardTitle>
-          {/* 3. Tombol kembali diberi ikon agar lebih jelas */}
           <Button variant="outline" onClick={onBack}>
             <ChevronLeft className="mr-2 h-4 w-4" />
             Kembali
@@ -49,7 +47,6 @@ export function WastewaterRegulationSelection({ onSelect, onBack }: Props) {
         </CardDescription>
       </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* 4. Mengubah tombol biasa menjadi kartu yang lebih interaktif */}
         {regulations.map((reg) => (
           <div
             key={reg.id}

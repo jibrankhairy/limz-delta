@@ -2,16 +2,29 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronLeft, FilePlus2 } from "lucide-react"; // 1. Impor ikon
+import { ChevronLeft, FilePlus2 } from "lucide-react";
 
-export function TemplateSelection({ templates, onSelectTemplate, onBack }) {
+interface Template {
+  id: string;
+  name: string;
+}
+
+interface TemplateSelectionProps {
+  templates: Template[];
+  onSelectTemplate: (id: string) => void;
+  onBack: () => void;
+}
+
+export function TemplateSelection({
+  templates,
+  onSelectTemplate,
+  onBack,
+}: TemplateSelectionProps) {
   return (
-    // 2. Class hardcode dihapus, menggunakan style default dari Card
     <Card className="w-full max-w-4xl">
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <CardTitle>Langkah 2: Pilih Template</CardTitle>
-          {/* 3. Tombol kembali diberi ikon agar lebih jelas */}
           <Button variant="outline" onClick={onBack}>
             <ChevronLeft className="mr-2 h-4 w-4" />
             Kembali
@@ -19,8 +32,7 @@ export function TemplateSelection({ templates, onSelectTemplate, onBack }) {
         </div>
       </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* 4. Mengubah tombol biasa menjadi kartu yang lebih interaktif */}
-        {templates.map((template) => (
+        {templates.map((template: Template) => (
           <div
             key={template.id}
             onClick={() => onSelectTemplate(template.id)}
@@ -34,4 +46,3 @@ export function TemplateSelection({ templates, onSelectTemplate, onBack }) {
     </Card>
   );
 }
- 

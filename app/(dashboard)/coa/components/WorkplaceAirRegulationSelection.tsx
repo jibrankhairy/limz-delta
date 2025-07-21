@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ChevronLeft, Wind } from "lucide-react"; // 1. Impor ikon
+import { ChevronLeft, Wind } from "lucide-react";
 
 interface Props {
   onSelect: (regulationId: string) => void;
@@ -35,12 +35,10 @@ export function WorkplaceAirRegulationSelection({ onSelect, onBack }: Props) {
   ];
 
   return (
-    // 2. Class hardcode dihapus, menggunakan style default dari Card
     <Card className="w-full max-w-2xl">
       <CardHeader>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <CardTitle>Pilih Standar Baku Mutu Udara Lingkungan Kerja</CardTitle>
-          {/* 3. Tombol kembali diberi ikon agar lebih jelas */}
           <Button variant="outline" onClick={onBack}>
             <ChevronLeft className="mr-2 h-4 w-4" />
             Kembali
@@ -52,7 +50,6 @@ export function WorkplaceAirRegulationSelection({ onSelect, onBack }: Props) {
         </CardDescription>
       </CardHeader>
       <CardContent className="grid grid-cols-1 gap-4">
-        {/* 4. Mengubah tombol biasa menjadi kartu yang lebih interaktif */}
         {regulations.map((reg) => (
           <div
             key={reg.id}

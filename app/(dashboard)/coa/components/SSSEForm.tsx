@@ -1,5 +1,3 @@
-// components/SSSEForm.tsx
-
 "use client";
 
 import React from "react";
@@ -17,17 +15,58 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Pencil, Eye, EyeOff, Settings, ChevronLeft } from "lucide-react";
 
+interface ParameterResult {
+  name: string;
+  testingResult: string;
+  unit: string;
+  standard: string;
+  method: string;
+  isVisible: boolean;
+}
+
+interface SampleInfo {
+  sampleNo: string;
+  samplingLocation: string;
+  samplingTime: string;
+  samplingMethod: string;
+  notes: string;
+  coordinate: string;
+  velocity: string;
+  stackTemperature: string;
+}
+
+interface Template {
+  results: ParameterResult[];
+  sampleInfo: SampleInfo;
+  showKanLogo: boolean;
+}
+
+interface SSSEFormProps {
+  template: Template;
+  onTemplateChange: (template: Template) => void;
+  onSave: (template: Template) => void;
+  onBack: () => void;
+  onPreview: () => void;
+}
+
 export function SSSEForm({
   template,
   onTemplateChange,
   onSave,
   onBack,
   onPreview,
-}) {
-  const handleParameterChange = (index: number, field: string, value: any) => {
+}: SSSEFormProps) {
+  const handleParameterChange = (
+    index: number,
+    field: keyof ParameterResult,
+    value: string | boolean
+  ) => {
     const newResults = [...template.results];
-    newResults[index] = { ...newResults[index], [field]: value };
-    onTemplateChange({ ...template, results: newResults });
+    const currentParam = newResults[index];
+    if (typeof currentParam[field] === typeof value) {
+      (newResults[index] as any)[field] = value;
+      onTemplateChange({ ...template, results: newResults });
+    }
   };
 
   const handleSampleInfoChange = (
@@ -41,7 +80,6 @@ export function SSSEForm({
   };
 
   return (
-    // Card utama, class warna dihapus agar otomatis mengikuti tema
     <Card className="w-full max-w-6xl">
       <CardHeader>
         <div className="flex justify-between items-center">
@@ -55,7 +93,6 @@ export function SSSEForm({
         </div>
       </CardHeader>
       <CardContent className="space-y-8">
-        {/* === SEKSI INFORMASI SAMPEL === */}
         <div className="space-y-6">
           <h3 className="text-xl font-semibold border-b pb-3">
             Informasi Sampel & Catatan
@@ -111,7 +148,6 @@ export function SSSEForm({
           </div>
         </div>
 
-        {/* === SEKSI DATA EMISI & CEROBONG === */}
         <div className="space-y-6">
           <h3 className="text-xl font-semibold border-b pb-3">
             Data Emisi & Cerobong
@@ -149,7 +185,6 @@ export function SSSEForm({
           </div>
         </div>
 
-        {/* === SEKSI HASIL PENGUJIAN PARAMETER === */}
         <div className="space-y-6">
           <h3 className="text-xl font-semibold border-b pb-3">
             Hasil Pengujian Parameter
@@ -240,7 +275,6 @@ export function SSSEForm({
           </div>
         </div>
 
-        {/* === SEKSI PENGATURAN HALAMAN === */}
         <div className="space-y-4">
           <h3 className="text-lg font-medium border-b pb-3 flex items-center">
             <Settings className="w-4 h-4 mr-2" />
@@ -258,7 +292,7 @@ export function SSSEForm({
             <Switch
               id="kan-logo-switch"
               checked={template.showKanLogo}
-              onCheckedChange={(value) =>
+              onCheckedChange={(value: boolean) =>
                 onTemplateChange({ ...template, showKanLogo: value })
               }
             />

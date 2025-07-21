@@ -15,14 +15,52 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Pencil, Settings, ChevronLeft, Save, FileSearch } from "lucide-react";
 
+interface ParameterResult {
+  id: number | string;
+  name: string;
+  testingResult: string;
+  unit: string;
+  standard: string;
+  method: string;
+}
+
+interface SampleInfo {
+  sampleNo: string;
+  samplingLocation: string;
+  samplingTime: string;
+  temperatureWorkplace?: string;
+  humidityWorkplace?: string;
+  coordinate?: string;
+  temperatureAmbient?: string;
+  pressure?: string;
+  humidityAmbient?: string;
+  windSpeed?: string;
+  windDirection?: string;
+  weather?: string;
+}
+
+interface Template {
+  regulation: string;
+  results: ParameterResult[];
+  sampleInfo: SampleInfo;
+  showKanLogo: boolean;
+}
+
+interface OdorFormProps {
+  template: Template;
+  onTemplateChange: (template: Template) => void;
+  onSave: (template: Template) => void;
+  onBack: () => void;
+  onPreview: () => void;
+}
+
 export function OdorForm({
   template,
   onTemplateChange,
   onSave,
   onBack,
   onPreview,
-}) {
-  // Judul dinamis berdasarkan regulasi yang dipilih
+}: OdorFormProps) {
   const regulationTitle = React.useMemo(() => {
     if (template.regulation.startsWith("permenaker"))
       return "Permenaker No. 05 Tahun 2018";
@@ -31,13 +69,17 @@ export function OdorForm({
     return "Template Odor";
   }, [template.regulation]);
 
-  const handleParameterChange = (index, field, value) => {
+  const handleParameterChange = (
+    index: number,
+    field: keyof ParameterResult,
+    value: string
+  ) => {
     const newResults = [...template.results];
     newResults[index] = { ...newResults[index], [field]: value };
     onTemplateChange({ ...template, results: newResults });
   };
 
-  const handleSampleInfoChange = (e) => {
+  const handleSampleInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     onTemplateChange({
       ...template,
@@ -45,12 +87,11 @@ export function OdorForm({
     });
   };
 
-  // Helper untuk mempersingkat pemanggilan input dan label
   const renderField = (
-    label,
-    id,
-    value,
-    onChange,
+    label: string,
+    id: string,
+    value: string | undefined,
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
     placeholder = "",
     isEditable = false
   ) => (
@@ -92,7 +133,6 @@ export function OdorForm({
         </div>
       </CardHeader>
       <CardContent className="space-y-8">
-        {/* === Bagian Informasi Sampel === */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-foreground border-b pb-3">
             Informasi Sampel Umum
@@ -121,7 +161,6 @@ export function OdorForm({
           </div>
         </div>
 
-        {/* === Bagian Hasil Pengujian === */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-foreground border-b pb-3">
             Hasil Pengujian Parameter
@@ -177,7 +216,6 @@ export function OdorForm({
           </div>
         </div>
 
-        {/* === Bagian Kondisi Lingkungan === */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-foreground border-b pb-3">
             {template.regulation.startsWith("permenaker")
@@ -255,7 +293,6 @@ export function OdorForm({
           </div>
         </div>
 
-        {/* === Bagian Pengaturan Halaman === */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-foreground border-b pb-3 flex items-center">
             <Settings className="w-5 h-5 mr-3" />
@@ -276,7 +313,7 @@ export function OdorForm({
             <Switch
               id="kan-logo-switch"
               checked={template.showKanLogo}
-              onCheckedChange={(value) =>
+              onCheckedChange={(value: boolean) =>
                 onTemplateChange({ ...template, showKanLogo: value })
               }
             />

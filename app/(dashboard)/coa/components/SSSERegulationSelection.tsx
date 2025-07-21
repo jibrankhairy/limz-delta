@@ -1,5 +1,3 @@
-// components/SSSERegulationSelection.tsx
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -92,7 +90,6 @@ export function SSSERegulationSelection({ onSelect, onBack }: Props) {
   ];
 
   return (
-    // Card utama, class warna dihapus agar otomatis mengikuti tema
     <Card className="w-full max-w-4xl">
       <CardHeader>
         <div className="flex justify-between items-center">
