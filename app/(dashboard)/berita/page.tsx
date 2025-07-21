@@ -41,6 +41,11 @@ interface BapsData {
     jenisSampel: string;
     waktuPengambilan: string;
   }>;
+  // Perubahan: Menambahkan data untuk penanda tangan
+  penandaTangan: {
+    pihakLab: string;
+    pihakPerusahaan: string;
+  };
 }
 
 export default function BeritaPage() {
@@ -84,6 +89,11 @@ export default function BeritaPage() {
           jenisSampel: "",
           waktuPengambilan: "",
         })),
+        // Perubahan: Inisialisasi data penanda tangan
+        penandaTangan: {
+          pihakLab: "",
+          pihakPerusahaan: "",
+        },
       });
     } catch (err) {
       console.error(err);
@@ -93,10 +103,17 @@ export default function BeritaPage() {
     }
   };
 
+  // Perubahan: Fungsi ini diupdate untuk menangani data bertingkat (nested)
   const handleBapsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!bapsData) return;
     const { name, value } = e.target;
-    if (name in bapsData.titikPengujian) {
+
+    if (name === "pihakLab" || name === "pihakPerusahaan") {
+      setBapsData({
+        ...bapsData,
+        penandaTangan: { ...bapsData.penandaTangan, [name]: value },
+      });
+    } else if (name in bapsData.titikPengujian) {
       setBapsData({
         ...bapsData,
         titikPengujian: { ...bapsData.titikPengujian, [name]: value },
@@ -129,9 +146,7 @@ export default function BeritaPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 items-start gap-6">
-        {/* ✅ FORM DI KIRI */}
         <div className="space-y-6">
-          {/* Form cari */}
           <div className="border border-border rounded-lg p-4">
             <h2 className="text-base font-medium mb-2">Cari Data FPPS</h2>
             <CariForm
@@ -142,7 +157,6 @@ export default function BeritaPage() {
             />
           </div>
 
-          {/* Form isi data jika sudah ada bapsData */}
           {bapsData && (
             <>
               <div className="border border-border rounded-lg p-4 space-y-4">
@@ -172,12 +186,8 @@ export default function BeritaPage() {
                     </p>
                   </div>
                 </div>
-
                 <div>
-                  <Label
-                    htmlFor="hariTanggal"
-                    className="text-sm font-medium text-foreground"
-                  >
+                  <Label htmlFor="hariTanggal" className="text-sm font-medium text-foreground">
                     Hari, Tanggal Pengambilan Sampel
                   </Label>
                   <Input
@@ -190,7 +200,6 @@ export default function BeritaPage() {
                 </div>
               </div>
 
-              {/* Titik Pengujian Form */}
               <div className="border border-border rounded-lg p-4">
                 <TitikPengujianForm
                   data={bapsData.titikPengujian}
@@ -198,12 +207,44 @@ export default function BeritaPage() {
                 />
               </div>
 
-              {/* Rincian Form */}
               <div className="border border-border rounded-lg p-4">
                 <RincianForm
                   rincianUji={bapsData.rincianUji}
                   onChange={handleRincianChange}
                 />
+              </div>
+              
+              {/* Perubahan: Form untuk nama penanda tangan */}
+              <div className="border border-border rounded-lg p-4">
+                <h2 className="text-base font-medium mb-4">Penanda Tangan</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="pihakLab" className="text-sm font-medium text-foreground">
+                      Pihak Laboratorium
+                    </Label>
+                    <Input
+                      id="pihakLab"
+                      name="pihakLab"
+                      value={bapsData.penandaTangan.pihakLab}
+                      onChange={handleBapsChange}
+                      placeholder="Masukkan nama..."
+                      className="bg-transparent border border-input text-foreground mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="pihakPerusahaan" className="text-sm font-medium text-foreground">
+                      Pihak Perusahaan
+                    </Label>
+                    <Input
+                      id="pihakPerusahaan"
+                      name="pihakPerusahaan"
+                      value={bapsData.penandaTangan.pihakPerusahaan}
+                      onChange={handleBapsChange}
+                      placeholder="Masukkan nama..."
+                      className="bg-transparent border border-input text-foreground mt-1"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="flex justify-end">
@@ -222,7 +263,6 @@ export default function BeritaPage() {
         )}
       </div>
 
-      {/* PREVIEW CETAK */}
       <BapsPreviewDialog
         open={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}

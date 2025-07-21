@@ -147,11 +147,11 @@ export default function CoaPage() {
             setView("dashboard");
           } else {
             alert("Gagal memuat laporan.");
-            router.push("/dashboard/coa");
+            router.push("/coa");
           }
         } catch (error) {
           alert("Terjadi kesalahan saat memuat laporan.");
-          router.push("/dashboard/coa");
+          router.push("/coa");
         }
       };
       loadReport();
@@ -163,7 +163,7 @@ export default function CoaPage() {
       const startDate = new Date(coaData.analysisDateStart);
       const endDate = new Date(startDate);
       endDate.setDate(startDate.getDate() + 14);
-      setCoaData((prev) => ({
+      setCoaData((prev: any) => ({
         ...prev,
         analysisDateEnd: format(endDate, "MMMM dd, yyyy", { locale: id }),
       }));
@@ -174,7 +174,7 @@ export default function CoaPage() {
     if (coaData?.nomorFpps) {
       const fppsNumber = coaData.nomorFpps;
       const newCertNo = `${fppsNumber}-COA`;
-      setCoaData((prev) => ({ ...prev, certificateNo: newCertNo }));
+      setCoaData((prev: any) => ({ ...prev, certificateNo: newCertNo }));
     }
   }, [coaData?.nomorFpps]);
 
@@ -186,8 +186,7 @@ export default function CoaPage() {
       const response = await fetch(`/api/fpps/${nomor}`);
       if (!response.ok) throw new Error("Data tidak ditemukan");
       const fppsData = await response.json();
-      console.log("DATA FPPS", fppsData.formData);
-
+      
       const newReportId = nanoid(24);
       setReportId(newReportId);
 
@@ -207,6 +206,7 @@ export default function CoaPage() {
         signatureUrl: null,
         directorName: "Drs. H. Soekardin Rachman, M.Si",
         certificateNo: "",
+        showKanLogo: true,
       });
       setView("cover");
     } catch (error) {
@@ -218,51 +218,41 @@ export default function CoaPage() {
   };
 
   const handleSaveReport = async () => {
-    if (!coaData || !reportId)
-      return alert("Data cover atau ID Laporan tidak lengkap.");
+    if (!coaData || !reportId) return alert("Data cover atau ID Laporan tidak lengkap.");
     setIsLoading(true);
 
-    const reportPayload = {
+    const resCheck = await fetch(`/api/reports/${reportId}`);
+    const isExisting = resCheck.ok;
+
+    const method = isExisting ? 'PUT' : 'POST';
+    const endpoint = isExisting ? `/api/reports/${reportId}` : '/api/reports';
+
+    const payload = {
       _id: reportId,
       coverData: coaData,
       activeTemplates: activeTemplates,
     };
 
     try {
-      let response;
-      const resCheck = await fetch(`/api/reports/${reportId}`);
-      const isExisting = resCheck.ok;
+      const response = await fetch(endpoint, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
 
-      if (isExisting) {
-        response = await fetch(`/api/reports/${reportId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            coverData: coaData,
-            activeTemplates: activeTemplates,
-          }),
-        });
-      } else {
-        response = await fetch("/api/reports", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(reportPayload),
-        });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Gagal membaca respons error dari server.' }));
+        throw new Error(errorData.error);
       }
 
       const result = await response.json();
-      if (result.success) {
-        alert("Laporan berhasil disimpan!");
-        if (!isExisting) {
-          router.push(`/dashboard/coa?id=${result.data._id}`, {
-            scroll: false,
-          });
-        }
-      } else {
-        throw new Error(result.error || "Gagal menyimpan laporan.");
+      alert('Laporan berhasil disimpan!');
+      
+      if (!isExisting) {
+        router.push(`/coa?id=${result.data._id}`, { scroll: false });
       }
-    } catch (error) {
-      console.error("Save error:", error);
+
+    } catch (error: any) {
       alert(`Gagal menyimpan laporan: ${error.message}`);
     } finally {
       setIsLoading(false);
@@ -281,12 +271,12 @@ export default function CoaPage() {
       });
       const result = await response.json();
       if (result.success) {
-        setCoaData((prev) => ({ ...prev, signatureUrl: result.url }));
+        setCoaData((prev: any) => ({ ...prev, signatureUrl: result.url }));
         alert("Tanda tangan berhasil diunggah!");
       } else {
         throw new Error(result.error || "Gagal mengunggah file.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Upload failed:", error);
       alert(error.message);
     } finally {
@@ -295,12 +285,18 @@ export default function CoaPage() {
   };
 
   const handlePrint = () => window.print();
+  
+  // FUNGSI UNTUK TOMBOL KEMBALI
+  const handleBackToCover = () => setView("cover");
+
   const handlePreview = (node: React.ReactNode) => {
     setPreviewNode(node);
     setIsPreviewOpen(true);
   };
+
   const handleCoaChange = (field: string, value: any) =>
     setCoaData((prev: any) => ({ ...prev, [field]: value }));
+  
   const handleCheckboxChange = (
     field: "subjects" | "sampleTakenBy",
     value: string
@@ -478,8 +474,7 @@ export default function CoaPage() {
             onSave={handleSaveReport}
             onPrint={handlePrint}
             isSaving={isLoading}
-            reportId={reportId}
-            onGenerateQrClick={() => setIsQrModalOpen(true)}
+            onBackToCover={handleBackToCover}
           />
         );
       case "template_selection":
@@ -495,49 +490,20 @@ export default function CoaPage() {
               };
               if (
                 [
-                  "odor",
-                  "wastewater",
-                  "cleanwater",
-                  "workplaceair",
-                  "surfacewater",
-                  "vibration",
-                  "airambient",
-                  "ssse",
-                  "noise",
+                  "odor", "wastewater", "cleanwater", "workplaceair", 
+                  "surfacewater", "vibration", "airambient", "ssse", "noise",
                 ].includes(type)
               ) {
                 setEditingTemplate({ templateType: type });
               } else {
                 if (type === "illumination") {
-                  newTemplate = {
-                    ...baseTemplate,
-                    results: [{ ...defaultIlluminationRow, id: nanoid() }],
-                    sampleInfo: {
-                      sampleNo: "",
-                      samplingLocation: "",
-                      samplingTime: "",
-                    },
-                  };
+                  newTemplate = { ...baseTemplate, results: [{ ...defaultIlluminationRow, id: nanoid() }], sampleInfo: { sampleNo: "", samplingLocation: "", samplingTime: "" } };
                 } else if (type === "heatstress") {
-                  newTemplate = {
-                    ...baseTemplate,
-                    results: [{ ...defaultHeatStressRow, id: nanoid() }],
-                    sampleInfo: { ...defaultHeatStressSampleInfo },
-                  };
+                  newTemplate = { ...baseTemplate, results: [{ ...defaultHeatStressRow, id: nanoid() }], sampleInfo: { ...defaultHeatStressSampleInfo } };
                 } else if (type === "ispu") {
-                  newTemplate = {
-                    ...baseTemplate,
-                    results: ispuData.defaultISPUParameters.map((p) => ({
-                      ...p,
-                    })),
-                    sampleInfo: { ...ispuData.defaultISPUSampleInfo },
-                  };
+                  newTemplate = { ...baseTemplate, results: ispuData.defaultISPUParameters.map((p) => ({ ...p })), sampleInfo: { ...ispuData.defaultISPUSampleInfo } };
                 } else if (type === "nonsse") {
-                  newTemplate = {
-                    ...baseTemplate,
-                    results: [{ ...nonsseData.defaultNonSSERow, id: nanoid() }],
-                    sampleInfo: { ...nonsseData.defaultNonSSESampleInfo },
-                  };
+                  newTemplate = { ...baseTemplate, results: [{ ...nonsseData.defaultNonSSERow, id: nanoid() }], sampleInfo: { ...nonsseData.defaultNonSSESampleInfo } };
                 }
                 setEditingTemplate(newTemplate);
               }
@@ -548,308 +514,38 @@ export default function CoaPage() {
         );
       case "form":
         const baseTemplate = { id: nanoid(), showKanLogo: true };
-        if (
-          editingTemplate?.templateType === "odor" &&
-          !editingTemplate.regulation
-        ) {
-          return (
-            <OdorRegulationSelection
-              onSelect={(regulationId) => {
-                const paramsMap = {
-                  permenaker_a: odorParamsPermenakerA,
-                  permenaker_b: odorParamsPermenakerB,
-                  kepmenlh: odorParamsKepmenLH,
-                };
-                setEditingTemplate({
-                  ...baseTemplate,
-                  templateType: "odor",
-                  regulation: regulationId,
-                  sampleInfo: defaultOdorSampleInfo,
-                  results: (paramsMap[regulationId] || []).map((p) => ({
-                    ...p,
-                    isVisible: true,
-                  })),
-                });
-              }}
-              onBack={() => {
-                setEditingTemplate(null);
-                setView("template_selection");
-              }}
-            />
-          );
+        if (editingTemplate?.templateType === "odor" && !editingTemplate.regulation) {
+          return (<OdorRegulationSelection onSelect={(regulationId) => { const paramsMap = { permenaker_a: odorParamsPermenakerA, permenaker_b: odorParamsPermenakerB, kepmenlh: odorParamsKepmenLH }; setEditingTemplate({ ...baseTemplate, templateType: "odor", regulation: regulationId, sampleInfo: defaultOdorSampleInfo, results: (paramsMap[regulationId] || []).map((p) => ({ ...p, isVisible: true })) }); }} onBack={() => { setEditingTemplate(null); setView("template_selection"); }} />);
         }
-        if (
-          editingTemplate?.templateType === "wastewater" &&
-          !editingTemplate.regulation
-        ) {
-          return (
-            <WastewaterRegulationSelection
-              onSelect={(regulationId) => {
-                const paramsMap = {
-                  menlhk_p68: wastewaterData.wastewaterParamsMenlhkP68,
-                  jababeka: wastewaterData.wastewaterParamsJababeka,
-                  surya_cipta: wastewaterData.wastewaterParamsSuryaCipta,
-                };
-                setEditingTemplate({
-                  ...baseTemplate,
-                  templateType: "wastewater",
-                  regulation: regulationId,
-                  sampleInfo: wastewaterData.defaultWastewaterSampleInfo,
-                  results: (paramsMap[regulationId] || []).map((p) => ({
-                    ...p,
-                    testingResult: "",
-                    isVisible: true,
-                  })),
-                });
-              }}
-              onBack={() => {
-                setEditingTemplate(null);
-                setView("template_selection");
-              }}
-            />
-          );
+        if (editingTemplate?.templateType === "wastewater" && !editingTemplate.regulation) {
+          return (<WastewaterRegulationSelection onSelect={(regulationId) => { const paramsMap = { menlhk_p68: wastewaterData.wastewaterParamsMenlhkP68, jababeka: wastewaterData.wastewaterParamsJababeka, surya_cipta: wastewaterData.wastewaterParamsSuryaCipta }; setEditingTemplate({ ...baseTemplate, templateType: "wastewater", regulation: regulationId, sampleInfo: wastewaterData.defaultWastewaterSampleInfo, results: (paramsMap[regulationId] || []).map((p) => ({ ...p, testingResult: "", isVisible: true })) }); }} onBack={() => { setEditingTemplate(null); setView("template_selection"); }} />);
         }
-        if (
-          editingTemplate?.templateType === "cleanwater" &&
-          !editingTemplate.regulation
-        ) {
-          return (
-            <CleanWaterRegulationSelection
-              onSelect={(regulationId) => {
-                const paramsMap = {
-                  permenkes_32_2017: cleanwaterData.cleanWaterParamsPermenkes32,
-                  permenkes_2_2023: cleanwaterData.cleanWaterParamsPermenkes2,
-                };
-                setEditingTemplate({
-                  ...baseTemplate,
-                  templateType: "cleanwater",
-                  regulation: regulationId,
-                  sampleInfo: cleanwaterData.defaultCleanWaterSampleInfo,
-                  results: (paramsMap[regulationId] || []).map((p) => ({
-                    ...p,
-                    testingResult: "",
-                    isVisible: true,
-                  })),
-                });
-              }}
-              onBack={() => {
-                setEditingTemplate(null);
-                setView("template_selection");
-              }}
-            />
-          );
+        if (editingTemplate?.templateType === "cleanwater" && !editingTemplate.regulation) {
+          return (<CleanWaterRegulationSelection onSelect={(regulationId) => { const paramsMap = { permenkes_32_2017: cleanwaterData.cleanWaterParamsPermenkes32, permenkes_2_2023: cleanwaterData.cleanWaterParamsPermenkes2 }; setEditingTemplate({ ...baseTemplate, templateType: "cleanwater", regulation: regulationId, sampleInfo: cleanwaterData.defaultCleanWaterSampleInfo, results: (paramsMap[regulationId] || []).map((p) => ({ ...p, testingResult: "", isVisible: true })) }); }} onBack={() => { setEditingTemplate(null); setView("template_selection"); }} />);
         }
-        if (
-          editingTemplate?.templateType === "workplaceair" &&
-          !editingTemplate.regulation
-        ) {
-          return (
-            <WorkplaceAirRegulationSelection
-              onSelect={(regulationId) => {
-                const paramsMap = {
-                  permenaker_a: workplaceairData.workplaceAirParamsPermenakerA,
-                  permenaker_b: workplaceairData.workplaceAirParamsPermenakerB,
-                  menkes_1405: workplaceairData.workplaceAirParamsMenkes1405,
-                };
-                setEditingTemplate({
-                  ...baseTemplate,
-                  templateType: "workplaceair",
-                  regulation: regulationId,
-                  sampleInfo: workplaceairData.defaultWorkplaceAirSampleInfo,
-                  results: (paramsMap[regulationId] || []).map((p) => ({
-                    ...p,
-                    testingResult: "",
-                    isVisible: true,
-                  })),
-                });
-              }}
-              onBack={() => {
-                setEditingTemplate(null);
-                setView("template_selection");
-              }}
-            />
-          );
+        if (editingTemplate?.templateType === "workplaceair" && !editingTemplate.regulation) {
+          return (<WorkplaceAirRegulationSelection onSelect={(regulationId) => { const paramsMap = { permenaker_a: workplaceairData.workplaceAirParamsPermenakerA, permenaker_b: workplaceairData.workplaceAirParamsPermenakerB, menkes_1405: workplaceairData.workplaceAirParamsMenkes1405 }; setEditingTemplate({ ...baseTemplate, templateType: "workplaceair", regulation: regulationId, sampleInfo: workplaceairData.defaultWorkplaceAirSampleInfo, results: (paramsMap[regulationId] || []).map((p) => ({ ...p, testingResult: "", isVisible: true })) }); }} onBack={() => { setEditingTemplate(null); setView("template_selection"); }} />);
         }
-        if (
-          editingTemplate?.templateType === "surfacewater" &&
-          !editingTemplate.regulation
-        ) {
-          return (
-            <SurfaceWaterRegulationSelection
-              onSelect={(regulationId) => {
-                const paramsMap = {
-                  pp_22_2021_river:
-                    surfacewaterData.surfaceWaterParamsPP22_River,
-                  pp_22_2021_lake: surfacewaterData.surfaceWaterParamsPP22_Lake,
-                  pergub_dki_582:
-                    surfacewaterData.surfaceWaterParamsPergubDKI582,
-                };
-                setEditingTemplate({
-                  ...baseTemplate,
-                  templateType: "surfacewater",
-                  regulation: regulationId,
-                  sampleInfo: surfacewaterData.defaultSurfaceWaterSampleInfo,
-                  results: (paramsMap[regulationId] || []).map((p) => ({
-                    ...p,
-                    testingResult: "",
-                    isVisible: true,
-                  })),
-                });
-              }}
-              onBack={() => {
-                setEditingTemplate(null);
-                setView("template_selection");
-              }}
-            />
-          );
+        if (editingTemplate?.templateType === "surfacewater" && !editingTemplate.regulation) {
+          return (<SurfaceWaterRegulationSelection onSelect={(regulationId) => { const paramsMap = { pp_22_2021_river: surfacewaterData.surfaceWaterParamsPP22_River, pp_22_2021_lake: surfacewaterData.surfaceWaterParamsPP22_Lake, pergub_dki_582: surfacewaterData.surfaceWaterParamsPergubDKI582 }; setEditingTemplate({ ...baseTemplate, templateType: "surfacewater", regulation: regulationId, sampleInfo: surfacewaterData.defaultSurfaceWaterSampleInfo, results: (paramsMap[regulationId] || []).map((p) => ({ ...p, testingResult: "", isVisible: true })) }); }} onBack={() => { setEditingTemplate(null); setView("template_selection"); }} />);
         }
-        if (
-          editingTemplate?.templateType === "vibration" &&
-          !editingTemplate.regulation
-        ) {
-          return (
-            <VibrationRegulationSelection
-              onSelect={(regulationId) => {
-                const paramsMap = {
-                  permenaker_5: vibrationData.vibrationParamsPermenaker5,
-                  kepmenlh_49_kejut:
-                    vibrationData.vibrationParamsKepmenlh49_Kejut,
-                  kepmenlh_49_class3:
-                    vibrationData.vibrationParamsKepmenlh49_Class3,
-                  kepmenlh_49_class2:
-                    vibrationData.vibrationParamsKepmenlh49_Class2,
-                };
-                setEditingTemplate({
-                  ...baseTemplate,
-                  templateType: "vibration",
-                  regulation: regulationId,
-                  sampleInfo: vibrationData.defaultVibrationSampleInfo,
-                  results: (paramsMap[regulationId] || []).map((p) => ({
-                    ...p,
-                    isVisible: true,
-                  })),
-                });
-              }}
-              onBack={() => {
-                setEditingTemplate(null);
-                setView("template_selection");
-              }}
-            />
-          );
+        if (editingTemplate?.templateType === "vibration" && !editingTemplate.regulation) {
+          return (<VibrationRegulationSelection onSelect={(regulationId) => { const paramsMap = { permenaker_5: vibrationData.vibrationParamsPermenaker5, kepmenlh_49_kejut: vibrationData.vibrationParamsKepmenlh49_Kejut, kepmenlh_49_class3: vibrationData.vibrationParamsKepmenlh49_Class3, kepmenlh_49_class2: vibrationData.vibrationParamsKepmenlh49_Class2 }; setEditingTemplate({ ...baseTemplate, templateType: "vibration", regulation: regulationId, sampleInfo: vibrationData.defaultVibrationSampleInfo, results: (paramsMap[regulationId] || []).map((p) => ({ ...p, isVisible: true })) }); }} onBack={() => { setEditingTemplate(null); setView("template_selection"); }} />);
         }
-        if (
-          editingTemplate?.templateType === "airambient" &&
-          !editingTemplate.regulation
-        ) {
-          return (
-            <AirAmbientRegulationSelection
-              onSelect={(regulationId) => {
-                const paramsMap = {
-                  pp_22_2021: airambientData.airAmbientParamsPP22,
-                  pp_22_2021_plus_odor:
-                    airambientData.airAmbientParamsPP22PlusOdor,
-                  pp_41_1999: airambientData.airAmbientParamsPP41,
-                  kepgub_dki_551: airambientData.airAmbientParamsDKI551,
-                  kepgub_dki_551_plus_odor:
-                    airambientData.airAmbientParamsDKI551PlusOdor,
-                  pergub_jabar_82: airambientData.airAmbientParamsJabar624,
-                };
-                setEditingTemplate({
-                  ...baseTemplate,
-                  templateType: "airambient",
-                  regulation: regulationId,
-                  sampleInfo: airambientData.defaultAirAmbientSampleInfo,
-                  results: (paramsMap[regulationId] || []).map((p) => ({
-                    ...p,
-                    testingResult: "",
-                    isVisible: true,
-                  })),
-                });
-              }}
-              onBack={() => {
-                setEditingTemplate(null);
-                setView("template_selection");
-              }}
-            />
-          );
+        if (editingTemplate?.templateType === "airambient" && !editingTemplate.regulation) {
+          return (<AirAmbientRegulationSelection onSelect={(regulationId) => { const paramsMap = { pp_22_2021: airambientData.airAmbientParamsPP22, pp_22_2021_plus_odor: airambientData.airAmbientParamsPP22PlusOdor, pp_41_1999: airambientData.airAmbientParamsPP41, kepgub_dki_551: airambientData.airAmbientParamsDKI551, kepgub_dki_551_plus_odor: airambientData.airAmbientParamsDKI551PlusOdor, pergub_jabar_82: airambientData.airAmbientParamsJabar624 }; setEditingTemplate({ ...baseTemplate, templateType: "airambient", regulation: regulationId, sampleInfo: airambientData.defaultAirAmbientSampleInfo, results: (paramsMap[regulationId] || []).map((p) => ({ ...p, testingResult: "", isVisible: true })) }); }} onBack={() => { setEditingTemplate(null); setView("template_selection"); }} />);
         }
-        if (
-          editingTemplate?.templateType === "ssse" &&
-          !editingTemplate.regulation
-        ) {
-          return (
-            <SSSERegulationSelection
-              onSelect={(regulationId) => {
-                const paramsMap = {
-                  permenlh_13_Vb: ssseData.ssseParamsPermenlh13_Vb,
-                  permenlh_7_III: ssseData.ssseParamsPermenlh7_III,
-                  permenlh_7_IV: ssseData.ssseParamsPermenlh7_IV,
-                  permenlh_7_V: ssseData.ssseParamsPermenlh7_V,
-                  permenlh_7_VI: ssseData.ssseParamsPermenlh7_VI,
-                  permenlh_21_IIIA: ssseData.ssseParamsPermenlh21_IIIA,
-                  permenlh_21_IVA: ssseData.ssseParamsPermenlh21_IVA,
-                  permenlhk_11_I1: ssseData.ssseParamsPermenLhk11_I1,
-                  permenlhk_11_I2: ssseData.ssseParamsPermenLhk11_I2,
-                  permenlhk_11_I3: ssseData.ssseParamsPermenLhk11_I3,
-                  permenlhk_15_IIIA: ssseData.ssseParamsPermenLhk15_IIIA,
-                  permenlhk_15_IXA: ssseData.ssseParamsPermenLhk15_IXA,
-                  permenlhk_15_IXB: ssseData.ssseParamsPermenLhk15_IXB,
-                  kepgub_dki_670_III: ssseData.ssseParamsKepgubDKI670_III,
-                };
-                setEditingTemplate({
-                  ...baseTemplate,
-                  templateType: "ssse",
-                  regulation: regulationId,
-                  sampleInfo: ssseData.defaultSSSESampleInfo,
-                  results: (paramsMap[regulationId] || []).map((p) => ({
-                    ...p,
-                    testingResult: "",
-                    isVisible: true,
-                  })),
-                });
-              }}
-              onBack={() => {
-                setEditingTemplate(null);
-                setView("template_selection");
-              }}
-            />
-          );
+        if (editingTemplate?.templateType === "ssse" && !editingTemplate.regulation) {
+          return (<SSSERegulationSelection onSelect={(regulationId) => { const paramsMap = { permenlh_13_Vb: ssseData.ssseParamsPermenlh13_Vb, permenlh_7_III: ssseData.ssseParamsPermenlh7_III, permenlh_7_IV: ssseData.ssseParamsPermenlh7_IV, permenlh_7_V: ssseData.ssseParamsPermenlh7_V, permenlh_7_VI: ssseData.ssseParamsPermenlh7_VI, permenlh_21_IIIA: ssseData.ssseParamsPermenlh21_IIIA, permenlh_21_IVA: ssseData.ssseParamsPermenlh21_IVA, permenlhk_11_I1: ssseData.ssseParamsPermenLhk11_I1, permenlhk_11_I2: ssseData.ssseParamsPermenLhk11_I2, permenlhk_11_I3: ssseData.ssseParamsPermenLhk11_I3, permenlhk_15_IIIA: ssseData.ssseParamsPermenLhk15_IIIA, permenlhk_15_IXA: ssseData.ssseParamsPermenLhk15_IXA, permenlhk_15_IXB: ssseData.ssseParamsPermenLhk15_IXB, kepgub_dki_670_III: ssseData.ssseParamsKepgubDKI670_III }; setEditingTemplate({ ...baseTemplate, templateType: "ssse", regulation: regulationId, sampleInfo: ssseData.defaultSSSESampleInfo, results: (paramsMap[regulationId] || []).map((p) => ({ ...p, testingResult: "", isVisible: true })) }); }} onBack={() => { setEditingTemplate(null); setView("template_selection"); }} />);
         }
-        if (
-          editingTemplate?.templateType === "noise" &&
-          !editingTemplate.regulation
-        ) {
-          return (
-            <NoiseRegulationSelection
-              onSelect={(regulationId) => {
-                const paramsMap = {
-                  kepmen_lh_48: noiseData.noiseParamsKepmenLH48,
-                  kepgub_dki_551: noiseData.noiseParamsKepgubDKI551,
-                  permenaker_5: noiseData.noiseParamsPermenaker5,
-                };
-                setEditingTemplate({
-                  ...baseTemplate,
-                  templateType: "noise",
-                  regulation: regulationId,
-                  sampleInfo: noiseData.defaultNoiseSampleInfo,
-                  results: JSON.parse(
-                    JSON.stringify(paramsMap[regulationId] || [])
-                  ),
-                });
-              }}
-              onBack={() => {
-                setEditingTemplate(null);
-                setView("template_selection");
-              }}
-            />
-          );
+        if (editingTemplate?.templateType === "noise" && !editingTemplate.regulation) {
+          return (<NoiseRegulationSelection onSelect={(regulationId) => { const paramsMap = { kepmen_lh_48: noiseData.noiseParamsKepmenLH48, kepgub_dki_551: noiseData.noiseParamsKepgubDKI551, permenaker_5: noiseData.noiseParamsPermenaker5 }; setEditingTemplate({ ...baseTemplate, templateType: "noise", regulation: regulationId, sampleInfo: noiseData.defaultNoiseSampleInfo, results: JSON.parse(JSON.stringify(paramsMap[regulationId] || [])) }); }} onBack={() => { setEditingTemplate(null); setView("template_selection"); }} />);
         }
         return editingTemplate ? (
           renderFormForTemplate(editingTemplate)
         ) : (
-          <p>Silakan pilih template untuk diedit.</p>
+          <p>Silakan pilih template.</p>
         );
-
       default:
         return <p>Tampilan tidak ditemukan.</p>;
     }
@@ -859,80 +555,26 @@ export default function CoaPage() {
     <>
       <div className="coa-page-wrapper">
         <div className="print-only">
-          {coaData && (
-            <CoaCoverDocument data={{ ...coaData, totalPages, reportId }} />
-          )}
+          {coaData && <CoaCoverDocument data={{ ...coaData, totalPages, reportId }} />}
           {activeTemplates.map((template, index) => {
             const pageNumber = index + 2;
-            const fullTemplateData = {
-              ...coaData,
-              ...template,
-              totalPages,
-              pageNumber,
-              reportId,
-              sampleInfo: {
-                ...template.sampleInfo,
-                samplingDate: coaData.receiveDate
-                  ? format(new Date(coaData.receiveDate), "MMMM dd, yyyy", {
-                      locale: id,
-                    })
-                  : "",
-                dateReceived: coaData.receiveDate
-                  ? format(new Date(coaData.receiveDate), "MMMM dd, yyyy", {
-                      locale: id,
-                    })
-                  : "",
-                intervalTestingDate: coaData.analysisDateStart
-                  ? `${format(
-                      new Date(coaData.analysisDateStart),
-                      "MMMM dd, yyyy",
-                      { locale: id }
-                    )} to ${coaData.analysisDateEnd}`
-                  : "",
-              },
-            };
+            const fullTemplateData = { ...coaData, ...template, totalPages, pageNumber, reportId, sampleInfo: { ...template.sampleInfo, samplingDate: coaData.receiveDate ? format(new Date(coaData.receiveDate), "MMMM dd, yyyy", { locale: id }) : "", dateReceived: coaData.receiveDate ? format(new Date(coaData.receiveDate), "MMMM dd, yyyy", { locale: id }) : "", intervalTestingDate: coaData.analysisDateStart ? `${format(new Date(coaData.analysisDateStart), "MMMM dd, yyyy", { locale: id })} to ${coaData.analysisDateEnd}`: "" } };
             return (
               <React.Fragment key={template.id}>
                 <div className="page-break"></div>
-                {template.templateType === "odor" && (
-                  <TemplateOdorDocument data={fullTemplateData} />
-                )}
-                {template.templateType === "illumination" && (
-                  <TemplateIlluminationDocument data={fullTemplateData} />
-                )}
-                {template.templateType === "heatstress" && (
-                  <TemplateHeatStressDocument data={fullTemplateData} />
-                )}
-                {template.templateType === "wastewater" && (
-                  <TemplateWastewaterDocument data={fullTemplateData} />
-                )}
-                {template.templateType === "cleanwater" && (
-                  <TemplateCleanWaterDocument data={fullTemplateData} />
-                )}
-                {template.templateType === "workplaceair" && (
-                  <TemplateWorkplaceAirDocument data={fullTemplateData} />
-                )}
-                {template.templateType === "surfacewater" && (
-                  <TemplateSurfaceWaterDocument data={fullTemplateData} />
-                )}
-                {template.templateType === "vibration" && (
-                  <TemplateVibrationDocument data={fullTemplateData} />
-                )}
-                {template.templateType === "airambient" && (
-                  <TemplateAirAmbientDocument data={fullTemplateData} />
-                )}
-                {template.templateType === "ssse" && (
-                  <TemplateSSSEDocument data={fullTemplateData} />
-                )}
-                {template.templateType === "ispu" && (
-                  <TemplateISPUDocument data={fullTemplateData} />
-                )}
-                {template.templateType === "nonsse" && (
-                  <TemplateNonSSEDocument data={fullTemplateData} />
-                )}
-                {template.templateType === "noise" && (
-                  <TemplateNoiseDocument data={fullTemplateData} />
-                )}
+                {template.templateType === "odor" && (<TemplateOdorDocument data={fullTemplateData} />)}
+                {template.templateType === "illumination" && (<TemplateIlluminationDocument data={fullTemplateData} />)}
+                {template.templateType === "heatstress" && (<TemplateHeatStressDocument data={fullTemplateData} />)}
+                {template.templateType === "wastewater" && (<TemplateWastewaterDocument data={fullTemplateData} />)}
+                {template.templateType === "cleanwater" && (<TemplateCleanWaterDocument data={fullTemplateData} />)}
+                {template.templateType === "workplaceair" && (<TemplateWorkplaceAirDocument data={fullTemplateData} />)}
+                {template.templateType === "surfacewater" && (<TemplateSurfaceWaterDocument data={fullTemplateData} />)}
+                {template.templateType === "vibration" && (<TemplateVibrationDocument data={fullTemplateData} />)}
+                {template.templateType === "airambient" && (<TemplateAirAmbientDocument data={fullTemplateData} />)}
+                {template.templateType === "ssse" && (<TemplateSSSEDocument data={fullTemplateData} />)}
+                {template.templateType === "ispu" && (<TemplateISPUDocument data={fullTemplateData} />)}
+                {template.templateType === "nonsse" && (<TemplateNonSSEDocument data={fullTemplateData} />)}
+                {template.templateType === "noise" && (<TemplateNoiseDocument data={fullTemplateData} />)}
               </React.Fragment>
             );
           })}
@@ -948,23 +590,19 @@ export default function CoaPage() {
         {renderCurrentView()}
       </div>
 
-      {/* === DIALOG PRATINJAU DENGAN UKURAN YANG BENAR === */}
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent className="max-w-6xl w-[95vw] h-[95vh] flex flex-col p-0">
           <DialogHeader className="p-6 border-b">
             <DialogTitle>Pratinjau Dokumen</DialogTitle>
             <DialogDescription>
-              Ini adalah pratinjau halaman. Gunakan tombol "Print" untuk
-              mencetak keseluruhan dokumen.
+              Ini adalah pratinjau halaman. Gunakan tombol "Print" untuk mencetak keseluruhan dokumen.
             </DialogDescription>
           </DialogHeader>
-
           <div className="flex-grow overflow-auto p-4 sm:p-8 bg-muted/50 flex justify-center">
             <div className="w-full max-w-[210mm] aspect-[210/297] bg-white shadow-lg">
               {previewNode}
             </div>
           </div>
-
           <DialogFooter className="p-6 border-t flex-wrap">
             <Button variant="outline" onClick={() => setIsPreviewOpen(false)}>
               Tutup
@@ -984,34 +622,13 @@ export default function CoaPage() {
         reportNumber={coaData?.certificateNo || reportId || ""}
       />
       <style jsx global>{`
-        /* Sembunyikan konten print saat di layar */
-        .print-only {
-          display: none;
-        }
-
-        /* Aturan khusus saat mode print diaktifkan */
+        .print-only { display: none; }
         @media print {
-          /* Sembunyikan semua konten interaktif */
-          .no-print {
-            display: none !important;
-          }
-
-          /* Tampilkan konten yang khusus untuk print */
-          .print-only {
-            display: block !important;
-          }
-
-          /* Aturan untuk page break */
-          .page-break {
-            page-break-before: always;
-          }
+          .no-print { display: nonimportant; }
+          .print-only { display: block !important; }
+          .page-break { page-break-before: always; }
         }
-
-        /* Aturan untuk ukuran kertas cetak */
-        @page {
-          size: A4;
-          margin: 0;
-        }
+        @page { size: A4; margin: 0; }
       `}</style>
     </>
   );
