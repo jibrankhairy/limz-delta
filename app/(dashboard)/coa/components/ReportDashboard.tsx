@@ -18,8 +18,35 @@ import {
   Pencil,
   Trash2,
   Loader2,
+  ArrowLeft, // 1. Impor ikon ArrowLeft
 } from "lucide-react";
 
+// Tipe data untuk nama template agar lebih mudah dibaca
+const getTemplateDisplayName = (template: any) => {
+  // ... (fungsi getTemplateDisplayName tidak perlu diubah)
+  switch (template.templateType) {
+    case "odor":
+      if (template.regulation === "permenaker_a") return "Odor - Permenaker (Set A)";
+      if (template.regulation === "permenaker_b") return "Odor - Permenaker (Set B)";
+      if (template.regulation === "kepmenlh") return "Odor - Kepmen LH 1996";
+      return "Odor";
+    case "illumination": return "Illumination";
+    case "heatstress": return "Heat Stress (Iklim Kerja)";
+    case "wastewater": return "Wastewater";
+    case "cleanwater": return "Clean Water";
+    case "workplaceair": return "Workplace Air";
+    case "surfacewater": return "Surface Water";
+    case "vibration": return "Vibration";
+    case "airambient": return "Air Ambient";
+    case "ssse": return "Stationary Source Emission";
+    case "ispu": return "ISPU (Indeks Standar Pencemar Udara)";
+    case "nonsse": return "Non-Stationary Source Emission";
+    case "noise": return "Noise";
+    default: return "Template Tidak Dikenal";
+  }
+};
+
+// 2. Tambahkan prop onBackToCover ke interface
 interface Props {
   templates: any[];
   onAddNew: () => void;
@@ -27,46 +54,9 @@ interface Props {
   onRemove: (templateId: string) => void;
   onSave: () => void;
   onPrint: () => void;
+  onBackToCover: () => void; // Prop baru untuk tombol kembali
   isSaving: boolean;
 }
-
-const getTemplateDisplayName = (template: any) => {
-  switch (template.templateType) {
-    case "odor":
-      if (template.regulation === "permenaker_a")
-        return "Odor - Permenaker (Set A)";
-      if (template.regulation === "permenaker_b")
-        return "Odor - Permenaker (Set B)";
-      if (template.regulation === "kepmenlh") return "Odor - Kepmen LH 1996";
-      return "Odor";
-    case "illumination":
-      return "Illumination";
-    case "heatstress":
-      return "Heat Stress (Iklim Kerja)";
-    case "wastewater":
-      return "Wastewater";
-    case "cleanwater":
-      return "Clean Water";
-    case "workplaceair":
-      return "Workplace Air";
-    case "surfacewater":
-      return "Surface Water";
-    case "vibration":
-      return "Vibration";
-    case "airambient":
-      return "Air Ambient";
-    case "ssse":
-      return "Stationary Source Emission";
-    case "ispu":
-      return "ISPU (Indeks Standar Pencemar Udara)";
-    case "nonsse":
-      return "Non-Stationary Source Emission";
-    case "noise":
-      return "Noise";
-    default:
-      return "Template Tidak Dikenal";
-  }
-};
 
 export function ReportDashboard({
   templates,
@@ -75,6 +65,7 @@ export function ReportDashboard({
   onRemove,
   onSave,
   onPrint,
+  onBackToCover, // 3. Terima prop baru
   isSaving,
 }: Props) {
   return (
@@ -88,6 +79,11 @@ export function ReportDashboard({
             </CardDescription>
           </div>
           <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+            {/* 4. Tambahkan tombol baru di sini */}
+            <Button variant="outline" onClick={onBackToCover}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Kembali ke Cover
+            </Button>
             <Button variant="outline" onClick={onSave} disabled={isSaving}>
               {isSaving ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />

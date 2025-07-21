@@ -3,7 +3,6 @@
 import Link from "next/link";
 import * as React from "react";
 import {
-  IconAnalyze,
   IconCertificate2,
   IconDashboard,
   IconDatabase,
@@ -72,17 +71,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       url: "/berita",
       icon: IconNews,
     },
-    {
-      title: "Hasil Analiisa",
-      url: "#",
-      icon: IconAnalyze,
-    },
   ];
 
   const documents = [
     {
       name: "Data Library",
-      url: "#",
+      url: "/library",
       icon: IconDatabase,
     },
     {

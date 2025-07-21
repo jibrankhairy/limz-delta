@@ -139,7 +139,7 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
         variant="outline"
         className="text-muted-foreground px-1.5 flex gap-1 items-center"
       >
-        {row.original.status === "Done" ? (
+        {row.original.status === "done" ? (
           <IconCircleCheckFilled className="fill-green-500 size-4" />
         ) : (
           <IconLoader className="animate-spin size-4" />

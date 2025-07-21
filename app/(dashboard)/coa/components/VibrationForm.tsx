@@ -12,15 +12,32 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { PlusCircle, Trash2, Settings, ChevronLeft } from "lucide-react";
+import {
+  PlusCircle,
+  Trash2,
+  Settings,
+  ChevronLeft,
+  FileSearch,
+  Save,
+} from "lucide-react";
 import { nanoid } from "nanoid";
 
+// Impor data untuk tombol "Tambah Baris" (dari versi remote)
+import {
+  vibrationParamsPermenaker5,
+  vibrationParamsKepmenlh49_Kejut,
+  vibrationParamsKepmenlh49_Class3,
+} from "../data/vibration-data";
+
+// Interface dari versimu (HEAD)
 interface ParameterResult {
   id: string;
   location: string;
   time: string;
   testingResult: string;
   unit: string;
+  frequency?: string; // Tambahkan properti opsional
+  method?: string; // Tambahkan properti opsional
 }
 
 interface SampleInfo {
@@ -69,17 +86,19 @@ export function VibrationForm({
     });
   };
 
+  // Logika handleAddRow dari versi remote yang lebih lengkap
   const handleAddRow = () => {
+    let newRow;
     if (template.regulation === "permenaker_5") {
-      const {
-        vibrationParamsPermenaker5,
-      }: {
-        vibrationParamsPermenaker5: Omit<ParameterResult, "id">[];
-      } = require("../data/vibration-data");
-      const newResults = [
-        ...template.results,
-        { ...vibrationParamsPermenaker5[0], id: nanoid() },
-      ];
+      newRow = { ...vibrationParamsPermenaker5[0], id: nanoid() };
+    } else if (template.regulation === "kepmenlh_49_kejut") {
+      newRow = { ...vibrationParamsKepmenlh49_Kejut[0], id: nanoid() };
+    } else if (template.regulation === "kepmenlh_49_class3") {
+      newRow = { ...vibrationParamsKepmenlh49_Class3[0], id: nanoid() };
+    }
+
+    if (newRow) {
+      const newResults = [...template.results, newRow];
       onTemplateChange({ ...template, results: newResults });
     }
   };
@@ -91,78 +110,155 @@ export function VibrationForm({
     onTemplateChange({ ...template, results: newResults });
   };
 
+  // Fungsi untuk merender baris input dinamis (dari versi remote)
+  const renderDynamicRows = () => {
+    const canAddRows = [
+      "permenaker_5",
+      "kepmenlh_49_kejut",
+      "kepmenlh_49_class3",
+    ].includes(template.regulation);
+
+    return (
+      <div className="space-y-4">
+        {template.results.map((row, index) => (
+          <div
+            key={row.id || index}
+            className="p-4 rounded-lg border bg-muted/30 space-y-4"
+          >
+            <div className="flex justify-between items-center">
+              <p className="font-semibold">Pengukuran #{index + 1}</p>
+              {template.results.length > 1 && canAddRows && (
+                <Button
+                  variant="destructive"
+                  size="icon"
+                  onClick={() => handleRemoveRow(index)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-4">
+              <div className="space-y-2">
+                <Label>Lokasi Sampling</Label>
+                <Input
+                  value={row.location || ""}
+                  onChange={(e) =>
+                    handleParameterChange(index, "location", e.target.value)
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Waktu</Label>
+                <Input
+                  value={row.time || ""}
+                  onChange={(e) =>
+                    handleParameterChange(index, "time", e.target.value)
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Hasil Uji</Label>
+                <Input
+                  value={row.testingResult || ""}
+                  onChange={(e) =>
+                    handleParameterChange(
+                      index,
+                      "testingResult",
+                      e.target.value
+                    )
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Unit</Label>
+                <Input
+                  value={row.unit}
+                  readOnly
+                  className="bg-muted/70 cursor-default"
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+        {canAddRows && (
+          <Button variant="outline" onClick={handleAddRow}>
+            <PlusCircle className="w-4 h-4 mr-2" />
+            Tambah Baris Pengukuran
+          </Button>
+        )}
+      </div>
+    );
+  };
+
+  // Fungsi untuk merender daftar parameter tetap (dari versi remote)
+  const renderFixedParamsList = () => {
+    return (
+      <div className="space-y-4">
+        {template.results.map((param, index) => (
+          <div
+            key={param.frequency || index}
+            className="p-4 rounded-lg border bg-muted/30"
+          >
+            <p className="font-semibold mb-4">
+              Frekuensi: {param.frequency}{" "}
+              {param.unit.includes("Hz") ? "" : "Hz"}
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-4">
+              <div className="space-y-2">
+                <Label>Lokasi</Label>
+                <Input
+                  value={param.location || ""}
+                  onChange={(e) =>
+                    handleParameterChange(index, "location", e.target.value)
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Waktu</Label>
+                <Input
+                  value={param.time || ""}
+                  onChange={(e) =>
+                    handleParameterChange(index, "time", e.target.value)
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Hasil Tes (mm/s)</Label>
+                <Input
+                  value={param.testingResult || ""}
+                  onChange={(e) =>
+                    handleParameterChange(
+                      index,
+                      "testingResult",
+                      e.target.value
+                    )
+                  }
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Metode</Label>
+                <Input
+                  value={param.method}
+                  readOnly
+                  className="bg-muted/70 cursor-default"
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // Logika renderFormContent dari versi remote yang lebih lengkap
   const renderFormContent = () => {
     switch (template.regulation) {
       case "permenaker_5":
-        return (
-          <div className="space-y-4">
-            {template.results.map((row: ParameterResult, index: number) => (
-              <div
-                key={row.id}
-                className="p-4 rounded-lg border bg-muted/30 space-y-4"
-              >
-                <div className="flex justify-between items-center">
-                  <p className="font-semibold">Lokasi #{index + 1}</p>
-                  {template.results.length > 1 && (
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      onClick={() => handleRemoveRow(index)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-4">
-                  <div className="space-y-2">
-                    <Label>Lokasi Sampling</Label>
-                    <Input
-                      value={row.location || ""}
-                      onChange={(e) =>
-                        handleParameterChange(index, "location", e.target.value)
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Waktu</Label>
-                    <Input
-                      value={row.time || ""}
-                      onChange={(e) =>
-                        handleParameterChange(index, "time", e.target.value)
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Hasil Uji</Label>
-                    <Input
-                      value={row.testingResult || ""}
-                      onChange={(e) =>
-                        handleParameterChange(
-                          index,
-                          "testingResult",
-                          e.target.value
-                        )
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Unit</Label>
-                    <Input
-                      value={row.unit}
-                      readOnly
-                      className="bg-muted/70 cursor-default"
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-            <Button variant="outline" onClick={handleAddRow}>
-              <PlusCircle className="w-4 h-4 mr-2" />
-              Tambah Lokasi
-            </Button>
-          </div>
-        );
-
+      case "kepmenlh_49_kejut":
+      case "kepmenlh_49_class3":
+        return renderDynamicRows();
+      case "kepmenlh_49_class2":
+        return renderFixedParamsList();
       default:
         return (
           <p className="text-muted-foreground">
@@ -252,11 +348,19 @@ export function VibrationForm({
           </div>
         </div>
       </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button variant="ghost" onClick={onPreview}>
+      <CardFooter className="flex flex-col-reverse sm:flex-row items-center justify-between gap-4">
+        <Button
+          variant="ghost"
+          onClick={onPreview}
+          className="w-full sm:w-auto"
+        >
+          <FileSearch className="mr-2 h-4 w-4" />
           Preview Halaman
         </Button>
-        <Button onClick={() => onSave(template)}>Simpan Perubahan</Button>
+        <Button onClick={() => onSave(template)} className="w-full sm:w-auto">
+          <Save className="mr-2 h-4 w-4" />
+          Simpan Perubahan
+        </Button>
       </CardFooter>
     </Card>
   );

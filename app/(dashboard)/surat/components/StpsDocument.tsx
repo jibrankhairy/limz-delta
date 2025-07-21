@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image"; // Import Image dari next/image
 import { Logo } from "@/components/logo";
 
 interface StpsDocumentProps {
@@ -27,90 +28,103 @@ export const StpsDocument = React.forwardRef<HTMLDivElement, StpsDocumentProps>(
     return (
       <div
         ref={ref}
-        className="bg-white p-12 font-[Times_New_Roman] text-black"
+        className="bg-white p-12 font-[Times_New_Roman] text-black relative"
         style={{ width: "794px", height: "1123px" }}
       >
-        <header className="flex items-start justify-between border-b-2 border-black pb-4">
-          <div className="w-1/4">
-            <Logo />
-            <p className="text-sm font-bold">Delta Indonesia Laboratory</p>
+        <div className="absolute inset-30 flex items-center justify-center z-0 pointer-events-none">
+          <div className="w-[500px] h-[500px] opacity-30">
+            <Image
+              src="/images/logo-delta-transparan.png"
+              alt="Logo DIL Watermark"
+              layout="fill"
+              objectFit="contain"
+            />
           </div>
-          <div className="text-right text-xs">
-            <p className="font-bold">PT. Delta Indonesia Laboratory</p>
-            <p>Jln. Porum Prima Harapan Regency,</p>
-            <p>Gedung Prima Orchard Blok C, No. 2</p>
-            <p>Bekasi Utara, Kota Bekasi 17123, Provinsi Jawa Barat</p>
-            <p>Telp. 021 - 88982018</p>
-          </div>
-        </header>
+        </div>
 
-        <main className="mt-10">
-          <h1 className="text-center text-lg font-bold underline">
-            SURAT TUGAS PENGAMBILAN SAMPEL
-          </h1>
-          <p className="text-center text-sm">
-            No: {nomorSurat || "___/DIL/___/____"}
-          </p>
-
-          <div className="mt-8">
-            <p>Memerintahkan kepada :</p>
-            <ol className="list-inside list-decimal pl-4">
-              {data.petugas.map((nama, index) => (
-                <li key={index}>{nama}</li>
-              ))}
-            </ol>
-          </div>
-
-          <div className="mt-6">
-            <p>Untuk melakukan pengambilan sampel, pada :</p>
-            <table className="mt-2 w-full">
-              <tbody>
-                <tr>
-                  <td className="w-1/4 align-top">Hari/tanggal</td>
-                  <td className="align-top">: {data.hariTanggal}</td>
-                </tr>
-                <tr>
-                  <td className="align-top">Nama Pelanggan</td>
-                  <td className="align-top">: {data.namaPelanggan}</td>
-                </tr>
-                <tr>
-                  <td className="align-top">Alamat</td>
-                  <td className="align-top">: {data.alamat}</td>
-                </tr>
-                <tr>
-                  <td className="align-top">Contact person</td>
-                  <td className="align-top">: {data.contactPerson}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <p className="mt-8">
-            Demikian, Surat tugas ini dibuat untuk dipergunakan semestinya.
-          </p>
-
-          <div className="mt-16 flex justify-end">
-            <div className="text-center">
-              <p>Bekasi, {today}</p>
-              <p>PT Delta Indonesia Laboratory</p>
-              <div className="relative h-24">
-                {data.signatureUrl ? (
-                  <img
-                    src={data.signatureUrl}
-                    alt="Tanda Tangan"
-                    className="absolute inset-0 mx-auto h-full w-full object-contain"
-                  />
-                ) : (
-                  <div className="h-full"></div>
-                )}
-              </div>
-              <p className="font-bold underline">
-                {data.pjTeknis || "....................."}
-              </p>
-              <p>PJ Teknis</p>
+        <div className="relative z-10">
+          <header className="flex items-start justify-between border-b-2 border-black pb-4">
+            <div className="w-1/4">
+              <Logo />
+              <p className="text-sm font-bold">Delta Indonesia Laboratory</p>
             </div>
-          </div>
-        </main>
+            <div className="text-right text-xs">
+              <p className="font-bold">PT. Delta Indonesia Laboratory</p>
+              <p>Jln. Porum Prima Harapan Regency,</p>
+              <p>Gedung Prima Orchard Blok C, No. 2</p>
+              <p>Bekasi Utara, Kota Bekasi 17123, Provinsi Jawa Barat</p>
+              <p>Telp. 021 - 88982018</p>
+            </div>
+          </header>
+
+          <main className="mt-10">
+            <h1 className="text-center text-lg font-bold underline">
+              SURAT TUGAS PENGAMBILAN SAMPEL
+            </h1>
+            <p className="text-center text-sm">
+              No: {nomorSurat || "___/DIL/___/____"}
+            </p>
+
+            <div className="mt-8">
+              <p>Memerintahkan kepada :</p>
+              <ol className="list-inside list-decimal pl-4">
+                {data.petugas.map((nama, index) => (
+                  <li key={index}>{nama}</li>
+                ))}
+              </ol>
+            </div>
+
+            <div className="mt-6">
+              <p>Untuk melakukan pengambilan sampel, pada :</p>
+              <table className="mt-2 w-full">
+                <tbody>
+                  <tr>
+                    <td className="w-1/4 align-top">Hari/tanggal</td>
+                    <td className="align-top">: {data.hariTanggal}</td>
+                  </tr>
+                  <tr>
+                    <td className="align-top">Nama Pelanggan</td>
+                    <td className="align-top">: {data.namaPelanggan}</td>
+                  </tr>
+                  <tr>
+                    <td className="align-top">Alamat</td>
+                    <td className="align-top">: {data.alamat}</td>
+                  </tr>
+                  <tr>
+                    <td className="align-top">Contact person</td>
+                    <td className="align-top">: {data.contactPerson}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <p className="mt-8">
+              Demikian, Surat tugas ini dibuat untuk dipergunakan semestinya.
+            </p>
+
+            <div className="mt-16 flex justify-end">
+              <div className="text-center">
+                <p>Bekasi, {today}</p>
+                <p>PT Delta Indonesia Laboratory</p>
+                <div className="relative h-24">
+                  {data.signatureUrl ? (
+                    <img
+                      src={data.signatureUrl}
+                      alt="Tanda Tangan"
+                      className="absolute inset-0 mx-auto h-full w-full object-contain"
+                    />
+                  ) : (
+                    <div className="h-full"></div>
+                  )}
+                </div>
+                <p className="font-bold underline">
+                  {data.pjTeknis || "....................."}
+                </p>
+                <p>PJ Teknis</p>
+              </div>
+            </div>
+          </main>
+        </div>
       </div>
     );
   }

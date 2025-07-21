@@ -79,7 +79,8 @@ export function WastewaterForm({
     value: string | boolean
   ) => {
     const newResults = [...template.results];
-    (newResults[index] as any)[field] = value;
+    // Menggunakan logika dari versi remote yang lebih aman (immutable update)
+    newResults[index] = { ...newResults[index], [field]: value };
     onTemplateChange({ ...template, results: newResults });
   };
 
@@ -180,87 +181,93 @@ export function WastewaterForm({
             Hasil Pengujian Parameter
           </h3>
           <div className="space-y-2 pt-2">
-            {template.results.map((param: ParameterResult, index: number) => (
-              <React.Fragment key={`${param.name}-${index}`}>
-                {param.category && (
-                  <h4 className="font-semibold text-foreground pt-4 pb-2">
-                    {param.category}
-                  </h4>
-                )}
-                <div className="border rounded-lg p-4 space-y-4 bg-muted/20">
-                  <div className="flex justify-between items-center">
-                    <p className="font-semibold text-foreground">
-                      {param.name}
-                    </p>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() =>
-                        handleParameterChange(
-                          index,
-                          "isVisible",
-                          !param.isVisible
-                        )
-                      }
-                      className="h-8 w-8 text-muted-foreground hover:text-foreground"
-                    >
-                      {param.isVisible ? (
-                        <EyeOff className="w-4 h-4" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
-                    </Button>
-                  </div>
-                  {param.isVisible && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                      {renderField({
-                        label: "Hasil Tes",
-                        id: `testingResult-${index}`,
-                        value: param.testingResult,
-                        onChange: (e) =>
-                          handleParameterChange(
-                            index,
-                            "testingResult",
-                            e.target.value
-                          ),
-                      })}
-                      {renderField({
-                        label: "Unit",
-                        id: `unit-${index}`,
-                        value: param.unit,
-                        onChange: (e) =>
-                          handleParameterChange(index, "unit", e.target.value),
-                        isEditable: true,
-                      })}
-                      {renderField({
-                        label: "Standar Baku Mutu",
-                        id: `standard-${index}`,
-                        value: param.standard,
-                        onChange: (e) =>
-                          handleParameterChange(
-                            index,
-                            "standard",
-                            e.target.value
-                          ),
-                        isEditable: true,
-                      })}
-                      {renderField({
-                        label: "Metode",
-                        id: `method-${index}`,
-                        value: param.method,
-                        onChange: (e) =>
-                          handleParameterChange(
-                            index,
-                            "method",
-                            e.target.value
-                          ),
-                        isEditable: true,
-                      })}
-                    </div>
+            {template.results.map((param: ParameterResult, index: number) => {
+              // Mengambil cara yang lebih aman untuk menentukan visibilitas dari versi remote
+              const isVisible = param.isVisible !== false;
+
+              return (
+                <React.Fragment key={`${param.name}-${index}`}>
+                  {param.category && (
+                    <h4 className="font-semibold text-foreground pt-4 pb-2">
+                      {param.category}
+                    </h4>
                   )}
-                </div>
-              </React.Fragment>
-            ))}
+                  <div className="border rounded-lg p-4 space-y-4 bg-muted/20">
+                    <div className="flex justify-between items-center">
+                      <p className="font-semibold text-foreground">
+                        {param.name}
+                      </p>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() =>
+                          handleParameterChange(index, "isVisible", !isVisible)
+                        }
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                      >
+                        {/* Menggunakan logika ikon dari versimu yang lebih baik */}
+                        {isVisible ? (
+                          <EyeOff className="w-4 h-4" />
+                        ) : (
+                          <Eye className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </div>
+                    {isVisible && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {renderField({
+                          label: "Hasil Tes",
+                          id: `testingResult-${index}`,
+                          value: param.testingResult,
+                          onChange: (e) =>
+                            handleParameterChange(
+                              index,
+                              "testingResult",
+                              e.target.value
+                            ),
+                        })}
+                        {renderField({
+                          label: "Unit",
+                          id: `unit-${index}`,
+                          value: param.unit,
+                          onChange: (e) =>
+                            handleParameterChange(
+                              index,
+                              "unit",
+                              e.target.value
+                            ),
+                          isEditable: true,
+                        })}
+                        {renderField({
+                          label: "Standar Baku Mutu",
+                          id: `standard-${index}`,
+                          value: param.standard,
+                          onChange: (e) =>
+                            handleParameterChange(
+                              index,
+                              "standard",
+                              e.target.value
+                            ),
+                          isEditable: true,
+                        })}
+                        {renderField({
+                          label: "Metode",
+                          id: `method-${index}`,
+                          value: param.method,
+                          onChange: (e) =>
+                            handleParameterChange(
+                              index,
+                              "method",
+                              e.target.value
+                            ),
+                          isEditable: true,
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </React.Fragment>
+              );
+            })}
           </div>
         </div>
 

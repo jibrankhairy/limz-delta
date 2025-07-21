@@ -25,7 +25,15 @@ export function WastewaterRegulationSelection({ onSelect, onBack }: Props) {
     { id: "lippo_cikarang", name: "Kawasan Industri Lippo Cikarang" },
     { id: "kiic", name: "Karawang International Industrial City (KIIC)" },
     { id: "permenlh_5_2014_xxix", name: "PermenLH 5/2014 (Lamp. XXIX)" },
-    { id: "permenlh_5_2014_xlvii", name: "PermenLH 5/2014 (Lamp. XLVII)" },
+    // ✨ Pilihan ini dipisah menjadi dua untuk Kelas I dan Kelas II ✨
+    {
+      id: "permenlh_5_2014_xlvii_1",
+      name: "PermenLH 5/2014 (Lamp. XLVII - Kelas I)",
+    },
+    {
+      id: "permenlh_5_2014_xlvii_2",
+      name: "PermenLH 5/2014 (Lamp. XLVII - Kelas II)",
+    },
     { id: "pergub_dki_69_2013", name: "Pergub DKI Jakarta 69/2013" },
     { id: "bekasi_fajar", name: "Kawasan Industri Bekasi Fajar (MM2100)" },
     { id: "giic", name: "Greenland International Industrial Center (GIIC)" },

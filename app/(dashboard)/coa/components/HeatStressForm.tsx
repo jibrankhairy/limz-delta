@@ -21,8 +21,6 @@ import {
 import { nanoid } from "nanoid";
 import { defaultHeatStressRow } from "../data/heatstress-data";
 
-// --- TYPE DEFINITIONS ---
-// Mendefinisikan struktur untuk setiap baris hasil pengujian
 interface HeatStressResultRow {
   id: string;
   location: string;

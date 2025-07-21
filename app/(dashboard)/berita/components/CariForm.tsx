@@ -21,7 +21,7 @@ export function CariForm({
     <div className="flex w-full items-center gap-3">
       <Input
         type="text"
-        placeholder="Ketik nomornya saja, cth: 001"
+        placeholder="Ketik nomornya saja, cth: 250712001"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="bg-transparent border border-input text-foreground mt-1"

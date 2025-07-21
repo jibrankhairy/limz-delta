@@ -49,6 +49,7 @@ interface CoverFormProps {
   handleSignatureUpload: (file: File) => void;
   onNextStep: () => void;
   onPrevStep: () => void;
+  onPreview: () => void;
 }
 
 const allSubjects = [
@@ -74,6 +75,7 @@ export function CoverForm({
   handleSignatureUpload,
   onNextStep,
   onPrevStep,
+  onPreview,
 }: CoverFormProps) {
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -305,6 +307,9 @@ export function CoverForm({
         <Button variant="outline" onClick={onPrevStep}>
           <ChevronLeft className="mr-2 h-4 w-4" />
           Kembali
+        </Button>
+        <Button variant="outline" onClick={onPreview}>
+          Pratinjau
         </Button>
         <Button onClick={onNextStep}>Selanjutnya</Button>
       </CardFooter>

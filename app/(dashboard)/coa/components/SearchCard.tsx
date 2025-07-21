@@ -53,7 +53,7 @@ export function SearchCard({
               <Input
                 id="search-fpps"
                 type="text"
-                placeholder="Ketik nomornya saja, cth: 001"
+                placeholder="Ketik nomornya saja...(cth: 250712001)"
                 value={fppsInput}
                 onChange={(e) => setFppsInput(e.target.value)}
                 className="bg-transparent border border-input text-foreground mt-1 w-full"
