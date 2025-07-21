@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { useSearchParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -146,11 +147,11 @@ export default function CoaPage() {
             setReportId(report._id);
             setView("dashboard");
           } else {
-            alert("Gagal memuat laporan.");
+            toast.error("Gagal memuat laporan.");
             router.push("/coa");
           }
         } catch (error) {
-          alert("Terjadi kesalahan saat memuat laporan.");
+          toast.error("Terjadi kesalahan saat memuat laporan.");
           router.push("/coa");
         }
       };
@@ -211,14 +212,14 @@ export default function CoaPage() {
       setView("cover");
     } catch (error) {
       console.error(error);
-      alert("Data tidak ditemukan atau terjadi kesalahan.");
+      toast.error("Data tidak ditemukan atau terjadi kesalahan.");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSaveReport = async () => {
-    if (!coaData || !reportId) return alert("Data cover atau ID Laporan tidak lengkap.");
+    if (!coaData || !reportId) return toast.error("Data cover atau ID Laporan tidak lengkap.");
     setIsLoading(true);
 
     const resCheck = await fetch(`/api/reports/${reportId}`);
@@ -246,14 +247,14 @@ export default function CoaPage() {
       }
 
       const result = await response.json();
-      alert('Laporan berhasil disimpan!');
+      toast.success('Laporan berhasil disimpan!');
 
       if (!isExisting) {
         router.push(`/coa?id=${result.data._id}`, { scroll: false });
       }
 
     } catch (error: any) {
-      alert(`Gagal menyimpan laporan: ${error.message}`);
+      toast.error(`Gagal menyimpan laporan: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -272,13 +273,13 @@ export default function CoaPage() {
       const result = await response.json();
       if (result.success) {
         setCoaData((prev: any) => ({ ...prev, signatureUrl: result.url }));
-        alert("Tanda tangan berhasil diunggah!");
+        toast.success("Tanda tangan berhasil diunggah!");
       } else {
         throw new Error(result.error || "Gagal mengunggah file.");
       }
     } catch (error: any) {
       console.error("Upload failed:", error);
-      alert(error.message);
+      toast.error(error.message);
     } finally {
       setIsLoading(false);
     }

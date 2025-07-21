@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Pencil, Trash2, Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 
 // Helper untuk membuat teks status lebih rapi
 const formatStatusText = (status: string) => {
@@ -43,10 +44,10 @@ export function ReportListClient({ initialReportsResult }: { initialReportsResul
       }
       
       setReports((prevReports: any[]) => prevReports.filter(report => report._id !== reportId));
-      alert('Laporan berhasil dihapus.');
+      toast.success('Laporan berhasil dihapus.');
 
     } catch (err: any) {
-      alert(`Error: ${err.message}`);
+      toast.error(`Error: ${err.message}`);
     } finally {
       setLoadingId(null);
     }

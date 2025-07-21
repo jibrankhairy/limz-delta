@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Button } from '@/components/ui/button';
 import { QRCodeCanvas } from 'qrcode.react';
 import { Download, Copy } from 'lucide-react';
+import { toast } from "sonner";
 
 interface QrCodeModalProps {
   isOpen: boolean;
@@ -31,9 +32,9 @@ export function QrCodeModal({ isOpen, onClose, url, reportNumber }: QrCodeModalP
 
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(url).then(() => {
-        alert('URL berhasil disalin!');
+        toast.success('URL berhasil disalin!');
     }, (err) => {
-        alert('Gagal menyalin URL.');
+        toast.error('Gagal menyalin URL.');
         console.error('Copy failed', err);
     });
   };

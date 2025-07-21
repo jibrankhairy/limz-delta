@@ -1,13 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -16,6 +10,7 @@ import { TitikPengujianForm } from "./components/TitikPengujianForm";
 import { RincianForm } from "./components/RincianForm";
 import { BapsPreviewDialog } from "./components/BapsPreviewDialog";
 import { BapsDocument } from "./BapsDocument";
+import { toast } from "sonner";
 
 interface BapsData {
   nomorFpps: string;
@@ -55,7 +50,7 @@ export default function BeritaPage() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   const handleCariFpps = async () => {
-    if (!fppsInput) return alert("Masukkan nomor FPPS");
+    if (!fppsInput) return toast.error("Masukkan nomor FPPS");
     setIsLoading(true);
     setBapsData(null);
 
@@ -97,7 +92,7 @@ export default function BeritaPage() {
       });
     } catch (err) {
       console.error(err);
-      alert("Data tidak ditemukan.");
+      toast.error("Data tidak ditemukan.");
     } finally {
       setIsLoading(false);
     }
