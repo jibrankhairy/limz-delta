@@ -97,7 +97,7 @@ export function ReportListClient({
           report._id === reportId ? { ...report, status: newStatus } : report
         )
       );
-      alert(
+      toast.success(
         `Status laporan berhasil diubah menjadi "${formatStatusText(
           newStatus
         )}"`
