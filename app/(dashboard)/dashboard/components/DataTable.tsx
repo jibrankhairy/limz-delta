@@ -24,7 +24,6 @@ import {
   IconDotsVertical,
   IconGripVertical,
   IconLoader,
-  // Tambahan: Impor ikon untuk tombol paginasi
   IconChevronLeft,
   IconChevronRight,
   IconChevronsLeft,
@@ -47,7 +46,8 @@ import { z } from "zod";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+// --- PERUBAHAN --- Checkbox tidak lagi digunakan
+// import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -98,29 +98,25 @@ function DragHandle({ id }: { id: string }) {
 }
 
 const columns: ColumnDef<z.infer<typeof schema>>[] = [
+  // {
+  //   id: "drag",
+  //   header: () => null,
+  //   cell: ({ row }) => <DragHandle id={row.original.id} />,
+  // },
   {
-    id: "drag",
-    header: () => null,
-    cell: ({ row }) => <DragHandle id={row.original.id} />,
-  },
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={table.getIsAllPageRowsSelected()}
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
+    id: "no",
+    // PERUBAHAN: Header dibuat rata tengah
+    header: () => <div className="text-center">No.</div>,
+    cell: ({ row, table }) => {
+      const { pageIndex, pageSize } = table.getState().pagination;
+      // PERUBAHAN: Nomor juga dibuat rata tengah
+      return (
+        <div className="text-center">
+          {pageIndex * pageSize + row.index + 1}
+        </div>
+      );
+    },
+    size: 50,
   },
   {
     accessorKey: "header",
@@ -186,11 +182,12 @@ function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       data-dragging={isDragging}
-      data-state={row.getIsSelected() && "selected"}
+      // --- PERUBAHAN --- 'data-state' untuk seleksi tidak lagi diperlukan
+      // data-state={row.getIsSelected() && "selected"}
       className="relative z-0 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80"
     >
       {row.getVisibleCells().map((cell) => (
-        <TableCell key={cell.id}>
+        <TableCell key={cell.id} style={{ width: cell.column.getSize() }}>
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
         </TableCell>
       ))}
@@ -204,14 +201,14 @@ export function DataTable({
   data: z.infer<typeof schema>[];
 }) {
   const [data, setData] = React.useState(initialData);
-  const [rowSelection, setRowSelection] = React.useState({});
+  // --- PERUBAHAN --- State untuk 'rowSelection' tidak lagi diperlukan
+  // const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   );
-  // State paginasi sudah ada, tidak perlu diubah
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
@@ -234,19 +231,21 @@ export function DataTable({
     state: {
       sorting,
       columnVisibility,
-      rowSelection,
+      // --- PERUBAHAN --- 'rowSelection' dihapus dari state tabel
+      // rowSelection,
       columnFilters,
-      pagination, // state paginasi dihubungkan ke tabel
+      pagination,
     },
     getRowId: (row) => row.id,
-    onRowSelectionChange: setRowSelection,
+    // --- PERUBAHAN --- Handler untuk 'rowSelection' dihapus
+    // onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
-    onPaginationChange: setPagination, // fungsi untuk update state paginasi
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(), // model paginasi sudah aktif
+    getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
 
@@ -264,7 +263,6 @@ export function DataTable({
   return (
     <div className="space-y-4">
       <div className="overflow-hidden rounded-lg border">
-        {/* ... (Tabel kamu tetap sama) ... */}
         <DndContext
           collisionDetection={closestCenter}
           sensors={sensors}
@@ -275,7 +273,11 @@ export function DataTable({
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id} colSpan={header.colSpan}>
+                    <TableHead
+                      key={header.id}
+                      colSpan={header.colSpan}
+                      style={{ width: header.getSize() }}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -312,17 +314,14 @@ export function DataTable({
         </DndContext>
       </div>
 
-      {/* ================================================================== */}
-      {/* Tambahan: Komponen Paginasi diletakkan di sini, di bawah tabel */}
-      {/* ================================================================== */}
       <div className="flex items-center justify-between px-2">
+        {/* --- PERUBAHAN --- Teks jumlah baris terpilih dihapus */}
         <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
+          Total {table.getFilteredRowModel().rows.length} baris.
         </div>
         <div className="flex items-center space-x-6 lg:space-x-8">
           <div className="flex items-center space-x-2">
-            <p className="text-sm font-medium">Rows per page</p>
+            <p className="text-sm font-medium">Baris per halaman</p>
             <Select
               value={`${table.getState().pagination.pageSize}`}
               onValueChange={(value) => {
@@ -344,7 +343,7 @@ export function DataTable({
             </Select>
           </div>
           <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-            Page {table.getState().pagination.pageIndex + 1} of{" "}
+            Halaman {table.getState().pagination.pageIndex + 1} dari{" "}
             {table.getPageCount()}
           </div>
           <div className="flex items-center space-x-2">
