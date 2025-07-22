@@ -1,11 +1,6 @@
 import { Users, Loader, CheckCircle } from "lucide-react";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface SectionCardProps {
   totalClients: number;
@@ -13,14 +8,16 @@ interface SectionCardProps {
   finalCoa: number;
 }
 
-export function SectionCards({ totalClients, onProgress, finalCoa }: SectionCardProps) {
+export function SectionCards({
+  totalClients,
+  onProgress,
+  finalCoa,
+}: SectionCardProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {/* Kartu Total Client */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Client</CardTitle>
-          {/* Icon dengan background berwarna agar lebih menonjol */}
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
             <Users className="h-4 w-4" />
           </div>
@@ -33,7 +30,6 @@ export function SectionCards({ totalClients, onProgress, finalCoa }: SectionCard
         </CardContent>
       </Card>
 
-      {/* Kartu On Progress */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">On Progress</CardTitle>
@@ -49,7 +45,6 @@ export function SectionCards({ totalClients, onProgress, finalCoa }: SectionCard
         </CardContent>
       </Card>
 
-      {/* Kartu Final COA */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Final COA</CardTitle>

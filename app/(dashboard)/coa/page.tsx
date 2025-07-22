@@ -233,6 +233,7 @@ export default function CoaPage() {
       _id: reportId,
       coverData: coaData,
       activeTemplates: activeTemplates,
+      status: "sertifikat",
     };
 
     try {
@@ -251,6 +252,37 @@ export default function CoaPage() {
 
       const result = await response.json();
       toast.success("Laporan berhasil disimpan!");
+
+      // ❗ PERUBAHAN: Panggil API untuk update status FPPS
+      // Setelah laporan utama berhasil disimpan, kita trigger update status di FPPS.
+      // Endpoint ini akan mengurus update status di kedua koleksi (reports & fpps)
+      try {
+        const statusUpdateResponse = await fetch(
+          `/api/reports/${reportId}/status`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ status: "sertifikat" }),
+          }
+        );
+
+        if (statusUpdateResponse.ok) {
+          toast.success("Status FPPS berhasil diupdate menjadi 'Sertifikat'.");
+        } else {
+          const errorStatusData = await statusUpdateResponse.json();
+          toast.error(
+            `Gagal update status FPPS: ${
+              errorStatusData.error || "Terjadi kesalahan"
+            }`
+          );
+        }
+      } catch (statusError: any) {
+        console.error("Status Update Fetch Error:", statusError);
+        toast.error(
+          `Terjadi kesalahan saat mengupdate status FPPS: ${statusError.message}`
+        );
+      }
+      // Akhir dari blok kode baru
 
       if (!isExisting) {
         router.push(`/coa?id=${result.data._id}`, { scroll: false });

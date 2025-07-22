@@ -29,7 +29,7 @@ const fppsSchema = new mongoose.Schema(
         "sampling",
         "analisis",
         "sertifikat",
-        "done",
+        "selesai",
       ],
       default: "pendaftaran",
     },

@@ -10,7 +10,6 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 
-
 export default async function DashboardPage() {
   await connectDB();
 
@@ -26,14 +25,15 @@ export default async function DashboardPage() {
   };
 
   const allData = (await Fpps.find().lean()) as unknown as FppsDoc[];
-  
+
   const totalClients = new Set(allData.map((item) => item.namaPelanggan)).size;
+
   const onProgressCount = allData.filter(
-    (item) => !item.status || item.status.toLowerCase() === "process"
+    (item) => item.status?.toLowerCase() !== "selesai"
   ).length;
+
   const finalCoaCount = allData.filter(
-    (item) =>
-      item.status && (item.status.toLowerCase() === "completed" || item.status.toLowerCase() === "done")
+    (item) => item.status?.toLowerCase() === "selesai"
   ).length;
 
   const dataForTable = allData.map((item) => ({
@@ -42,31 +42,28 @@ export default async function DashboardPage() {
     ppic: item.namaPpic,
     email: item.emailPpic,
     limit: item.noTelp,
-    status: item.status || "Process",
+    status: item.status || "Pendaftaran",
     target: item.target || "",
     reviewer: item.reviewer || "",
   }));
 
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-      {/* 1. Header Halaman yang Jelas */}
       <div className="flex items-center">
         <h1 className="text-lg font-semibold md:text-2xl">Dashboard</h1>
       </div>
 
-      {/* 2. Kartu Statistik */}
       <SectionCards
         totalClients={totalClients}
         onProgress={onProgressCount}
         finalCoa={finalCoaCount}
       />
 
-      {/* 3. Tabel Data Dibungkus Dalam Card */}
       <Card>
         <CardHeader>
-          <CardTitle>Daftar Proyek Terbaru</CardTitle>
+          <CardTitle>Daftar Pelanggan</CardTitle>
           <CardDescription>
-            Lihat semua proyek yang sedang berjalan dan yang telah selesai.
+            Lihat semua pelanggan yang sedang berjalan dan yang telah selesai.
           </CardDescription>
         </CardHeader>
         <CardContent>

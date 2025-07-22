@@ -41,7 +41,7 @@ const ReportSchema: Schema = new Schema(
         "sampling",
         "analisis",
         "sertifikat",
-        "done",
+        "selesai",
       ],
       default: "pendaftaran",
     },

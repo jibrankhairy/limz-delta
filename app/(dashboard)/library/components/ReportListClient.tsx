@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { format } from "date-fns";
 import {
   Card,
   CardContent,
@@ -24,8 +23,9 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
+// PERUBAHAN: Default status diubah menjadi "Analisis"
 const formatStatusText = (status: string) => {
-  if (!status) return "Process";
+  if (!status) return "Analisis"; // Diubah dari "Process"
   return status.charAt(0).toUpperCase() + status.slice(1);
 };
 
@@ -75,9 +75,10 @@ export function ReportListClient({
     }
   };
 
+  // PERUBAHAN: Tipe status diubah menjadi "analisis" | "selesai"
   const handleStatusChange = async (
     reportId: string,
-    newStatus: "process" | "done"
+    newStatus: "analisis" | "selesai"
   ) => {
     setLoadingId(reportId);
     try {
@@ -147,9 +148,10 @@ export function ReportListClient({
                     </TableCell>
                     <TableCell>{report.coverData?.nomorFpps || "-"}</TableCell>
                     <TableCell>
+                      {/* PERUBAHAN: Kondisi badge disesuaikan menjadi 'selesai' */}
                       <Badge
                         variant={
-                          report.status === "done" ? "default" : "secondary"
+                          report.status === "selesai" ? "default" : "secondary"
                         }
                       >
                         {formatStatusText(report.status)}
@@ -160,25 +162,27 @@ export function ReportListClient({
                         <Loader2 className="h-4 w-4 animate-spin inline-block mr-2" />
                       ) : (
                         <>
-                          {report.status !== "done" && (
+                          {/* PERUBAHAN: Teks, kondisi, dan fungsi onClick untuk tombol 'Selesai' */}
+                          {report.status !== "selesai" && (
                             <Button
                               size="sm"
                               onClick={() =>
-                                handleStatusChange(report._id, "done")
+                                handleStatusChange(report._id, "selesai")
                               }
                             >
-                              Done
+                              Selesai
                             </Button>
                           )}
-                          {report.status === "done" && (
+                          {/* PERUBAHAN: Teks, kondisi, dan fungsi onClick untuk tombol 'Analisis' */}
+                          {report.status === "selesai" && (
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() =>
-                                handleStatusChange(report._id, "process")
+                                handleStatusChange(report._id, "analisis")
                               }
                             >
-                              Process
+                              Analisis
                             </Button>
                           )}
                           <Button
