@@ -43,7 +43,7 @@ export const FppsDocument = React.forwardRef<HTMLDivElement, FppsDocumentProps>(
       >
         <div className="text-center mb-6">
           <h1 className="text-sm font-bold uppercase">
-            Permintaan Contoh Uji dan Atau Ulang Permintaan Pengujian
+            Permintaan Contoh Uji dan Atau Kaji Ulang Permintaan Pengujian
           </h1>
         </div>
 

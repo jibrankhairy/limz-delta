@@ -67,7 +67,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     },
     {
       title: "Surat Tugas Pengujian",
-      url: "/pengajuan",
+      url: "/pengujian",
       icon: FileText as any,
     },
     {
