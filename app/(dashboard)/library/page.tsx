@@ -1,12 +1,10 @@
 import { ReportListClient } from "./components/ReportListClient";
 
-// Fungsi untuk fetch data di server
 async function getReports() {
   try {
-    // URL absolut diperlukan saat fetch di Server Component
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
     const response = await fetch(`${baseUrl}/api/reports`, {
-      cache: "no-store", // Selalu ambil data terbaru
+      cache: "no-store",
     });
 
     if (!response.ok) {
@@ -29,7 +27,6 @@ export default async function DataLibraryPage() {
           Lihat dan kelola semua laporan yang telah disimpan.
         </p>
       </div>
-      {/* Kirim data awal ke Client Component */}
       <ReportListClient initialReportsResult={result} />
     </div>
   );

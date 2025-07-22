@@ -16,6 +16,15 @@ import FormRincian from "./components/FormRincian";
 import { FppsDocument } from "./components/FppsDocument";
 import { toast } from "sonner";
 
+interface RincianItem {
+  id: string;
+  area: string;
+  matriks: string;
+  parameter: string;
+  regulasi: string;
+  metode: string;
+}
+
 export default function RegistrationPage() {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -27,10 +36,11 @@ export default function RegistrationPage() {
     noTelp: "",
     tanggalMasuk: "",
     kegiatan: "",
-    namaPpic: "", 
+    namaPpic: "",
     emailPpic: "",
   });
-  const [rincian, setRincian] = useState([]);
+
+  const [rincian, setRincian] = useState<RincianItem[]>([]);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const documentRef = useRef<HTMLDivElement>(null);
 
@@ -48,11 +58,15 @@ export default function RegistrationPage() {
         body: JSON.stringify(payload),
       });
 
-      if (!res.ok) throw new Error("Gagal menyimpan");
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Gagal menyimpan data");
+      }
+
       toast.success(`Data untuk ${nomorFppsFinal} berhasil disimpan!`);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error("Gagal menyimpan data!");
+      toast.error(`Gagal menyimpan: ${error.message}`);
     }
   };
 
@@ -62,11 +76,11 @@ export default function RegistrationPage() {
 
   return (
     <div className="space-y-8">
-      <div className="px-4 md:px-8 lg:px-6 pt-6">
-        <h1 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-foreground leading-tight">
+      <div className="px-4 pt-6 md:px-8 lg:px-6">
+        <h1 className="text-2xl font-semibold leading-tight text-foreground md:text-3xl lg:text-4xl">
           Form Pendaftaran Pengujian
         </h1>
-        <p className="text-sm md:text-base text-muted-foreground mt-2 max-w-2xl">
+        <p className="mt-2 max-w-2xl text-sm text-muted-foreground md:text-base">
           Silakan isi data pelanggan dan rincian pengujian secara lengkap di
           bawah ini.
         </p>
@@ -90,7 +104,7 @@ export default function RegistrationPage() {
       )}
 
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="sm:max-w-md bg-background text-foreground">
+        <DialogContent className="bg-background text-foreground sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Pratinjau Dokumen</DialogTitle>
             <DialogDescription>
@@ -118,6 +132,7 @@ export default function RegistrationPage() {
           data={{
             ...formData,
             nomorFpps: `DIL-${formData.nomorFpps}`,
+            petugas: formData.petugas.join(", "),
             rincian,
           }}
         />
@@ -130,32 +145,26 @@ export default function RegistrationPage() {
               size: A4 landscape;
               margin: 0;
             }
-
             body {
               margin: 0;
               -webkit-print-color-adjust: exact;
               print-color-adjust: exact;
             }
-
             .print-only {
               display: block;
             }
-
             body * {
               visibility: hidden;
             }
-
             .print-only, .print-only * {
               visibility: visible;
             }
-
             .print-only {
               position: absolute;
               left: 0;
               top: 0;
               width: 100%;
             }
-
             button, [data-no-print] {
               display: none !important;
             }

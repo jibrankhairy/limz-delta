@@ -26,14 +26,12 @@ export default function SuratPengujianPage() {
   const [nomorSurat, setNomorSurat] = useState("");
   const [petugas, setPetugas] = useState([""]);
   const [sampelData, setSampelData] = useState<SampleRow[]>([]);
-
   const [signatureData, setSignatureData] = useState<SignatureData>({
     pjTeknis: "",
     admin: "",
     signatureUrlPj: "",
     signatureUrlAdmin: "",
   });
-
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const documentRef = useRef<HTMLDivElement>(null);
 
@@ -69,22 +67,17 @@ export default function SuratPengujianPage() {
       setSampelData([]);
       return;
     }
-
     const fetchFppsData = async () => {
       try {
         const res = await fetch(`/api/fpps/${nomorFpps}`);
         if (!res.ok) throw new Error("Nomor FPPS tidak ditemukan");
-
         const result = await res.json();
         const formData = result.formData;
         const rincianData = result.rincian;
-
         if (!formData || !rincianData) {
           throw new Error("Struktur data dari API tidak lengkap.");
         }
-
         setPetugas(formData.petugas || [""]);
-
         if (rincianData && Array.isArray(rincianData)) {
           const initialSampelData = rincianData.map((sample: any) => ({
             id: sample.sampleId || sample.sampelId || sample.id || "N/A",
@@ -95,17 +88,12 @@ export default function SuratPengujianPage() {
             deadline: "",
             keterangan: "",
           }));
-
           setSampelData(initialSampelData);
-
           if (initialSampelData.length > 0) {
             toast.success("Data FPPS berhasil dimuat.");
-          } else {
-            toast.warning("Data FPPS dimuat, namun tidak ada detail sampel.");
           }
         } else {
           setSampelData([]);
-          toast.error("Struktur data rincian sampel tidak valid.");
         }
       } catch (error: any) {
         toast.error(`Gagal memuat data FPPS: ${error.message}`);
@@ -113,18 +101,44 @@ export default function SuratPengujianPage() {
         setSampelData([]);
       }
     };
-
     const handler = setTimeout(() => {
       fetchFppsData();
     }, 800);
-
     return () => {
       clearTimeout(handler);
     };
   }, [nomorFpps]);
 
-  const handlePreview = (e: React.FormEvent) => {
+  const handleSaveStatus = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!nomorFpps) {
+      toast.error("Nomor FPPS harus diisi terlebih dahulu.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/fpps/${nomorFpps}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "sampling" }), // Status baru adalah "sampling"
+      });
+
+      if (!res.ok) {
+        throw new Error("Gagal memperbarui status FPPS.");
+      }
+
+      toast.success("Status FPPS berhasil diubah menjadi 'Sampling'.");
+    } catch (error: any) {
+      console.error("Update FPPS Status Error:", error);
+      toast.error(error.message || "Terjadi kesalahan saat menyimpan.");
+    }
+  };
+
+  const handleRequestPrint = () => {
+    if (!nomorFpps) {
+      toast.error("Isi dan simpan data terlebih dahulu untuk mencetak.");
+      return;
+    }
     setIsPreviewOpen(true);
   };
 
@@ -139,8 +153,7 @@ export default function SuratPengujianPage() {
           Surat Tugas Pengujian Sampel
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground md:text-base">
-          Isi data untuk menerbitkan Surat Tugas Pengujian (STP). Data petugas
-          dan sampel akan ditarik dari FPPS.
+          Isi data untuk menerbitkan Surat Tugas Pengujian (STP).
         </p>
       </div>
 
@@ -155,7 +168,8 @@ export default function SuratPengujianPage() {
           setSampelData={setSampelData}
           signatureData={signatureData}
           setSignatureData={setSignatureData}
-          onSubmit={handlePreview}
+          onSubmit={handleSaveStatus}
+          onPrint={handleRequestPrint}
         />
 
         <div className="print-only max-h-[90vh] rounded-lg border border-muted shadow-sm">

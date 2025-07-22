@@ -22,8 +22,6 @@ import {
 } from "@/components/ui/table";
 import { PlusCircle, Printer, XCircle } from "lucide-react";
 
-// --- Tipe Data untuk Props ---
-// Menggunakan interface agar kode lebih aman dan mudah dibaca, menggantikan `any`
 interface Sampel {
   id: string;
   parameter: string;
@@ -52,10 +50,9 @@ interface FormPengujianProps {
     data: SignatureData | ((prev: SignatureData) => SignatureData)
   ) => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  onPrint: () => void;
 }
 
-// --- Komponen Section ---
-// Membuat komponen kecil untuk setiap bagian form agar lebih terstruktur
 const FormSection = ({
   title,
   children,
@@ -80,8 +77,8 @@ export default function FormPengujian({
   signatureData,
   setSignatureData,
   onSubmit,
+  onPrint,
 }: FormPengujianProps) {
-  // --- Handlers ---
   const handlePetugasChange = (index: number, value: string) => {
     const newPetugas = [...petugas];
     newPetugas[index] = value;
@@ -127,7 +124,6 @@ export default function FormPengujian({
     }
   };
 
-  // --- Render ---
   return (
     <Card className="w-full">
       <form onSubmit={onSubmit}>
@@ -139,7 +135,6 @@ export default function FormPengujian({
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* --- SEKSI INFORMASI SURAT --- */}
           <FormSection title="">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
@@ -159,7 +154,6 @@ export default function FormPengujian({
             </div>
           </FormSection>
 
-          {/* --- SEKSI PETUGAS --- */}
           <FormSection title="Petugas Ditugaskan">
             <div className="space-y-2">
               {petugas.map((nama, index) => (
@@ -197,7 +191,6 @@ export default function FormPengujian({
             </Button>
           </FormSection>
 
-          {/* --- SEKSI DETAIL SAMPEL --- */}
           <FormSection title="Detail Pengujian Sampel">
             <div className="overflow-hidden rounded-md border">
               <Table>
@@ -268,8 +261,7 @@ export default function FormPengujian({
                         colSpan={5}
                         className="py-8 text-center text-muted-foreground"
                       >
-                        Data sampel akan muncul di sini setelah memasukkan Nomor
-                        FPPS yang valid.
+                        Data sampel akan muncul di sini.
                       </TableCell>
                     </TableRow>
                   )}
@@ -278,7 +270,6 @@ export default function FormPengujian({
             </div>
           </FormSection>
 
-          {/* --- SEKSI PENANGGUNG JAWAB --- */}
           <FormSection title="Penanggung Jawab">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <div className="space-y-2">
@@ -331,14 +322,14 @@ export default function FormPengujian({
               </div>
             </div>
           </FormSection>
-
-          <CardFooter className="flex justify-end border-t px-6 py-4">
-            <Button type="submit" size="lg">
-              <Printer className="mr-2 h-5 w-5" />
-              Preview & Print
-            </Button>
-          </CardFooter>
         </CardContent>
+        <CardFooter className="flex justify-end border-t px-6 py-4 gap-2">
+          <Button type="submit">Simpan</Button>
+          <Button type="button" onClick={onPrint}>
+            <Printer className="h-5 w-5 mr-2" />
+            Print
+          </Button>
+        </CardFooter>
       </form>
     </Card>
   );

@@ -1,16 +1,14 @@
-export const dynamicParams = true;
-
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Fpps from "@/models/Fpps";
 
-export async function GET(req: NextRequest) {
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { nomor: string } }
+) {
   await connectDB();
-
   try {
-    const url = new URL(req.url);
-    const nomor = url.pathname.split("/").pop(); // ambil terakhir dari path
-
+    const { nomor } = params;
     const data = await Fpps.findOne({ nomorFpps: nomor });
 
     if (!data) {
@@ -39,7 +37,50 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error("Fetch FPPS Error:", error);
     return NextResponse.json(
-      { message: "Gagal mengambil data FPPS", error },
+      { message: "Gagal mengambil data FPPS" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { nomor: string } }
+) {
+  const { nomor } = params;
+
+  try {
+    const { status } = await request.json();
+    if (!status) {
+      return NextResponse.json(
+        { message: "Status baru harus disertakan" },
+        { status: 400 }
+      );
+    }
+
+    await connectDB();
+
+    const updatedFpps = await Fpps.findOneAndUpdate(
+      { nomorFpps: nomor },
+      { status: status },
+      { new: true }
+    );
+
+    if (!updatedFpps) {
+      return NextResponse.json(
+        { message: `FPPS dengan nomor ${nomor} tidak ditemukan` },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      message: "Status FPPS berhasil diperbarui",
+      data: updatedFpps,
+    });
+  } catch (error) {
+    console.error(`API FPPS Status Update Error (nomor: ${nomor}):`, error);
+    return NextResponse.json(
+      { message: "Gagal mengupdate status FPPS" },
       { status: 500 }
     );
   }

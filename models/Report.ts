@@ -35,8 +35,15 @@ const ReportSchema: Schema = new Schema(
     },
     status: {
       type: String,
-      default: "process",
-      enum: ["process", "done"],
+      enum: [
+        "pendaftaran",
+        "penyuratan",
+        "sampling",
+        "analisis",
+        "sertifikat",
+        "done",
+      ],
+      default: "pendaftaran",
     },
   },
   {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-
+import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { RincianForm } from "./components/RincianForm";
 import { BapsPreviewDialog } from "./components/BapsPreviewDialog";
 import { BapsDocument } from "./BapsDocument";
 import { toast } from "sonner";
+import { Printer, Save } from "lucide-react";
 
 interface BapsData {
   nomorFpps: string;
@@ -36,10 +37,11 @@ interface BapsData {
     jenisSampel: string;
     waktuPengambilan: string;
   }>;
-  // Perubahan: Menambahkan data untuk penanda tangan
   penandaTangan: {
     pihakLab: string;
+    signatureUrlLab: string;
     pihakPerusahaan: string;
+    signatureUrlPerusahaan: string;
   };
 }
 
@@ -54,11 +56,13 @@ export default function BeritaPage() {
     setIsLoading(true);
     setBapsData(null);
 
-    const searchKey = `DIL-${fppsInput}`;
+    const searchKey = fppsInput.startsWith("DIL-")
+      ? fppsInput
+      : `DIL-${fppsInput}`;
 
     try {
       const res = await fetch(`/api/fpps/${searchKey}`);
-      if (!res.ok) throw new Error("Gagal ambil data");
+      if (!res.ok) throw new Error("Gagal mengambil data FPPS");
       const data = await res.json();
       setBapsData({
         nomorFpps: data.formData.nomorFpps,
@@ -84,26 +88,27 @@ export default function BeritaPage() {
           jenisSampel: "",
           waktuPengambilan: "",
         })),
-        // Perubahan: Inisialisasi data penanda tangan
         penandaTangan: {
           pihakLab: "",
+          signatureUrlLab: "",
           pihakPerusahaan: "",
+          signatureUrlPerusahaan: "",
         },
       });
+      toast.success("Data FPPS berhasil dimuat.");
     } catch (err) {
       console.error(err);
-      toast.error("Data tidak ditemukan.");
+      toast.error("Data tidak ditemukan atau terjadi kesalahan.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Perubahan: Fungsi ini diupdate untuk menangani data bertingkat (nested)
   const handleBapsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!bapsData) return;
     const { name, value } = e.target;
 
-    if (name === "pihakLab" || name === "pihakPerusahaan") {
+    if (name in bapsData.penandaTangan) {
       setBapsData({
         ...bapsData,
         penandaTangan: { ...bapsData.penandaTangan, [name]: value },
@@ -129,21 +134,63 @@ export default function BeritaPage() {
     setBapsData({ ...bapsData, rincianUji: updated });
   };
 
+  const handleSignatureUpload = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    field: "signatureUrlLab" | "signatureUrlPerusahaan"
+  ) => {
+    if (!bapsData) return;
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setBapsData({
+          ...bapsData,
+          penandaTangan: {
+            ...bapsData.penandaTangan,
+            [field]: reader.result as string,
+          },
+        });
+      };
+      reader.readAsDataURL(file);
+    } else if (file) {
+      toast.error("Harap unggah file gambar yang valid.");
+    }
+  };
+
+  const handleSaveStatus = async () => {
+    if (!bapsData) return toast.error("Data Berita Acara belum dimuat.");
+
+    try {
+      const res = await fetch(`/api/fpps/${bapsData.nomorFpps}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "analisis" }),
+      });
+
+      if (!res.ok) throw new Error("Gagal memperbarui status FPPS.");
+
+      toast.success("Status FPPS berhasil diubah menjadi 'Analisis'.");
+    } catch (error: any) {
+      console.error("Update FPPS Status Error:", error);
+      toast.error(error.message || "Terjadi kesalahan saat menyimpan.");
+    }
+  };
+
   return (
-    <div className="space-y-8 px-4 md:px-8 lg:px-6 pt-6">
+    <div className="space-y-8 px-4 pt-6 md:px-8 lg:px-6">
       <div>
-        <h1 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-foreground leading-tight">
+        <h1 className="text-2xl font-semibold leading-tight text-foreground md:text-3xl lg:text-4xl">
           Berita Acara Pengambilan Sampel
         </h1>
-        <p className="text-sm md:text-base text-muted-foreground mt-2 max-w-2xl">
+        <p className="mt-2 max-w-2xl text-sm text-muted-foreground md:text-base">
           Cari data berdasarkan Nomor FPPS untuk mengisi Berita Acara.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 items-start gap-6">
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-2">
         <div className="space-y-6">
-          <div className="border border-border rounded-lg p-4">
-            <h2 className="text-base font-medium mb-2">Cari Data FPPS</h2>
+          <div className="rounded-lg border border-border p-4">
+            <h2 className="mb-2 text-base font-medium">Cari Data FPPS</h2>
             <CariForm
               value={fppsInput}
               loading={isLoading}
@@ -154,35 +201,29 @@ export default function BeritaPage() {
 
           {bapsData && (
             <>
-              <div className="border border-border rounded-lg p-4 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4 rounded-lg border border-border p-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
-                    <Label className="text-sm font-medium text-foreground">
-                      Perusahaan
-                    </Label>
-                    <p className="text-base font-semibold mt-1">
+                    <Label className="text-sm font-medium">Perusahaan</Label>
+                    <p className="mt-1 text-base font-semibold">
                       {bapsData.perusahaan}
                     </p>
                   </div>
                   <div>
-                    <Label className="text-sm font-medium text-foreground">
-                      No. Telp
-                    </Label>
-                    <p className="text-base font-semibold mt-1">
+                    <Label className="text-sm font-medium">No. Telp</Label>
+                    <p className="mt-1 text-base font-semibold">
                       {bapsData.noTelp}
                     </p>
                   </div>
                   <div className="md:col-span-2">
-                    <Label className="text-sm font-medium text-foreground">
-                      Alamat
-                    </Label>
-                    <p className="text-base font-semibold mt-1">
+                    <Label className="text-sm font-medium">Alamat</Label>
+                    <p className="mt-1 text-base font-semibold">
                       {bapsData.alamat}
                     </p>
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="hariTanggal" className="text-sm font-medium text-foreground">
+                  <Label htmlFor="hariTanggal" className="text-sm font-medium">
                     Hari, Tanggal Pengambilan Sampel
                   </Label>
                   <Input
@@ -190,61 +231,95 @@ export default function BeritaPage() {
                     name="hariTanggal"
                     value={bapsData.hariTanggal}
                     onChange={handleBapsChange}
-                    className="bg-transparent border border-input text-foreground mt-1"
+                    className="mt-1"
                   />
                 </div>
               </div>
 
-              <div className="border border-border rounded-lg p-4">
+              <div className="rounded-lg border border-border p-4">
                 <TitikPengujianForm
                   data={bapsData.titikPengujian}
                   onChange={handleBapsChange}
                 />
               </div>
-
-              <div className="border border-border rounded-lg p-4">
+              <div className="rounded-lg border border-border p-4">
                 <RincianForm
                   rincianUji={bapsData.rincianUji}
                   onChange={handleRincianChange}
                 />
               </div>
-              
-              {/* Perubahan: Form untuk nama penanda tangan */}
-              <div className="border border-border rounded-lg p-4">
-                <h2 className="text-base font-medium mb-4">Penanda Tangan</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="pihakLab" className="text-sm font-medium text-foreground">
-                      Pihak Laboratorium
-                    </Label>
+
+              <div className="rounded-lg border border-border p-4">
+                <h2 className="mb-4 text-base font-medium">Penanda Tangan</h2>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="pihakLab">Pihak Laboratorium</Label>
                     <Input
                       id="pihakLab"
                       name="pihakLab"
                       value={bapsData.penandaTangan.pihakLab}
                       onChange={handleBapsChange}
-                      placeholder="Masukkan nama..."
-                      className="bg-transparent border border-input text-foreground mt-1"
+                      placeholder="Nama..."
                     />
-                  </div>
-                  <div>
-                    <Label htmlFor="pihakPerusahaan" className="text-sm font-medium text-foreground">
-                      Pihak Perusahaan
+                    <Label
+                      htmlFor="ttd-lab"
+                      className="text-xs text-muted-foreground"
+                    >
+                      Tanda Tangan (PNG)
                     </Label>
+                    <div className="flex items-center gap-4">
+                      <Input
+                        id="ttd-lab"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) =>
+                          handleSignatureUpload(e, "signatureUrlLab")
+                        }
+                        className="text-xs file:text-xs"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="pihakPerusahaan">Pihak Perusahaan</Label>
                     <Input
                       id="pihakPerusahaan"
                       name="pihakPerusahaan"
                       value={bapsData.penandaTangan.pihakPerusahaan}
                       onChange={handleBapsChange}
-                      placeholder="Masukkan nama..."
-                      className="bg-transparent border border-input text-foreground mt-1"
+                      placeholder="Nama..."
                     />
+                    <Label
+                      htmlFor="ttd-perusahaan"
+                      className="text-xs text-muted-foreground"
+                    >
+                      Tanda Tangan (PNG)
+                    </Label>
+                    <div className="flex items-center gap-4">
+                      <Input
+                        id="ttd-perusahaan"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) =>
+                          handleSignatureUpload(e, "signatureUrlPerusahaan")
+                        }
+                        className="text-xs file:text-xs"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end">
-                <Button onClick={() => setIsPreviewOpen(true)}>
-                  Simpan & Cetak
+              <div className="flex justify-end gap-2">
+                <Button onClick={handleSaveStatus}>
+                  <Save className="mr-2 h-4 w-4" />
+                  Simpan
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsPreviewOpen(true)}
+                >
+                  <Printer className="mr-2 h-4 w-4" />
+                  Print
                 </Button>
               </div>
             </>
@@ -252,7 +327,7 @@ export default function BeritaPage() {
         </div>
 
         {bapsData && (
-          <div className="print-only max-h-[90vh] overflow-auto sticky top-20">
+          <div className="print-only sticky top-20 max-h-[90vh] overflow-auto">
             <BapsDocument data={bapsData} />
           </div>
         )}

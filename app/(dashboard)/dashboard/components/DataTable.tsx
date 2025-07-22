@@ -54,7 +54,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-// Tambahan: Impor komponen Select untuk pilihan jumlah data per halaman
 import {
   Select,
   SelectContent,
@@ -99,7 +98,6 @@ function DragHandle({ id }: { id: string }) {
 }
 
 const columns: ColumnDef<z.infer<typeof schema>>[] = [
-  // ... (definisi kolom kamu tetap sama, tidak perlu diubah)
   {
     id: "drag",
     header: () => null,

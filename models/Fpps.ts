@@ -19,15 +19,20 @@ const fppsSchema = new mongoose.Schema(
     noTelp: String,
     tanggalMasuk: String,
     kegiatan: String,
-
     namaPpic: String,
     emailPpic: String,
     status: {
       type: String,
-      enum: ["process", "done"],
-      default: "process",
+      enum: [
+        "pendaftaran",
+        "penyuratan",
+        "sampling",
+        "analisis",
+        "sertifikat",
+        "done",
+      ],
+      default: "pendaftaran",
     },
-
     rincian: [rincianSchema],
   },
   { timestamps: true }

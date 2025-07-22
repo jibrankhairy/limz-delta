@@ -16,10 +16,18 @@ export async function POST(req: NextRequest) {
       { message: "FPPS berhasil disimpan" },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("FPPS Save Error:", error);
+
+    if (error.code === 11000) {
+      return NextResponse.json(
+        { message: `Nomor FPPS '${error.keyValue.nomorFpps}' sudah ada.` },
+        { status: 409 }
+      );
+    }
+
     return NextResponse.json(
-      { message: "Gagal menyimpan FPPS", error },
+      { message: "Gagal menyimpan FPPS", error: error.message },
       { status: 500 }
     );
   }

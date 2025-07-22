@@ -26,23 +26,38 @@ const getTemplateDisplayName = (template: any) => {
   // ... (fungsi getTemplateDisplayName tidak perlu diubah)
   switch (template.templateType) {
     case "odor":
-      if (template.regulation === "permenaker_a") return "Odor - Permenaker (Set A)";
-      if (template.regulation === "permenaker_b") return "Odor - Permenaker (Set B)";
+      if (template.regulation === "permenaker_a")
+        return "Odor - Permenaker (Set A)";
+      if (template.regulation === "permenaker_b")
+        return "Odor - Permenaker (Set B)";
       if (template.regulation === "kepmenlh") return "Odor - Kepmen LH 1996";
       return "Odor";
-    case "illumination": return "Illumination";
-    case "heatstress": return "Heat Stress (Iklim Kerja)";
-    case "wastewater": return "Wastewater";
-    case "cleanwater": return "Clean Water";
-    case "workplaceair": return "Workplace Air";
-    case "surfacewater": return "Surface Water";
-    case "vibration": return "Vibration";
-    case "airambient": return "Air Ambient";
-    case "ssse": return "Stationary Source Emission";
-    case "ispu": return "ISPU (Indeks Standar Pencemar Udara)";
-    case "nonsse": return "Non-Stationary Source Emission";
-    case "noise": return "Noise";
-    default: return "Template Tidak Dikenal";
+    case "illumination":
+      return "Illumination";
+    case "heatstress":
+      return "Heat Stress (Iklim Kerja)";
+    case "wastewater":
+      return "Wastewater";
+    case "cleanwater":
+      return "Clean Water";
+    case "workplaceair":
+      return "Workplace Air";
+    case "surfacewater":
+      return "Surface Water";
+    case "vibration":
+      return "Vibration";
+    case "airambient":
+      return "Air Ambient";
+    case "ssse":
+      return "Stationary Source Emission";
+    case "ispu":
+      return "ISPU (Indeks Standar Pencemar Udara)";
+    case "nonsse":
+      return "Non-Stationary Source Emission";
+    case "noise":
+      return "Noise";
+    default:
+      return "Template Tidak Dikenal";
   }
 };
 

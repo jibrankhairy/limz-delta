@@ -8,6 +8,35 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Printer, XCircle } from "lucide-react";
 
+interface FormSuratProps {
+  nomorSurat: { nomorFpps: string; nomorStpsLengkap: string };
+  setNomorSurat: React.Dispatch<
+    React.SetStateAction<{ nomorFpps: string; nomorStpsLengkap: string }>
+  >;
+  customerData: {
+    hariTanggal: string;
+    namaPelanggan: string;
+    alamat: string;
+    contactPerson: string;
+  };
+  setCustomerData: React.Dispatch<
+    React.SetStateAction<{
+      hariTanggal: string;
+      namaPelanggan: string;
+      alamat: string;
+      contactPerson: string;
+    }>
+  >;
+  petugas: string[];
+  setPetugas: React.Dispatch<React.SetStateAction<string[]>>;
+  signatureData: { pjTeknis: string; signatureUrl: string };
+  setSignatureData: React.Dispatch<
+    React.SetStateAction<{ pjTeknis: string; signatureUrl: string }>
+  >;
+  onSubmit: (e: React.FormEvent) => void;
+  onPrint: () => void;
+}
+
 export default function FormSurat({
   nomorSurat,
   setNomorSurat,
@@ -19,12 +48,12 @@ export default function FormSurat({
   setSignatureData,
   onSubmit,
   onPrint,
-}: any) {
+}: FormSuratProps) {
   const handleCustomerChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setCustomerData((prev: any) => ({ ...prev, [name]: value }));
+    setCustomerData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handlePetugasChange = (index: number, value: string) => {
@@ -34,7 +63,7 @@ export default function FormSurat({
   };
 
   const handlePjTeknisChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSignatureData((prev: any) => ({ ...prev, pjTeknis: e.target.value }));
+    setSignatureData((prev) => ({ ...prev, pjTeknis: e.target.value }));
   };
 
   const handleSignatureUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,7 +71,7 @@ export default function FormSurat({
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setSignatureData((prev: any) => ({
+        setSignatureData((prev) => ({
           ...prev,
           signatureUrl: reader.result as string,
         }));
@@ -54,14 +83,13 @@ export default function FormSurat({
   const addPetugas = () => setPetugas([...petugas, ""]);
   const removePetugas = (index: number) => {
     if (petugas.length > 1) {
-      setPetugas(petugas.filter((_: any, i: number) => i !== index));
+      setPetugas(petugas.filter((_, i) => i !== index));
     }
   };
 
   return (
     <form onSubmit={onSubmit} className="max-w-[600px] w-full">
       <CardContent className="space-y-10">
-        {/* Nomor Surat */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <InputField
             label="Nomor FPPS (DIL - XXXX)"
@@ -83,7 +111,6 @@ export default function FormSurat({
           />
         </div>
 
-        {/* Petugas */}
         <div>
           <h2 className="mb-4 text-xl font-semibold text-foreground">
             Petugas
@@ -160,7 +187,6 @@ export default function FormSurat({
           />
         </div>
 
-        {/* Penanggung Jawab */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <InputField
             label="PJ Teknis"
@@ -182,6 +208,7 @@ export default function FormSurat({
             {signatureData.signatureUrl && (
               <img
                 src={signatureData.signatureUrl}
+                alt="Pratinjau TTD"
                 className="mt-3 h-16 w-32 object-contain border border-input"
               />
             )}
@@ -189,9 +216,10 @@ export default function FormSurat({
         </div>
       </CardContent>
 
-      <CardFooter className="flex justify-end pt-6">
-        <Button onClick={onPrint}>
-          <Printer />
+      <CardFooter className="flex justify-end pt-6 gap-2">
+        <Button type="submit">Simpan</Button>
+        <Button type="button" onClick={onPrint}>
+          <Printer className="mr-2 h-4 w-4" />
           Print
         </Button>
       </CardFooter>
