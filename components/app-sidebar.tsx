@@ -6,9 +6,7 @@ import {
   IconCertificate2,
   IconDashboard,
   IconDatabase,
-  IconListDetails,
   IconNews,
-  IconTableSpark,
 } from "@tabler/icons-react";
 
 import { NavDocuments } from "@/components/nav-documents";
@@ -24,6 +22,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import Image from "next/image";
+import { FileText, FormInput, UserPlus } from "lucide-react";
 
 const defaultUser = {
   name: "shadcn",
@@ -54,22 +53,27 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       title: "Dashboard",
       url: "/dashboard",
-      icon: IconDashboard,
+      icon: IconDashboard as any,
     },
     {
       title: "Form Pendaftaran",
       url: "/registration",
-      icon: IconListDetails,
+      icon: FormInput as any,
     },
     {
       title: "Surat Tugas",
       url: "/surat",
-      icon: IconTableSpark,
+      icon: UserPlus as any,
+    },
+    {
+      title: "Surat Tugas Pengujian",
+      url: "/pengajuan",
+      icon: FileText as any,
     },
     {
       title: "Berita Acara",
       url: "/berita",
-      icon: IconNews,
+      icon: IconNews as any,
     },
   ];
 
@@ -77,12 +81,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     {
       name: "Data Library",
       url: "/library",
-      icon: IconDatabase,
+      icon: IconDatabase as any,
     },
     {
       name: "Certificates Of Analysys",
       url: "/coa",
-      icon: IconCertificate2,
+      icon: IconCertificate2 as any,
     },
   ];
 
