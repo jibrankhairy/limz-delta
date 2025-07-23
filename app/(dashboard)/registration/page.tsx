@@ -132,7 +132,7 @@ export default function RegistrationPage() {
           data={{
             ...formData,
             nomorFpps: `DIL-${formData.nomorFpps}`,
-            petugas: formData.petugas.join(", "),
+            petugas: formData.petugas,
             rincian,
           }}
         />

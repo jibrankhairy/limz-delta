@@ -488,10 +488,6 @@ export default function CoaPage() {
               handleSignatureUpload={handleSignatureUpload}
               onNextStep={() => setView("dashboard")}
               onPrevStep={() => setView("search")}
-              // ⚠️ CATATAN: Error TS2322 terjadi di sini.
-              // Pastikan file './components/CoverForm.tsx'
-              // dan tipe 'CoverFormProps' di dalamnya
-              // menerima prop 'onPreview: () => void'.
               onPreview={() =>
                 handlePreview(
                   <CoaCoverDocument

@@ -14,6 +14,7 @@ type FormRincianProps = {
     namaPelanggan: string;
     nomorQuotation: string;
     kegiatan: string;
+    petugas: string[];
   };
   rincian: {
     id: string;
@@ -107,9 +108,9 @@ export default function FormRincian({
               {formData.kegiatan}
             </span>
           </p>
+          
         </div>
 
-        {/* Rincian Pengujian */}
         <div className="space-y-4">
           {rincian.map((item, index) => (
             <div

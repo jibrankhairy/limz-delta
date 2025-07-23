@@ -13,7 +13,7 @@ interface FppsDocumentProps {
   data: {
     nomorFpps: string;
     nomorQuotation: string;
-    petugas: string;
+    petugas: string[];
     namaPelanggan: string;
     alamatPelanggan: string;
     noTelp: string;
@@ -25,108 +25,182 @@ interface FppsDocumentProps {
 
 export const FppsDocument = React.forwardRef<HTMLDivElement, FppsDocumentProps>(
   ({ data }, ref) => {
-    const formatTanggalIndo = (tanggalISO: string) => {
-      if (!tanggalISO) return "";
-      const date = new Date(tanggalISO);
-      if (isNaN(date.getTime())) return "";
-      return date.toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-      });
-    };
+    const alamatArray = data.alamatPelanggan.split("Cikarang Barat");
+    const alamatL1 = alamatArray[0] ? `${alamatArray[0]}Cikarang Barat` : "";
+    const alamatL2 = alamatArray[1]
+      ? alamatArray[1].replace(",", "").trim()
+      : "";
 
     return (
       <div
         ref={ref}
         className="bg-white p-8 text-black text-xs font-[Times_New_Roman]"
       >
-        <div className="text-center mb-6">
-          <h1 className="text-sm font-bold uppercase">
-            Permintaan Contoh Uji dan Atau Kaji Ulang Permintaan Pengujian
+        <div className="flex justify-between items-start">
+          <img
+            src="/images/logo-delta-big.png"
+            alt="Logo Delta Indonesia Laboratory"
+            className="h-20 w-auto"
+          />
+          <div className="text-right text-[10px]">
+            <p className="font-bold text-xl">PT. Delta Indonesia Laboratory</p>
+            <p>Jl. Perum Prima Harapan Regency</p>
+            <p>Gedung Prima Orchard Block C, No. 2</p>
+            <p>Bekasi Utara, Kota Bekasi 17123, Provinsi Jawa Barat</p>
+            <p>Telp: 021 – 88382018</p>
+          </div>
+        </div>
+        <hr className="border-t-2 border-black" />
+        <div className="text-center mb-4">
+          <h1 className="text-sm font-bold underline uppercase">
+            PERMINTAAN PENGUJIAN
+          </h1>
+          <h1 className="text-sm font-bold underline">
+            Penerimaan Contoh Uji dan Atau Kaji Ulang Permintaan Pengujian
           </h1>
         </div>
 
-        <h2 className="font-bold mb-2">I. PERMINTAAN PENGUJIAN</h2>
-        <div className="border border-black p-2 mb-4">
-          <h3 className="font-bold mb-2">FORM CONTOH UJI</h3>
-          <div className="grid grid-cols-2 gap-6">
-            <div>
-              <p>1) Nama Pelanggan: {data.namaPelanggan}</p>
-              <p>2) Alamat Pelanggan: {data.alamatPelanggan}</p>
-              <p>3) No. Telp/HP: {data.noTelp}</p>
-              <p>
-                4) Tanggal Masuk Contoh Uji:{" "}
-                {formatTanggalIndo(data.tanggalMasuk)}
-              </p>
-
-              <p>5) Kegiatan/Paket Pekerjaan: {data.kegiatan}</p>
+        <div>
+          <div className="font-bold">I. PERMINTAAN PENGUJIAN</div>
+          <div className="border border-black">
+            <div className="p-1 font-bold border-b border-black">
+              KODE CONTOH UJI
             </div>
-            <div>
-              <p>Nomor FPPS: {data.nomorFpps}</p>
-              <p>Nomor Quotation: {data.nomorQuotation}</p>
-              <div className="flex items-start">
-                <span className="whitespace-nowrap mr-2">Petugas:</span>
-                <div className="flex flex-col">
-                  {Array.isArray(data.petugas) &&
-                    data.petugas.map((nama, i) => (
-                      <span key={i}>
-                        {i + 1}. {nama}
-                      </span>
-                    ))}
-                </div>
+            <div className="flex">
+              <div className="w-[65%]">
+                <table className="w-full border-collapse">
+                  <tbody>
+                    <tr className="border-b border-black">
+                      <td className="p-1 w-8 font-bold">1)</td>
+                      <td className="p-1 w-48 font-bold">Nama Pelanggan</td>
+                      <td className="p-1 w-4">:</td>
+                      <td className="p-1">{data.namaPelanggan}</td>
+                    </tr>
+                    <tr className="border-b border-black">
+                      <td className="p-1 align-top font-bold">2)</td>
+                      <td className="p-1 align-top font-bold">
+                        Alamat Pelanggan
+                      </td>
+                      <td className="p-1 align-top">:</td>
+                      <td className="p-1">
+                        <div>{alamatL1}</div>
+                        <div>{alamatL2}</div>
+                      </td>
+                    </tr>
+                    <tr className="border-b border-black">
+                      <td className="p-1"></td>
+                      <td className="p-1 font-bold">No. Telp/HP.</td>
+                      <td className="p-1">:</td>
+                      <td className="p-1">{data.noTelp}</td>
+                    </tr>
+                    <tr className="border-b border-black">
+                      <td className="p-1 font-bold">3)</td>
+                      <td className="p-1 font-bold">
+                        Tanggal Masuk Contoh Uji
+                      </td>
+                      <td className="p-1">:</td>
+                      <td className="p-1">{data.tanggalMasuk}</td>
+                    </tr>
+                    <tr>
+                      <td className="p-1 font-bold">4)</td>
+                      <td className="p-1 font-bold">
+                        Kegiatan/Paket Pekerjaan
+                      </td>
+                      <td className="p-1">:</td>
+                      <td className="p-1">{data.kegiatan}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="w-[35%] border-l border-black">
+                <table className="w-full border-collapse">
+                  <tbody>
+                    <tr className="border-b border-black">
+                      <td className="p-1 w-32 font-bold">Nomor FPPS</td>
+                      <td className="p-1 w-4">:</td>
+                      <td className="p-1 font-bold">{data.nomorFpps}</td>
+                    </tr>
+                    <tr className="border-b border-black">
+                      <td className="p-1 font-bold">Nomor Quotation</td>
+                      <td className="p-1">:</td>
+                      <td className="p-1">{data.nomorQuotation}</td>
+                    </tr>
+                    <tr>
+                      <td className="p-1 align-top font-bold">Petugas</td>
+                      <td className="p-1 align-top">:</td>
+                      <td className="p-1">
+                        <div className="grid grid-cols-2">
+                          <div>
+                            {data.petugas.slice(0, 3).map((nama, i) => (
+                              <div key={i}>{`${i + 1} ${nama}`}</div>
+                            ))}
+                          </div>
+                          <div>
+                            {data.petugas.slice(3).map((nama, i) => (
+                              <div key={i}>{`${i + 4} ${nama}`}</div>
+                            ))}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
         </div>
 
-        <h2 className="font-bold mb-2">II. Rincian Pengujian</h2>
-        <div className="border border-black">
-          <div className="flex font-bold bg-gray-200 border-b border-black">
-            <div className="w-8 p-1 border-r border-black text-center">No.</div>
-            <div className="w-28 p-1 border-r border-black text-center">
-              Stamp ID
-            </div>
-            <div className="flex-1 p-1 border-r border-black text-center">
-              Area
-            </div>
-            <div className="w-16 p-1 border-r border-black text-center">
-              Matriks
-            </div>
-            <div className="w-64 p-1 border-r border-black text-center">
-              Parameter
-            </div>
-            <div className="flex-1 p-1 border-r border-black text-center">
-              Regulasi
-            </div>
-            <div className="w-24 p-1 text-center">Metode</div>
-          </div>
+        <div className="mt-4">
+          <table className="w-full border-collapse border border-black text-xs">
+            <thead className="font-bold bg-gray-100">
+              <tr>
+                <th
+                  className="border-r border-b border-black p-1 text-left"
+                  colSpan={1}
+                >
+                  5)
+                </th>
+                <th className="text-left p-1">Rincian Pengujian</th>
+              </tr>
+              <tr>
+                <th className="border border-black p-1 w-[1%]">No.</th>
+                <th className="border border-black p-1 w-[10%]">Sample ID</th>
+                <th className="border border-black p-1 w-[15%]">Area</th>
+                <th className="border border-black p-1 w-[10%]">Matriks</th>
+                <th className="border border-black p-1 w-[25%]">Parameter</th>
+                <th className="border border-black p-1">Regulasi</th>
+                <th className="border border-black p-1 w-[15%]">Metode</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.rincian.map((item, index) => (
+                <tr key={item.id}>
+                  <td className="border border-black p-1 text-center">
+                    {index + 1}
+                  </td>
+                  <td className="border border-black p-1">{item.id}</td>
+                  <td className="border border-black p-1">{item.area}</td>
+                  <td className="border border-black p-1 text-center">
+                    {item.matriks}
+                  </td>
+                  <td className="border border-black p-1 whitespace-pre-wrap">
+                    {item.parameter}
+                  </td>
+                  <td className="border border-black p-1 whitespace-pre-wrap">
+                    {item.regulasi}
+                  </td>
+                  <td className="border border-black p-1 text-center">
+                    {item.metode}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
-          {/* Rows */}
-          {data.rincian.map((item, index) => (
-            <div
-              key={item.id}
-              className="flex border-b border-black last:border-b-0"
-            >
-              <div className="w-8 p-1 border-r border-black text-center">
-                {index + 1}
-              </div>
-              <div className="w-28 p-1 border-r border-black">{item.id}</div>
-              <div className="flex-1 p-1 border-r border-black">
-                {item.area}
-              </div>
-              <div className="w-16 p-1 border-r border-black text-center">
-                {item.matriks}
-              </div>
-              <div className="w-64 p-1 border-r border-black whitespace-pre-wrap">
-                {item.parameter}
-              </div>
-              <div className="flex-1 p-1 border-r border-black whitespace-pre-wrap">
-                {item.regulasi}
-              </div>
-              <div className="w-24 p-1 text-center">{item.metode}</div>
-            </div>
-          ))}
+        <div className="mt-2 text-[9px]">
+          <p>FB-7.1.1</p>
         </div>
       </div>
     );
