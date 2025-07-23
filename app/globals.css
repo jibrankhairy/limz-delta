@@ -142,14 +142,17 @@
     break-after: always;
   }
 
-  table,
   tr,
   td {
     page-break-inside: avoid;
   }
+
+  thead {
+    display: table-row-group;
+  }
 }
 
 @page {
-  margin: 0;
+  margin: 1.5cm;
   size: A4;
 }
