@@ -15,13 +15,9 @@ import { toast } from "sonner";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
-type Props = {
-  mode: "signin" | "signup";
-};
-
-export const AuthDialog = ({ mode }: Props) => {
+// Komponen ini sekarang hanya untuk Sign In
+export const AuthDialog = () => {
   const [open, setOpen] = React.useState(false);
-
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -31,35 +27,20 @@ export const AuthDialog = ({ mode }: Props) => {
     const email = (form.querySelector("#email") as HTMLInputElement).value;
     const password = (form.querySelector("#password") as HTMLInputElement)
       .value;
-    const name =
-      mode === "signup"
-        ? (form.querySelector("#name") as HTMLInputElement).value
-        : "";
 
-    // Validasi sederhana
-    if (!email || !password || (mode === "signup" && !name)) {
-      toast.error("All fields are required!");
+    if (!email || !password) {
+      toast.error("Email and password are required!");
       return;
     }
 
     try {
-      const endpoint =
-        mode === "signup" ? "/api/auth/register" : "/api/auth/login";
+      const res = await axios.post("/api/auth/login", { email, password });
 
-      const payload =
-        mode === "signup"
-          ? { fullName: name, email, password }
-          : { email, password };
+      toast.success("Sign In successful!");
 
-      const res = await axios.post(endpoint, payload);
-
-      toast.success(`${mode === "signin" ? "Sign In" : "Sign Up"} successful!`);
-
-      if (mode === "signin") {
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-        router.push("/dashboard");
-      }
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      router.push("/overview");
 
       setOpen(false);
     } catch (err: any) {
@@ -72,25 +53,16 @@ export const AuthDialog = ({ mode }: Props) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant={mode === "signin" ? "outline" : "default"} size="sm">
-          {mode === "signin" ? "Sign In" : "Sign Up"}
+        <Button variant="outline" size="sm">
+          Sign In
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            {mode === "signin" ? "Sign In" : "Create an account"}
-          </DialogTitle>
+          <DialogTitle>Sign In</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {mode === "signup" && (
-            <>
-              <Label htmlFor="name">Full Name</Label>
-              <Input id="name" placeholder="Your full name" />
-            </>
-          )}
-
           <div>
             <Label htmlFor="email" className="mb-2">
               Email
@@ -106,7 +78,7 @@ export const AuthDialog = ({ mode }: Props) => {
           </div>
 
           <Button type="submit" className="w-full">
-            {mode === "signin" ? "Sign In" : "Sign Up"}
+            Sign In
           </Button>
         </form>
       </DialogContent>

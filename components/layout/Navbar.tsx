@@ -5,6 +5,7 @@ import React from "react";
 import { ModeToggle } from "../mode-toggle";
 import { Logo } from "@/components/logo";
 import { AuthDialog } from "@/components/AuthDialog";
+import { Button } from "@/components/ui/button"; // Pastikan Button di-import
 
 export const Navbar = () => {
   const [menuState, setMenuState] = React.useState(false);
@@ -17,7 +18,7 @@ export const Navbar = () => {
       >
         <div className="mx-auto max-w-6xl px-6 transition-all duration-300">
           <div className="flex justify-between items-center py-3 lg:py-4">
-            {/* Kiri: Logo */}
+            {/* Logo */}
             <div className="flex items-center">
               <Link
                 href="/"
@@ -28,16 +29,19 @@ export const Navbar = () => {
               </Link>
             </div>
 
-            {/* Kanan: Tombol Aksi + Hamburger */}
+            {/* Tombol Aksi Kanan */}
             <div className="flex justify-end items-center gap-4">
-              {/* Desktop actions */}
+              {/* Tampilan Desktop */}
               <div className="hidden lg:flex items-center gap-3">
-                <AuthDialog mode="signin" />
-                <AuthDialog mode="signup" />
+                <AuthDialog /> {/* Tombol Sign In */}
+                {/* PERUBAHAN DI SINI */}
+                <Link href="/dashboard">
+                  <Button size="sm">View as Guest</Button>
+                </Link>
                 <ModeToggle />
               </div>
 
-              {/* Mobile hamburger */}
+              {/* Tombol Hamburger Mobile */}
               <button
                 onClick={() => setMenuState(!menuState)}
                 aria-label={menuState ? "Close Menu" : "Open Menu"}
@@ -48,15 +52,18 @@ export const Navbar = () => {
               </button>
             </div>
 
-            {/* Mobile Menu */}
+            {/* Menu Mobile */}
             <div
               className={`${
                 menuState ? "block" : "hidden"
               } bg-background lg:hidden col-span-3 mt-4 w-full rounded-3xl border p-6 shadow-2xl shadow-zinc-300/20 dark:shadow-none`}
             >
-              <div className="flex flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0">
-                <AuthDialog mode="signin" />
-                <AuthDialog mode="signup" />
+              <div className="flex flex-col space-y-3">
+                <AuthDialog /> {/* Tombol Sign In */}
+                {/* PERUBAHAN DI SINI */}
+                <Link href="/dashboard">
+                  <Button className="w-full">View as Guest</Button>
+                </Link>
                 <ModeToggle />
               </div>
             </div>
