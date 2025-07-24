@@ -69,7 +69,7 @@ export default function SuratPengujianPage() {
     }
     const fetchFppsData = async () => {
       try {
-        const res = await fetch(`/api/fpps/${nomorFpps}`);
+        const res = await fetch(`/api/fpps/DIL-${nomorFpps}`);
         if (!res.ok) throw new Error("Nomor FPPS tidak ditemukan");
         const result = await res.json();
         const formData = result.formData;
@@ -117,7 +117,7 @@ export default function SuratPengujianPage() {
     }
 
     try {
-      const res = await fetch(`/api/fpps/${nomorFpps}`, {
+      const res = await fetch(`/api/fpps/DIL-${nomorFpps}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "sampling" }), // Status baru adalah "sampling"

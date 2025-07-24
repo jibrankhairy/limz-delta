@@ -29,6 +29,8 @@ export async function GET(
           petugas: data.petugas,
           emailPpic: data.emailPpic,
           namaPpic: data.namaPpic,
+          nomorQuotation: data.nomorQuotation,
+          kegiatan: data.kegiatan,
         },
         rincian: data.rincian,
       },

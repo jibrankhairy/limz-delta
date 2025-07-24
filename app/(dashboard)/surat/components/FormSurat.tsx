@@ -49,6 +49,14 @@ export default function FormSurat({
   onSubmit,
   onPrint,
 }: FormSuratProps) {
+  const handleNomorFppsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    const onlyNumber = value.startsWith("DIL-") ? value.slice(4) : value;
+    if (/^\d*$/.test(onlyNumber)) {
+      setNomorSurat((prev) => ({ ...prev, nomorFpps: onlyNumber }));
+    }
+  };
+
   const handleCustomerChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -92,15 +100,10 @@ export default function FormSurat({
       <CardContent className="space-y-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <InputField
-            label="Nomor FPPS (DIL - XXXX)"
+            label="Nomor FPPS"
             name="nomorFpps"
-            value={nomorSurat.nomorFpps}
-            onChange={(e: any) =>
-              setNomorSurat((prev: any) => ({
-                ...prev,
-                nomorFpps: e.target.value,
-              }))
-            }
+            value={`DIL-${nomorSurat.nomorFpps}`}
+            onChange={handleNomorFppsChange}
             required
           />
           <InputField
@@ -155,7 +158,6 @@ export default function FormSurat({
           </div>
         </div>
 
-        {/* Info Pelanggan */}
         <div className="space-y-6">
           <InputField
             label="Hari/Tanggal"
@@ -205,13 +207,6 @@ export default function FormSurat({
               onChange={handleSignatureUpload}
               className="w-full text-sm text-muted-foreground file:mr-4 file:rounded file:border file:border-input file:bg-background file:px-4 file:py-2 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted"
             />
-            {/* {signatureData.signatureUrl && (
-              <img
-                src={signatureData.signatureUrl}
-                alt="Pratinjau TTD"
-                className="mt-3 h-16 w-32 object-contain border border-input"
-              />
-            )} */}
           </div>
         </div>
       </CardContent>

@@ -17,13 +17,23 @@ export function CariForm({
   onChange,
   onSubmit,
 }: CariFormProps) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = e.target.value;
+    const onlyNumber = inputValue.startsWith("DIL-")
+      ? inputValue.slice(4)
+      : inputValue;
+    if (/^\d*$/.test(onlyNumber)) {
+      onChange(onlyNumber);
+    }
+  };
+
   return (
     <div className="flex w-full items-center gap-3">
       <Input
         type="text"
-        placeholder="Ketik nomornya saja, cth: 250712001"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
+        placeholder="Ketik nomor FPPS"
+        value={`DIL-${value}`}
+        onChange={handleChange}
         className="bg-transparent border border-input text-foreground mt-1"
       />
       <Button onClick={onSubmit} disabled={loading}>

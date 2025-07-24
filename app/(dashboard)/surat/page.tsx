@@ -40,7 +40,6 @@ export default function SuratPage() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const documentRef = useRef<HTMLDivElement>(null);
 
-  // ... (useEffect tidak berubah)
   useEffect(() => {
     if (nomorSurat.nomorFpps) {
       const bulanRomawi = [
@@ -74,7 +73,7 @@ export default function SuratPage() {
     if (!nomorSurat.nomorFpps) return;
     const fetchFppsData = async () => {
       try {
-        const res = await fetch(`/api/fpps/${nomorSurat.nomorFpps}`);
+        const res = await fetch(`/api/fpps/DIL-${nomorSurat.nomorFpps}`);
         if (!res.ok) throw new Error("Nomor FPPS tidak ditemukan");
         const result = await res.json();
         setCustomerData({
@@ -107,7 +106,7 @@ export default function SuratPage() {
     }
 
     try {
-      const res = await fetch(`/api/fpps/${nomorSurat.nomorFpps}`, {
+      const res = await fetch(`/api/fpps/DIL-${nomorSurat.nomorFpps}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "penyuratan" }),

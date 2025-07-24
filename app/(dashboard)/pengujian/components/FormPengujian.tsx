@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+// ... (import lainnya tidak berubah)
 import {
   Card,
   CardContent,
@@ -79,6 +80,14 @@ export default function FormPengujian({
   onSubmit,
   onPrint,
 }: FormPengujianProps) {
+  const handleNomorFppsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    const onlyNumber = value.startsWith("DIL-") ? value.slice(4) : value;
+    if (/^\d*$/.test(onlyNumber)) {
+      setNomorFpps(onlyNumber);
+    }
+  };
+
   const handlePetugasChange = (index: number, value: string) => {
     const newPetugas = [...petugas];
     newPetugas[index] = value;
@@ -138,12 +147,12 @@ export default function FormPengujian({
           <FormSection title="">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="nomorFpps">Nomor FPPS (DIL-XXXX)</Label>
+                <Label htmlFor="nomorFpps">Nomor FPPS</Label>
                 <Input
                   id="nomorFpps"
-                  value={nomorFpps}
-                  onChange={(e) => setNomorFpps(e.target.value)}
-                  placeholder="Contoh: DIL-0724001"
+                  value={`DIL-${nomorFpps}`}
+                  onChange={handleNomorFppsChange}
+                  placeholder="Ketik nomornya saja"
                   required
                 />
               </div>

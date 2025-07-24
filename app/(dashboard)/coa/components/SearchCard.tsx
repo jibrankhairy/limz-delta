@@ -32,6 +32,14 @@ export function SearchCard({
     }
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    const onlyNumber = value.startsWith("DIL-") ? value.slice(4) : value;
+    if (/^\d*$/.test(onlyNumber)) {
+      setFppsInput(onlyNumber);
+    }
+  };
+
   return (
     <Card className="w-full max-w-lg">
       <CardHeader>
@@ -53,9 +61,9 @@ export function SearchCard({
               <Input
                 id="search-fpps"
                 type="text"
-                placeholder="Ketik nomornya saja...(cth: 250712001)"
-                value={fppsInput}
-                onChange={(e) => setFppsInput(e.target.value)}
+                placeholder="Ketik nomornya saja..."
+                value={`DIL-${fppsInput}`}
+                onChange={handleChange}
                 className="bg-transparent border border-input text-foreground mt-1 w-full"
                 disabled={isLoading}
               />
