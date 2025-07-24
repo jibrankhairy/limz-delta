@@ -327,7 +327,7 @@ export default function BeritaPage() {
         </div>
 
         {bapsData && (
-          <div className="print-only sticky top-20 max-h-[90vh] overflow-auto">
+          <div className="print-only">
             <BapsDocument data={bapsData} />
           </div>
         )}
