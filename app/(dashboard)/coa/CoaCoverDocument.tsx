@@ -1,10 +1,7 @@
-// app/dashboard/coa/CoaCoverDocument.tsx (Ganti Seluruh Isi)
-
 "use client";
 
 import React from "react";
 import Image from "next/image";
-import { Logo } from "@/components/logo";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { QRCodeCanvas } from "qrcode.react";
@@ -79,9 +76,13 @@ export const CoaCoverDocument = React.forwardRef<
 
       <div className="relative z-10 flex flex-col flex-grow">
         <header>
-          <div className="flex justify-between items-start">
-            <div className="w-36">
-              <Logo />
+          <div className="flex justify-between items-center">
+            <div className="w-auto">
+              <img
+                src="/images/logo-delta-big.png"
+                alt="Logo Delta Indonesia Laboratory"
+                className="h-30 w-auto"
+              />
             </div>
             {data.showKanLogo && (
               <div className="flex flex-col items-end text-right">
@@ -108,7 +109,6 @@ export const CoaCoverDocument = React.forwardRef<
             <h1 className="text-base font-bold tracking-wider">
               CERTIFICATE OF ANALYSIS (COA)
             </h1>
-            {/* PERBAIKAN: Menghapus awalan "DIL-" yang ditulis langsung */}
             <p className="text-xs">
               Certificate No.{" "}
               {data.certificateNo || "........................."}
@@ -196,7 +196,6 @@ export const CoaCoverDocument = React.forwardRef<
               </p>
               <p className="mt-1">Bekasi, {data.reportDate}</p>
               <div className="relative h-20 w-32 my-1 mx-auto">
-                {/* PERBAIKAN: Menggunakan tag <img> biasa untuk TTD agar pasti tercetak */}
                 {data.signatureUrl ? (
                   <img
                     src={data.signatureUrl}
