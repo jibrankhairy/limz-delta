@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import axios from "axios";
+import { toast } from "sonner";
 import {
   closestCenter,
   DndContext,
@@ -44,6 +46,16 @@ import {
 } from "@tanstack/react-table";
 import { z } from "zod";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -67,6 +79,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useLoading } from "@/components/context/LoadingContext";
 
 export const schema = z.object({
   id: z.string(),
@@ -78,79 +91,6 @@ export const schema = z.object({
   limit: z.string(),
   reviewer: z.string(),
 });
-
-const columns: ColumnDef<z.infer<typeof schema>>[] = [
-  {
-    id: "no",
-    header: () => <div className="text-center">No.</div>,
-    cell: ({ row, table }) => {
-      const { pageIndex, pageSize } = table.getState().pagination;
-      return (
-        <div className="text-center">
-          {pageIndex * pageSize + row.index + 1}
-        </div>
-      );
-    },
-    size: 60,
-  },
-  {
-    accessorKey: "header",
-    header: "Nama Pelanggan",
-    cell: ({ row }) => row.original.header,
-  },
-  {
-    accessorKey: "status",
-    header: () => <div className="text-center">Status</div>,
-    cell: ({ row }) => (
-      <div className="flex justify-center">
-        <Badge
-          variant="outline"
-          className="text-muted-foreground flex w-fit items-center gap-1 px-1.5"
-        >
-          {row.original.status === "selesai" ? (
-            <IconCircleCheckFilled className="size-4 fill-green-500" />
-          ) : (
-            <IconLoader className="size-4 animate-spin" />
-          )}
-          {row.original.status}
-        </Badge>
-      </div>
-    ),
-    size: 150,
-  },
-  // {
-  //   accessorKey: "ppic",
-  //   header: "Nama PPIC",
-  // },
-  // {
-  //   accessorKey: "email",
-  //   header: "Email PPIC",
-  // },
-  // {
-  //   accessorKey: "nomor",
-  //   header: "Nomor Handphone",
-  // },
-  {
-    id: "actions",
-    header: () => null,
-    cell: () => (
-      <div className="flex justify-end">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <IconDotsVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    ),
-    size: 80,
-  },
-];
 
 function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
   const { transform, transition, setNodeRef, isDragging } = useSortable({
@@ -179,6 +119,8 @@ export function DataTable({
   data: z.infer<typeof schema>[];
 }) {
   const [data, setData] = React.useState(initialData);
+  const [itemToDelete, setItemToDelete] = React.useState<string | null>(null);
+  const { setIsLoading } = useLoading();
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -189,6 +131,97 @@ export function DataTable({
     pageIndex: 0,
     pageSize: 10,
   });
+
+  const handleDelete = async () => {
+    if (!itemToDelete) return;
+
+    setIsLoading(true);
+    try {
+      const minimumDelay = new Promise((resolve) => setTimeout(resolve, 500));
+      await Promise.all([
+        axios.delete(`/api/fpps/${itemToDelete}`),
+        minimumDelay,
+      ]);
+
+      toast.success("Data berhasil dihapus!");
+
+      setData((currentData) =>
+        currentData.filter((item) => item.id !== itemToDelete)
+      );
+    } catch (error) {
+      console.error("Gagal menghapus data:", error);
+      toast.error("Gagal menghapus data. Coba lagi nanti.");
+    } finally {
+      setIsLoading(false);
+      setItemToDelete(null);
+    }
+  };
+
+  const columns: ColumnDef<z.infer<typeof schema>>[] = [
+    {
+      id: "no",
+      header: () => <div className="text-center">No.</div>,
+      cell: ({ row, table }) => {
+        const { pageIndex, pageSize } = table.getState().pagination;
+        return (
+          <div className="text-center">
+            {pageIndex * pageSize + row.index + 1}
+          </div>
+        );
+      },
+      size: 60,
+    },
+    {
+      accessorKey: "header",
+      header: "Nama Pelanggan",
+      cell: ({ row }) => row.original.header,
+    },
+    {
+      accessorKey: "status",
+      header: () => <div className="text-center">Status</div>,
+      cell: ({ row }) => (
+        <div className="flex justify-center">
+          <Badge
+            variant="outline"
+            className="text-muted-foreground flex w-fit items-center gap-1 px-1.5"
+          >
+            {row.original.status === "selesai" ? (
+              <IconCircleCheckFilled className="size-4 fill-green-500" />
+            ) : (
+              <IconLoader className="size-4 animate-spin" />
+            )}
+            {row.original.status}
+          </Badge>
+        </div>
+      ),
+      size: 150,
+    },
+    {
+      id: "actions",
+      header: () => null,
+      cell: ({ row }) => (
+        <div className="flex justify-end">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <IconDotsVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem>Edit</DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
+                onSelect={() => setItemToDelete(row.original.id)}
+              >
+                Hapus
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      ),
+      size: 80,
+    },
+  ];
 
   const sensors = useSensors(
     useSensor(MouseSensor),
@@ -357,6 +390,27 @@ export function DataTable({
           </div>
         </div>
       </div>
+
+      <AlertDialog
+        open={!!itemToDelete}
+        onOpenChange={(open) => !open && setItemToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Apakah Anda benar-benar yakin?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tindakan ini tidak dapat diurungkan. Ini akan menghapus data
+              secara permanen dari server kami.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete}>
+              Ya, Hapus
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

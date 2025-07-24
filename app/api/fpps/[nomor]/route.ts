@@ -87,3 +87,34 @@ export async function PUT(
     );
   }
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { nomor: string } }
+) {
+  const idToDelete = params.nomor;
+
+  try {
+    await connectDB();
+
+    const deletedFpps = await Fpps.findByIdAndDelete(idToDelete);
+
+    if (!deletedFpps) {
+      return NextResponse.json(
+        { message: `Data dengan ID ${idToDelete} tidak ditemukan` },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { message: "FPPS berhasil dihapus" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Delete FPPS Error:", error);
+    return NextResponse.json(
+      { message: "Gagal menghapus data FPPS" },
+      { status: 500 }
+    );
+  }
+}
