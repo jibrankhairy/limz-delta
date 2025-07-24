@@ -155,7 +155,7 @@ export default function SuratPage() {
           onSubmit={handleSave}
           onPrint={handlePrint}
         />
-        <div className=" print-only max-h-[90vh] rounded-lg border border-muted shadow-sm">
+        <div className="print-only">
           <StpsDocument
             ref={documentRef}
             nomorSurat={nomorSurat.nomorStpsLengkap}

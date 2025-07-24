@@ -205,13 +205,13 @@ export default function FormSurat({
               onChange={handleSignatureUpload}
               className="w-full text-sm text-muted-foreground file:mr-4 file:rounded file:border file:border-input file:bg-background file:px-4 file:py-2 file:text-sm file:font-medium file:text-foreground hover:file:bg-muted"
             />
-            {signatureData.signatureUrl && (
+            {/* {signatureData.signatureUrl && (
               <img
                 src={signatureData.signatureUrl}
                 alt="Pratinjau TTD"
                 className="mt-3 h-16 w-32 object-contain border border-input"
               />
-            )}
+            )} */}
           </div>
         </div>
       </CardContent>

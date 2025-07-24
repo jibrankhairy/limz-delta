@@ -78,7 +78,7 @@ export default function RegistrationPage() {
     <div className="space-y-8">
       <div className="px-4 pt-6 md:px-8 lg:px-6">
         <h1 className="text-2xl font-semibold leading-tight text-foreground md:text-3xl lg:text-4xl">
-          Form Pendaftaran Pengujian
+          Form Pendaftaran Pengujian Sampling
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground md:text-base">
           Silakan isi data pelanggan dan rincian pengujian secara lengkap di

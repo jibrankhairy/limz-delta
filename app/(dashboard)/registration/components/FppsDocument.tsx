@@ -36,6 +36,7 @@ export const FppsDocument = React.forwardRef<HTMLDivElement, FppsDocumentProps>(
         ref={ref}
         className="bg-white p-8 text-black text-xs font-[Times_New_Roman]"
       >
+        {/* --- BAGIAN HEADER (TIDAK BERUBAH) --- */}
         <div className="flex justify-between items-start">
           <img
             src="/images/logo-delta-big.png"
@@ -60,6 +61,7 @@ export const FppsDocument = React.forwardRef<HTMLDivElement, FppsDocumentProps>(
           </h1>
         </div>
 
+        {/* --- BAGIAN FORM (TIDAK BERUBAH) --- */}
         <div>
           <div className="font-bold">I. PERMINTAAN PENGUJIAN</div>
           <div className="border border-black">
@@ -151,46 +153,63 @@ export const FppsDocument = React.forwardRef<HTMLDivElement, FppsDocumentProps>(
           </div>
         </div>
 
-        <div className="mt-4">
+        {/* --- BAGIAN RINCIAN UJI (TIDAK BERUBAH) --- */}
+        <div className="mt-2">
           <table className="w-full border-collapse border border-black text-xs">
-            <thead className="font-bold bg-gray-100">
+            {/* ...thead dan tbody rincian... */}
+            <thead className="font-bold">
               <tr>
                 <th
                   className="border-r border-b border-black p-1 text-left"
-                  colSpan={1}
+                  colSpan={7}
                 >
-                  5)
+                  5) Rincian Pengujian
                 </th>
-                <th className="text-left p-1">Rincian Pengujian</th>
               </tr>
               <tr>
-                <th className="border border-black p-1 w-[1%]">No.</th>
-                <th className="border border-black p-1 w-[10%]">Sample ID</th>
-                <th className="border border-black p-1 w-[15%]">Area</th>
-                <th className="border border-black p-1 w-[10%]">Matriks</th>
-                <th className="border border-black p-1 w-[25%]">Parameter</th>
-                <th className="border border-black p-1">Regulasi</th>
-                <th className="border border-black p-1 w-[15%]">Metode</th>
+                <th className="border-r border-b border-black p-1 w-[4%]">
+                  No.
+                </th>
+                <th className="border-r border-b border-black p-1 w-[12%]">
+                  Sample ID
+                </th>
+                <th className="border-r border-b border-black p-1 w-[15%]">
+                  Area
+                </th>
+                <th className="border-r border-b border-black p-1 w-[8%]">
+                  Matriks
+                </th>
+                <th className="border-r border-b border-black p-1 w-[31%]">
+                  Parameter
+                </th>
+                <th className="border-r border-b border-black p-1 w-[15%]">
+                  Regulasi
+                </th>
+                <th className="border-b border-black p-1 w-[15%]">Metode</th>
               </tr>
             </thead>
             <tbody>
               {data.rincian.map((item, index) => (
                 <tr key={item.id}>
-                  <td className="border border-black p-1 text-center">
+                  <td className="border-r border-b border-black p-1 text-center align-top">
                     {index + 1}
                   </td>
-                  <td className="border border-black p-1">{item.id}</td>
-                  <td className="border border-black p-1">{item.area}</td>
-                  <td className="border border-black p-1 text-center">
+                  <td className="border-r border-b border-black p-1 align-top">
+                    {item.id}
+                  </td>
+                  <td className="border-r border-b border-black p-1 align-top">
+                    {item.area}
+                  </td>
+                  <td className="border-r border-b border-black p-1 text-center align-top">
                     {item.matriks}
                   </td>
-                  <td className="border border-black p-1 whitespace-pre-wrap">
+                  <td className="border-r border-b border-black p-1 align-top whitespace-pre-wrap">
                     {item.parameter}
                   </td>
-                  <td className="border border-black p-1 whitespace-pre-wrap">
+                  <td className="border-r border-b border-black p-1 align-top whitespace-pre-wrap">
                     {item.regulasi}
                   </td>
-                  <td className="border border-black p-1 text-center">
+                  <td className="border-b border-black p-1 text-center align-top">
                     {item.metode}
                   </td>
                 </tr>
@@ -199,8 +218,171 @@ export const FppsDocument = React.forwardRef<HTMLDivElement, FppsDocumentProps>(
           </table>
         </div>
 
-        <div className="mt-2 text-[9px]">
-          <p>FB-7.1.1</p>
+        <p className="text-[9px] mt-1">FR-7.1.1</p>
+        <div className="mt-4">
+          <div className="flex justify-between items-start gap-6">
+            {/* Kolom Kiri */}
+            <div className="w-1/2">
+              <p className="text-left text-[10px]">
+                DIISI OLEH PETUGAS ADMINISTRASI LABORATORIUM
+              </p>
+              <p className="text-left text-[10px] font-bold">
+                II. PENERIMAAN SAMPEL / CONTOH UJI
+              </p>
+              <table className="w-full border-collapse border border-black">
+                <thead>
+                  <tr className="font-bold">
+                    <td className="border border-black p-1 w-[4%]">No.</td>
+                    <td className="border border-black p-1">Uraian</td>
+                    <td className="border border-black p-1 text-center">
+                      Kondisi Contoh
+                    </td>
+                    <td className="border border-black p-1 text-center">
+                      Keterangan
+                    </td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="border border-black p-1">1)</td>
+                    <td className="border border-black p-1">Jumlah</td>
+                    <td className="border border-black p-1 text-center">
+                      Cukup / Tidak
+                    </td>
+                    <td className="border border-black p-1 h-6"></td>
+                  </tr>
+                  <tr>
+                    <td className="border border-black p-1">2)</td>
+                    <td className="border border-black p-1">Kondisi</td>
+                    <td className="border border-black p-1 text-center">
+                      Baik / Tidak
+                    </td>
+                    <td className="border border-black p-1 h-6"></td>
+                  </tr>
+                  <tr>
+                    <td className="border border-black p-1">3)</td>
+                    <td className="border border-black p-1">
+                      Tempat contoh uji / wadah
+                    </td>
+                    <td className="border border-black p-1 text-center">
+                      Baik / Tidak
+                    </td>
+                    <td className="border border-black p-1 h-6"></td>
+                  </tr>
+                </tbody>
+              </table>
+              <p className="mt-2 ml-7 underline">
+                Waktu pelaksanaan pengujian maksimum .........................
+                hari kerja *)
+              </p>
+            </div>
+
+            {/* Kolom Kanan */}
+            <div className="w-1/2 mt-2.5">
+              <p className="font-bold text-left">
+                III. KAJI ULANG PERMINTAAN PENGUJIAN
+              </p>
+              <table className="w-full border-collapse border border-black ">
+                <tbody>
+                  <tr>
+                    <td className="border border-black p-1 w-[2%] text-center">
+                      1)
+                    </td>
+                    <td className="border border-black p-1 w-[10%]">
+                      Kemampuan SDM
+                    </td>
+                    <td className="border border-black p-1 w-[1%] text-center">
+                      :
+                    </td>
+                    <td className="border border-black p-1 w-[5%] text-left">
+                      YA / TIDAK
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border border-black p-1 w-[2%] text-center">
+                      2)
+                    </td>
+                    <td className="border border-black p-1 w-[10%]">
+                      Kesesuaian Metode
+                    </td>
+                    <td className="border border-black p-1 w-[1%] text-center">
+                      :
+                    </td>
+                    <td className="border border-black p-1 w-[5%] text-left">
+                      YA / TIDAK
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border border-black p-1 w-[2%] text-center">
+                      3)
+                    </td>
+                    <td className="border border-black p-1 w-[10%]">
+                      Kemampuan Peralatan
+                    </td>
+                    <td className="border border-black p-1 w-[1%] text-center">
+                      :
+                    </td>
+                    <td className="border border-black p-1 w-[5%] text-left">
+                      YA / TIDAK
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="border border-black p-1 w-[2%] text-center">
+                      4)
+                    </td>
+                    <td className="border border-black p-1 w-[10%]">
+                      Kesimpulan
+                    </td>
+                    <td className="border border-black p-1 w-[1%] text-center">
+                      :
+                    </td>
+                    <td className="border border-black p-1 w-[5%] text-left">
+                      BISA / TIDAK BISA
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="mt-5 w-full">
+            <div className="border border-black h-12 mt-1 w-full">
+              {" "}
+              <p className="ml-1">Catatan :</p>
+            </div>
+          </div>
+
+          {/* Bagian Tanda Tangan */}
+          <div className="flex justify-between items-end mt-8 ml-30 mr-30">
+            <div className="text-center">
+              <p>PJ Teknis</p>
+              <div className="h-16"></div>
+              <p>..........................................</p>
+            </div>
+            <div className="text-center">
+              <p>............, ..............</p>
+              <p>Pelanggan</p>
+              <div className="h-16"></div>
+              <p>..........................................</p>
+            </div>
+          </div>
+
+          {/* Catatan Kaki */}
+          <div className="text-[12px] mt-8 space-y-1">
+            <p>
+              <strong>Catatan :</strong>
+            </p>
+            <p>
+              - Apabila terdapat perubahan yang mengakibatkan pengujian tidak
+              dapat dilakukan atau disubkontrakkan, maka akan ada pemberitahuan
+              dari Laboratorium DIL Kota Bekasi paling lambat 3 (tiga) hari
+              kerja sejak Permintaan Pengujian diterima.
+            </p>
+            <p>
+              *) Penerbitan Certificate Of Analysis (COA) maksimal 14 (empat
+              belas) hari kerja setelah sampel diterima.
+            </p>
+          </div>
         </div>
       </div>
     );
