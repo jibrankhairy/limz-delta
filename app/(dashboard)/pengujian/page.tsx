@@ -172,7 +172,7 @@ export default function SuratPengujianPage() {
           onPrint={handleRequestPrint}
         />
 
-        <div className="print-only max-h-[90vh] rounded-lg border border-muted shadow-sm">
+        <div className="print-only">
           <PengujianDocumment
             ref={documentRef}
             nomorSurat={nomorSurat}

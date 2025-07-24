@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import Image from "next/image"; // Import Image dari next/image
-import { Logo } from "@/components/logo";
+import Image from "next/image";
 
 interface StpsDocumentProps {
   nomorSurat: string;
@@ -27,7 +26,7 @@ export const StpsDocument = React.forwardRef<HTMLDivElement, StpsDocumentProps>(
 
     return (
       <div ref={ref} className="bg-white p-5 font-[Times_New_Roman] text-black">
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-end pb-2">
           <img
             src="/images/logo-delta-big.png"
             alt="Logo Delta Indonesia Laboratory"

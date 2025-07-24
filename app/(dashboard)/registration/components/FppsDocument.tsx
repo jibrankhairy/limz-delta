@@ -36,12 +36,11 @@ export const FppsDocument = React.forwardRef<HTMLDivElement, FppsDocumentProps>(
         ref={ref}
         className="bg-white p-8 text-black text-xs font-[Times_New_Roman]"
       >
-        {/* --- BAGIAN HEADER (TIDAK BERUBAH) --- */}
         <div className="flex justify-between items-start">
           <img
             src="/images/logo-delta-big.png"
             alt="Logo Delta Indonesia Laboratory"
-            className="h-20 w-auto"
+            className="h-30 w-auto"
           />
           <div className="text-right text-[10px]">
             <p className="font-bold text-xl">PT. Delta Indonesia Laboratory</p>
@@ -61,7 +60,6 @@ export const FppsDocument = React.forwardRef<HTMLDivElement, FppsDocumentProps>(
           </h1>
         </div>
 
-        {/* --- BAGIAN FORM (TIDAK BERUBAH) --- */}
         <div>
           <div className="font-bold">I. PERMINTAAN PENGUJIAN</div>
           <div className="border border-black">
@@ -153,7 +151,6 @@ export const FppsDocument = React.forwardRef<HTMLDivElement, FppsDocumentProps>(
           </div>
         </div>
 
-        {/* --- BAGIAN RINCIAN UJI (TIDAK BERUBAH) --- */}
         <div className="mt-2">
           <table className="w-full border-collapse border border-black text-xs">
             {/* ...thead dan tbody rincian... */}
@@ -277,7 +274,6 @@ export const FppsDocument = React.forwardRef<HTMLDivElement, FppsDocumentProps>(
               </p>
             </div>
 
-            {/* Kolom Kanan */}
             <div className="w-1/2 mt-2.5">
               <p className="font-bold text-left">
                 III. KAJI ULANG PERMINTAAN PENGUJIAN
@@ -367,7 +363,6 @@ export const FppsDocument = React.forwardRef<HTMLDivElement, FppsDocumentProps>(
             </div>
           </div>
 
-          {/* Catatan Kaki */}
           <div className="text-[12px] mt-8 space-y-1">
             <p>
               <strong>Catatan :</strong>
