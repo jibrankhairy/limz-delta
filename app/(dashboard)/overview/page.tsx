@@ -15,13 +15,12 @@ export default async function DashboardPage() {
 
   type FppsDoc = {
     _id: any;
+    nomorFpps: string;
     namaPelanggan: string;
     namaPpic: string;
     emailPpic: string;
     noTelp: string;
     status?: string;
-    target?: string;
-    reviewer?: string;
   };
 
   const allData = (await Fpps.find().lean()) as unknown as FppsDoc[];
@@ -38,13 +37,12 @@ export default async function DashboardPage() {
 
   const dataForTable = allData.map((item) => ({
     id: item._id.toString(),
+    nomorFpps: item.nomorFpps,
     header: item.namaPelanggan,
     ppic: item.namaPpic,
     email: item.emailPpic,
     limit: item.noTelp,
     status: item.status || "Pendaftaran",
-    target: item.target || "",
-    reviewer: item.reviewer || "",
   }));
 
   return (

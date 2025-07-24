@@ -24,7 +24,6 @@ import { CSS } from "@dnd-kit/utilities";
 import {
   IconCircleCheckFilled,
   IconDotsVertical,
-  IconGripVertical,
   IconLoader,
   IconChevronLeft,
   IconChevronRight,
@@ -80,16 +79,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useLoading } from "@/components/context/LoadingContext";
+import Link from "next/link";
 
 export const schema = z.object({
   id: z.string(),
+  nomorFpps: z.string(),
   header: z.string(),
   ppic: z.string(),
   email: z.string(),
   status: z.string(),
-  target: z.string(),
-  limit: z.string(),
-  reviewer: z.string(),
 });
 
 function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
@@ -208,7 +206,9 @@ export function DataTable({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>Edit</DropdownMenuItem>
+              <Link href={`/registration/${row.original.nomorFpps}`}>
+                <DropdownMenuItem>Edit</DropdownMenuItem>
+              </Link>
               <DropdownMenuItem
                 variant="destructive"
                 onSelect={() => setItemToDelete(row.original.id)}

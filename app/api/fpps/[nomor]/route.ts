@@ -52,37 +52,55 @@ export async function PUT(
   const { nomor } = params;
 
   try {
-    const { status } = await request.json();
-    if (!status) {
+    await connectDB();
+    const body = await request.json();
+
+    if (body.formData && body.rincian) {
+      const { formData, rincian } = body;
+      const updatedFpps = await Fpps.findOneAndUpdate(
+        { nomorFpps: nomor },
+        { ...formData, rincian },
+        { new: true, runValidators: true }
+      );
+
+      if (!updatedFpps) {
+        return NextResponse.json(
+          { message: `Data dengan nomor ${nomor} tidak ditemukan` },
+          { status: 404 }
+        );
+      }
       return NextResponse.json(
-        { message: "Status baru harus disertakan" },
+        { message: "Data FPPS berhasil diperbarui", data: updatedFpps },
+        { status: 200 }
+      );
+    } else if (body.status) {
+      const { status } = body;
+      const updatedFpps = await Fpps.findOneAndUpdate(
+        { nomorFpps: nomor },
+        { status: status },
+        { new: true }
+      );
+
+      if (!updatedFpps) {
+        return NextResponse.json(
+          { message: `FPPS dengan nomor ${nomor} tidak ditemukan` },
+          { status: 404 }
+        );
+      }
+      return NextResponse.json(
+        { message: "Status FPPS berhasil diperbarui", data: updatedFpps },
+        { status: 200 }
+      );
+    } else {
+      return NextResponse.json(
+        { message: "Payload request tidak valid" },
         { status: 400 }
       );
     }
-
-    await connectDB();
-
-    const updatedFpps = await Fpps.findOneAndUpdate(
-      { nomorFpps: nomor },
-      { status: status },
-      { new: true }
-    );
-
-    if (!updatedFpps) {
-      return NextResponse.json(
-        { message: `FPPS dengan nomor ${nomor} tidak ditemukan` },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({
-      message: "Status FPPS berhasil diperbarui",
-      data: updatedFpps,
-    });
-  } catch (error) {
-    console.error(`API FPPS Status Update Error (nomor: ${nomor}):`, error);
+  } catch (error: any) {
+    console.error(`API FPPS Update Error (nomor: ${nomor}):`, error);
     return NextResponse.json(
-      { message: "Gagal mengupdate status FPPS" },
+      { message: "Gagal memperbarui data", error: error.message },
       { status: 500 }
     );
   }
