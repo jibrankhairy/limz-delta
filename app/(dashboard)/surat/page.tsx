@@ -2,9 +2,11 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import axios from "axios";
 import FormSurat from "./components/FormSurat";
 import PreviewDialog from "./components/PreviewDialog";
 import { StpsDocument } from "./components/StpsDocument";
+import { useLoading } from "@/components/context/LoadingContext";
 
 interface NomorSuratState {
   nomorFpps: string;
@@ -21,24 +23,32 @@ interface SignatureDataState {
   signatureUrl: string;
 }
 
+const initialNomorSurat: NomorSuratState = {
+  nomorFpps: "",
+  nomorStpsLengkap: "",
+};
+const initialCustomerData: CustomerDataState = {
+  hariTanggal: "",
+  namaPelanggan: "",
+  alamat: "",
+  contactPerson: "",
+};
+const initialSignatureData: SignatureDataState = {
+  pjTeknis: "",
+  signatureUrl: "",
+};
+
 export default function SuratPage() {
-  const [nomorSurat, setNomorSurat] = useState<NomorSuratState>({
-    nomorFpps: "",
-    nomorStpsLengkap: "",
-  });
-  const [customerData, setCustomerData] = useState<CustomerDataState>({
-    hariTanggal: "",
-    namaPelanggan: "",
-    alamat: "",
-    contactPerson: "",
-  });
+  const [nomorSurat, setNomorSurat] =
+    useState<NomorSuratState>(initialNomorSurat);
+  const [customerData, setCustomerData] =
+    useState<CustomerDataState>(initialCustomerData);
   const [petugas, setPetugas] = useState<string[]>([""]);
-  const [signatureData, setSignatureData] = useState<SignatureDataState>({
-    pjTeknis: "",
-    signatureUrl: "",
-  });
+  const [signatureData, setSignatureData] =
+    useState<SignatureDataState>(initialSignatureData);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const documentRef = useRef<HTMLDivElement>(null);
+  const { setIsLoading } = useLoading();
 
   useEffect(() => {
     if (nomorSurat.nomorFpps) {
@@ -97,6 +107,13 @@ export default function SuratPage() {
     fetchFppsData();
   }, [nomorSurat.nomorFpps]);
 
+  const resetForm = () => {
+    setNomorSurat(initialNomorSurat);
+    setCustomerData(initialCustomerData);
+    setPetugas([""]);
+    setSignatureData(initialSignatureData);
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -105,21 +122,24 @@ export default function SuratPage() {
       return;
     }
 
+    setIsLoading(true);
     try {
-      const res = await fetch(`/api/fpps/DIL-${nomorSurat.nomorFpps}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "penyuratan" }),
+      const minimumDelay = new Promise((resolve) => setTimeout(resolve, 500));
+      const updatePromise = axios.put(`/api/fpps/DIL-${nomorSurat.nomorFpps}`, {
+        status: "penyuratan",
       });
 
-      if (!res.ok) {
-        throw new Error("Gagal memperbarui status FPPS.");
-      }
+      await Promise.all([updatePromise, minimumDelay]);
 
       toast.success("Status FPPS berhasil diubah menjadi 'Penyuratan'.");
+      resetForm();
     } catch (error: any) {
       console.error("Update FPPS Status Error:", error);
-      toast.error(error.message || "Terjadi kesalahan saat menyimpan.");
+      toast.error(
+        error.response?.data?.message || "Gagal memperbarui status FPPS."
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 

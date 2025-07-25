@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { useSearchParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
+import axios from "axios";
 import {
   Dialog,
   DialogContent,
@@ -82,6 +83,7 @@ import * as ssseData from "./data/ssse-data";
 import * as ispuData from "./data/ispu-data";
 import * as nonsseData from "./data/non-sse-data";
 import * as noiseData from "./data/noise-data";
+import { useLoading } from "@/components/context/LoadingContext";
 
 const coaTemplates = [
   { id: "illumination", name: "Template CoA Illumination" },
@@ -108,9 +110,9 @@ type ViewState =
   | "loading";
 
 export default function CoaPage() {
+  const { isLoading, setIsLoading } = useLoading();
   const [view, setView] = useState<ViewState>("search");
   const [fppsInput, setFppsInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<any | null>(null);
   const [coaData, setCoaData] = useState<any | null>(null);
   const [activeTemplates, setActiveTemplates] = useState<any[]>([]);
@@ -122,6 +124,16 @@ export default function CoaPage() {
 
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  const resetForm = () => {
+    setView("search");
+    setFppsInput("");
+    setEditingTemplate(null);
+    setCoaData(null);
+    setActiveTemplates([]);
+    setReportId(null);
+    router.push("/coa");
+  };
 
   useEffect(() => {
     const idFromUrl = searchParams.get("id");
@@ -221,74 +233,59 @@ export default function CoaPage() {
   const handleSaveReport = async () => {
     if (!coaData || !reportId)
       return toast.error("Data cover atau ID Laporan tidak lengkap.");
+
     setIsLoading(true);
-
-    const resCheck = await fetch(`/api/reports/${reportId}`);
-    const isExisting = resCheck.ok;
-
-    const method = isExisting ? "PUT" : "POST";
-    const endpoint = isExisting ? `/api/reports/${reportId}` : "/api/reports";
-
-    const payload = {
-      _id: reportId,
-      coverData: coaData,
-      activeTemplates: activeTemplates,
-      status: "sertifikat",
-    };
-
     try {
-      const response = await fetch(endpoint, {
+      const resCheck = await fetch(`/api/reports/${reportId}`);
+      const isExisting = resCheck.ok;
+
+      const method = isExisting ? "PUT" : "POST";
+      const endpoint = isExisting ? `/api/reports/${reportId}` : "/api/reports";
+
+      const payload = {
+        _id: reportId,
+        coverData: coaData,
+        activeTemplates: activeTemplates,
+        status: "sertifikat",
+      };
+
+      const minimumDelay = new Promise((resolve) => setTimeout(resolve, 500));
+
+      const savePromise = axios({
         method: method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        url: endpoint,
+        data: payload,
       });
 
-      if (!response.ok) {
-        const errorData = await response
-          .json()
-          .catch(() => ({ error: "Gagal membaca respons error dari server." }));
-        throw new Error(errorData.error);
-      }
+      await Promise.all([savePromise, minimumDelay]);
 
-      const result = await response.json();
       toast.success("Laporan berhasil disimpan!");
 
-      // ❗ PERUBAHAN: Panggil API untuk update status FPPS
-      // Setelah laporan utama berhasil disimpan, kita trigger update status di FPPS.
-      // Endpoint ini akan mengurus update status di kedua koleksi (reports & fpps)
       try {
-        const statusUpdateResponse = await fetch(
-          `/api/reports/${reportId}/status`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status: "sertifikat" }),
-          }
-        );
-
-        if (statusUpdateResponse.ok) {
-          toast.success("Status FPPS berhasil diupdate menjadi 'Sertifikat'.");
-        } else {
-          const errorStatusData = await statusUpdateResponse.json();
-          toast.error(
-            `Gagal update status FPPS: ${
-              errorStatusData.error || "Terjadi kesalahan"
-            }`
-          );
-        }
+        await axios.put(`/api/reports/${reportId}/status`, {
+          status: "sertifikat",
+        });
+        toast.success("Status FPPS berhasil diupdate menjadi 'Sertifikat'.");
       } catch (statusError: any) {
-        console.error("Status Update Fetch Error:", statusError);
+        console.error("Status Update Error:", statusError);
         toast.error(
-          `Terjadi kesalahan saat mengupdate status FPPS: ${statusError.message}`
+          `Gagal update status FPPS: ${
+            statusError.response?.data?.error || statusError.message
+          }`
         );
       }
-      // Akhir dari blok kode baru
 
       if (!isExisting) {
-        router.push(`/coa?id=${result.data._id}`, { scroll: false });
+        resetForm();
+      } else {
+        setView("dashboard");
       }
     } catch (error: any) {
-      toast.error(`Gagal menyimpan laporan: ${error.message}`);
+      toast.error(
+        `Gagal menyimpan laporan: ${
+          error.response?.data?.error || error.message
+        }`
+      );
     } finally {
       setIsLoading(false);
     }
@@ -577,8 +574,6 @@ export default function CoaPage() {
         );
       case "form":
         const baseTemplate = { id: nanoid(), showKanLogo: true };
-
-        // ✅ PERBAIKAN: Menambahkan tipe data eksplisit untuk parameter
         const createTemplate = (
           regulationId: string,
           params: any[],
@@ -667,7 +662,6 @@ export default function CoaPage() {
           editingTemplate?.templateType === "cleanwater" &&
           !editingTemplate.regulation
         ) {
-          // ✅ PERBAIKAN: Menambahkan signature index [key: string]
           const paramsMap: { [key: string]: any[] } = {
             permenkes_32_2017: cleanwaterData.cleanWaterParamsPermenkes32,
             permenkes_2_2023: cleanwaterData.cleanWaterParamsPermenkes2,
@@ -693,7 +687,6 @@ export default function CoaPage() {
           editingTemplate?.templateType === "workplaceair" &&
           !editingTemplate.regulation
         ) {
-          // ✅ PERBAIKAN: Menambahkan signature index [key: string]
           const paramsMap: { [key: string]: any[] } = {
             permenaker_a: workplaceairData.workplaceAirParamsPermenakerA,
             permenaker_b: workplaceairData.workplaceAirParamsPermenakerB,
@@ -720,7 +713,6 @@ export default function CoaPage() {
           editingTemplate?.templateType === "surfacewater" &&
           !editingTemplate.regulation
         ) {
-          // ✅ PERBAIKAN: Menambahkan signature index [key: string]
           const paramsMap: { [key: string]: any[] } = {
             pp_22_2021_river: surfacewaterData.surfaceWaterParamsPP22_River,
             pp_22_2021_lake: surfacewaterData.surfaceWaterParamsPP22_Lake,
@@ -747,7 +739,6 @@ export default function CoaPage() {
           editingTemplate?.templateType === "vibration" &&
           !editingTemplate.regulation
         ) {
-          // ✅ PERBAIKAN: Menambahkan signature index [key: string]
           const paramsMap: { [key: string]: any[] } = {
             permenaker_5: vibrationData.vibrationParamsPermenaker5,
             kepmenlh_49_kejut: vibrationData.vibrationParamsKepmenlh49_Kejut,
@@ -775,7 +766,6 @@ export default function CoaPage() {
           editingTemplate?.templateType === "airambient" &&
           !editingTemplate.regulation
         ) {
-          // ✅ PERBAIKAN: Menambahkan signature index [key: string]
           const paramsMap: { [key: string]: any[] } = {
             pp_22_2021: airambientData.airAmbientParamsPP22,
             pp_22_2021_plus_odor: airambientData.airAmbientParamsPP22PlusOdor,
@@ -806,7 +796,6 @@ export default function CoaPage() {
           editingTemplate?.templateType === "ssse" &&
           !editingTemplate.regulation
         ) {
-          // ✅ PERBAIKAN: Menambahkan signature index [key: string]
           const paramsMap: { [key: string]: any[] } = {
             permenlh_13_Vb: ssseData.ssseParamsPermenlh13_Vb,
             permenlh_7_III: ssseData.ssseParamsPermenlh7_III,
@@ -844,7 +833,6 @@ export default function CoaPage() {
           editingTemplate?.templateType === "noise" &&
           !editingTemplate.regulation
         ) {
-          // ✅ PERBAIKAN: Menambahkan signature index [key: string]
           const paramsMap: { [key: string]: any[] } = {
             kepmen_lh_48: noiseData.noiseParamsKepmenLH48,
             kepgub_dki_551: noiseData.noiseParamsKepgubDKI551,
@@ -873,7 +861,6 @@ export default function CoaPage() {
           <p>Silakan pilih template.</p>
         );
       default:
-        // ✅ PERBAIKAN: Menghapus typo 's;'
         return <p>Tampilan tidak ditemukan.</p>;
     }
   };

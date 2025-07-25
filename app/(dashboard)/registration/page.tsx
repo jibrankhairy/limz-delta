@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
+import axios from "axios";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,6 +16,7 @@ import FormDasar from "./components/FormDasar";
 import FormRincian from "./components/FormRincian";
 import { FppsDocument } from "./components/FppsDocument";
 import { toast } from "sonner";
+import { useLoading } from "@/components/context/LoadingContext";
 
 interface RincianItem {
   id: string;
@@ -25,24 +27,35 @@ interface RincianItem {
   metode: string;
 }
 
+const initialFormData = {
+  nomorFpps: "",
+  nomorQuotation: "",
+  petugas: [""],
+  namaPelanggan: "",
+  alamatPelanggan: "",
+  noTelp: "",
+  tanggalMasuk: "",
+  kegiatan: "",
+  namaPpic: "",
+  emailPpic: "",
+};
+
+const initialRincian: RincianItem[] = [];
+
 export default function RegistrationPage() {
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    nomorFpps: "",
-    nomorQuotation: "",
-    petugas: [""],
-    namaPelanggan: "",
-    alamatPelanggan: "",
-    noTelp: "",
-    tanggalMasuk: "",
-    kegiatan: "",
-    namaPpic: "",
-    emailPpic: "",
-  });
+  const [formData, setFormData] = useState(initialFormData);
+  const [rincian, setRincian] = useState(initialRincian);
+  const { setIsLoading } = useLoading();
 
-  const [rincian, setRincian] = useState<RincianItem[]>([]);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const documentRef = useRef<HTMLDivElement>(null);
+
+  const resetForm = () => {
+    setFormData(initialFormData);
+    setRincian(initialRincian);
+    setStep(1);
+  };
 
   const handleSimpanDanPreview = async () => {
     const nomorFppsFinal = `DIL-${formData.nomorFpps}`;
@@ -51,22 +64,21 @@ export default function RegistrationPage() {
       rincian,
     };
 
+    setIsLoading(true);
     try {
-      const res = await fetch("/api/fpps", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const minimumDelay = new Promise((resolve) => setTimeout(resolve, 500));
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Gagal menyimpan data");
-      }
+      await Promise.all([axios.post("/api/fpps", payload), minimumDelay]);
 
       toast.success(`Data untuk ${nomorFppsFinal} berhasil disimpan!`);
+      resetForm();
     } catch (error: any) {
       console.error(error);
-      toast.error(`Gagal menyimpan: ${error.message}`);
+      toast.error(
+        `Gagal menyimpan: ${error.response?.data?.message || error.message}`
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -126,7 +138,6 @@ export default function RegistrationPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
       <div className="print-only">
         <FppsDocument
           data={{
@@ -137,7 +148,6 @@ export default function RegistrationPage() {
           }}
         />
       </div>
-
       <style>
         {`
           @media print {

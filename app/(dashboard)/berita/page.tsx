@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import axios from "axios";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,7 @@ import { BapsPreviewDialog } from "./components/BapsPreviewDialog";
 import { BapsDocument } from "./BapsDocument";
 import { toast } from "sonner";
 import { Printer, Save } from "lucide-react";
+import { useLoading } from "@/components/context/LoadingContext";
 
 interface BapsData {
   nomorFpps: string;
@@ -48,8 +50,13 @@ interface BapsData {
 export default function BeritaPage() {
   const [bapsData, setBapsData] = useState<BapsData | null>(null);
   const [fppsInput, setFppsInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const { isLoading, setIsLoading } = useLoading();
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  const resetForm = () => {
+    setBapsData(null);
+    setFppsInput("");
+  };
 
   const handleCariFpps = async () => {
     if (!fppsInput) return toast.error("Masukkan nomor FPPS");
@@ -104,75 +111,39 @@ export default function BeritaPage() {
     }
   };
 
-  const handleBapsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!bapsData) return;
-    const { name, value } = e.target;
-
-    if (name in bapsData.penandaTangan) {
-      setBapsData({
-        ...bapsData,
-        penandaTangan: { ...bapsData.penandaTangan, [name]: value },
-      });
-    } else if (name in bapsData.titikPengujian) {
-      setBapsData({
-        ...bapsData,
-        titikPengujian: { ...bapsData.titikPengujian, [name]: value },
-      });
-    } else {
-      setBapsData({ ...bapsData, [name]: value });
-    }
-  };
+  const handleBapsChange = (e: React.ChangeEvent<HTMLInputElement>) => {};
 
   const handleRincianChange = (
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    if (!bapsData) return;
-    const { name, value } = e.target;
-    const updated = [...bapsData.rincianUji];
-    updated[index] = { ...updated[index], [name]: value };
-    setBapsData({ ...bapsData, rincianUji: updated });
-  };
+  ) => {};
 
   const handleSignatureUpload = (
     e: React.ChangeEvent<HTMLInputElement>,
     field: "signatureUrlLab" | "signatureUrlPerusahaan"
-  ) => {
-    if (!bapsData) return;
-    const file = e.target.files?.[0];
-    if (file && file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setBapsData({
-          ...bapsData,
-          penandaTangan: {
-            ...bapsData.penandaTangan,
-            [field]: reader.result as string,
-          },
-        });
-      };
-      reader.readAsDataURL(file);
-    } else if (file) {
-      toast.error("Harap unggah file gambar yang valid.");
-    }
-  };
+  ) => {};
 
   const handleSaveStatus = async () => {
     if (!bapsData) return toast.error("Data Berita Acara belum dimuat.");
 
+    setIsLoading(true);
     try {
-      const res = await fetch(`/api/fpps/${bapsData.nomorFpps}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "analisis" }),
+      const minimumDelay = new Promise((resolve) => setTimeout(resolve, 500));
+      const updatePromise = axios.put(`/api/fpps/${bapsData.nomorFpps}`, {
+        status: "analisis",
       });
 
-      if (!res.ok) throw new Error("Gagal memperbarui status FPPS.");
+      await Promise.all([updatePromise, minimumDelay]);
 
       toast.success("Status FPPS berhasil diubah menjadi 'Analisis'.");
+      resetForm();
     } catch (error: any) {
       console.error("Update FPPS Status Error:", error);
-      toast.error(error.message || "Terjadi kesalahan saat menyimpan.");
+      toast.error(
+        error.response?.data?.message || "Terjadi kesalahan saat menyimpan."
+      );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -201,40 +172,7 @@ export default function BeritaPage() {
 
           {bapsData && (
             <>
-              <div className="space-y-4 rounded-lg border border-border p-4">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div>
-                    <Label className="text-sm font-medium">Perusahaan</Label>
-                    <p className="mt-1 text-base font-semibold">
-                      {bapsData.perusahaan}
-                    </p>
-                  </div>
-                  <div>
-                    <Label className="text-sm font-medium">No. Telp</Label>
-                    <p className="mt-1 text-base font-semibold">
-                      {bapsData.noTelp}
-                    </p>
-                  </div>
-                  <div className="md:col-span-2">
-                    <Label className="text-sm font-medium">Alamat</Label>
-                    <p className="mt-1 text-base font-semibold">
-                      {bapsData.alamat}
-                    </p>
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="hariTanggal" className="text-sm font-medium">
-                    Hari, Tanggal Pengambilan Sampel
-                  </Label>
-                  <Input
-                    id="hariTanggal"
-                    name="hariTanggal"
-                    value={bapsData.hariTanggal}
-                    onChange={handleBapsChange}
-                    className="mt-1"
-                  />
-                </div>
-              </div>
+              <div className="space-y-4 rounded-lg border border-border p-4"></div>
 
               <div className="rounded-lg border border-border p-4">
                 <TitikPengujianForm
@@ -249,65 +187,7 @@ export default function BeritaPage() {
                 />
               </div>
 
-              <div className="rounded-lg border border-border p-4">
-                <h2 className="mb-4 text-base font-medium">Penanda Tangan</h2>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="pihakLab">Pihak Laboratorium</Label>
-                    <Input
-                      id="pihakLab"
-                      name="pihakLab"
-                      value={bapsData.penandaTangan.pihakLab}
-                      onChange={handleBapsChange}
-                      placeholder="Nama..."
-                    />
-                    <Label
-                      htmlFor="ttd-lab"
-                      className="text-xs text-muted-foreground"
-                    >
-                      Tanda Tangan (PNG)
-                    </Label>
-                    <div className="flex items-center gap-4">
-                      <Input
-                        id="ttd-lab"
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) =>
-                          handleSignatureUpload(e, "signatureUrlLab")
-                        }
-                        className="text-xs file:text-xs"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="pihakPerusahaan">Pihak Perusahaan</Label>
-                    <Input
-                      id="pihakPerusahaan"
-                      name="pihakPerusahaan"
-                      value={bapsData.penandaTangan.pihakPerusahaan}
-                      onChange={handleBapsChange}
-                      placeholder="Nama..."
-                    />
-                    <Label
-                      htmlFor="ttd-perusahaan"
-                      className="text-xs text-muted-foreground"
-                    >
-                      Tanda Tangan (PNG)
-                    </Label>
-                    <div className="flex items-center gap-4">
-                      <Input
-                        id="ttd-perusahaan"
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) =>
-                          handleSignatureUpload(e, "signatureUrlPerusahaan")
-                        }
-                        className="text-xs file:text-xs"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <div className="rounded-lg border border-border p-4"></div>
 
               <div className="flex justify-end gap-2">
                 <Button onClick={handleSaveStatus}>
