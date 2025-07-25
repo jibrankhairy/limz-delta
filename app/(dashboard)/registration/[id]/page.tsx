@@ -1,22 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "sonner";
 import FormDasar from "../components/FormDasar";
 import FormRincian from "../components/FormRincian";
 import { FppsDocument } from "../components/FppsDocument";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { Printer } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLoading } from "@/components/context/LoadingContext";
 
@@ -29,7 +19,6 @@ interface RincianItem {
   metode: string;
 }
 
-// Komponen Skeleton untuk loading
 const FormSkeleton = () => (
   <div className="p-6 space-y-6">
     <Skeleton className="h-8 w-1/4" />
@@ -51,7 +40,7 @@ const FormSkeleton = () => (
 export default function EditRegistrationPage() {
   const params = useParams();
   const router = useRouter();
-  const id = params.id as string;
+  const id = (params.nomor || params.id) as string;
 
   const [step, setStep] = useState(2);
   const { setIsLoading, isLoading } = useLoading();
@@ -72,16 +61,13 @@ export default function EditRegistrationPage() {
 
   useEffect(() => {
     if (!id) return;
-
     const fetchData = async () => {
       setIsLoading(true);
       try {
         const res = await axios.get(`/api/fpps/${id}`);
         const existingData = res.data;
-
         const nomorFppsWithoutPrefix =
           existingData.formData.nomorFpps.replace("DIL-", "") || "";
-
         setFormData({
           ...existingData.formData,
           nomorFpps: nomorFppsWithoutPrefix,
@@ -95,7 +81,6 @@ export default function EditRegistrationPage() {
         setIsLoading(false);
       }
     };
-
     fetchData();
   }, [id, setIsLoading, router]);
 
@@ -105,7 +90,6 @@ export default function EditRegistrationPage() {
       formData: { ...formData, nomorFpps: nomorFppsFinal },
       rincian,
     };
-
     setIsLoading(true);
     try {
       await axios.put(`/api/fpps/${id}`, payload);
@@ -119,6 +103,10 @@ export default function EditRegistrationPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handlePrint = () => {
+    window.print();
   };
 
   if (isLoading && !formData.nomorFpps) {
@@ -149,9 +137,54 @@ export default function EditRegistrationPage() {
           setRincian={setRincian}
           goBack={() => setStep(1)}
           onSubmit={handleUpdate}
-          onPrint={() => {}}
+          onPrint={handlePrint}
         />
       )}
+
+      <div className="print-only">
+        <FppsDocument
+          data={{
+            ...formData,
+            nomorFpps: `DIL-${formData.nomorFpps}`,
+            petugas: formData.petugas,
+            rincian,
+          }}
+        />
+      </div>
+
+      <style>
+        {`
+          @media print {
+            @page {
+              size: A4 landscape;
+              margin: 0;
+            }
+            body {
+              margin: 0;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .print-only {
+              display: block;
+            }
+            body * {
+              visibility: hidden;
+            }
+            .print-only, .print-only * {
+              visibility: visible;
+            }
+            .print-only {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100%;
+            }
+            button, [data-no-print] {
+              display: none !important;
+            }
+          }
+        `}
+      </style>
     </div>
   );
 }

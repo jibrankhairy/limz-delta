@@ -84,7 +84,6 @@ export default function FormRincian({
   return (
     <>
       <CardContent className="space-y-6">
-        {/* Ringkasan Info */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm px-4 py-3 rounded-md border border-muted">
           <p className="text-muted-foreground">
             No. FPPS:{" "}
@@ -108,7 +107,6 @@ export default function FormRincian({
               {formData.kegiatan}
             </span>
           </p>
-          
         </div>
 
         <div className="space-y-4">
@@ -195,7 +193,6 @@ export default function FormRincian({
           ))}
         </div>
 
-        {/* Tambah Area */}
         <Button
           onClick={handleAdd}
           variant="outline"
