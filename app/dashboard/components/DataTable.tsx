@@ -21,8 +21,6 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import {
   IconCircleCheckFilled,
-  IconDotsVertical,
-  IconGripVertical,
   IconLoader,
   IconChevronLeft,
   IconChevronRight,
@@ -46,14 +44,6 @@ import { z } from "zod";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-// --- PERUBAHAN --- Checkbox tidak lagi digunakan
-// import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -73,50 +63,22 @@ import {
 export const schema = z.object({
   id: z.string(),
   header: z.string(),
-  ppic: z.string(),
-  email: z.string(),
   status: z.string(),
-  target: z.string(),
-  limit: z.string(),
-  reviewer: z.string(),
 });
 
-function DragHandle({ id }: { id: string }) {
-  const { attributes, listeners } = useSortable({ id });
-
-  return (
-    <Button
-      {...attributes}
-      {...listeners}
-      variant="ghost"
-      size="icon"
-      className="text-muted-foreground size-7 hover:bg-transparent"
-    >
-      <IconGripVertical className="text-muted-foreground size-3" />
-    </Button>
-  );
-}
-
 const columns: ColumnDef<z.infer<typeof schema>>[] = [
-  // {
-  //   id: "drag",
-  //   header: () => null,
-  //   cell: ({ row }) => <DragHandle id={row.original.id} />,
-  // },
   {
     id: "no",
-    // PERUBAHAN: Header dibuat rata tengah
     header: () => <div className="text-center">No.</div>,
     cell: ({ row, table }) => {
       const { pageIndex, pageSize } = table.getState().pagination;
-      // PERUBAHAN: Nomor juga dibuat rata tengah
       return (
         <div className="text-center">
           {pageIndex * pageSize + row.index + 1}
         </div>
       );
     },
-    size: 50,
+    size: 60,
   },
   {
     accessorKey: "header",
@@ -124,51 +86,24 @@ const columns: ColumnDef<z.infer<typeof schema>>[] = [
     cell: ({ row }) => row.original.header,
   },
   {
-    accessorKey: "ppic",
-    header: "Nama PPIC",
-    cell: ({ row }) => row.original.ppic,
-  },
-  {
-    accessorKey: "email",
-    header: "Email PPIC",
-    cell: ({ row }) => row.original.email,
-  },
-  {
-    accessorKey: "nomor",
-    header: "Nomor Handphone",
-    cell: ({ row }) => row.original.limit,
-  },
-  {
     accessorKey: "status",
-    header: "Status",
+    header: () => <div className="text-center">Status</div>,
     cell: ({ row }) => (
-      <Badge
-        variant="outline"
-        className="text-muted-foreground px-1.5 flex gap-1 items-center"
-      >
-        {row.original.status === "selesai" ? (
-          <IconCircleCheckFilled className="fill-green-500 size-4" />
-        ) : (
-          <IconLoader className="animate-spin size-4" />
-        )}
-        {row.original.status}
-      </Badge>
+      <div className="flex justify-center">
+        <Badge
+          variant="outline"
+          className="text-muted-foreground flex w-fit items-center gap-1 px-1.5"
+        >
+          {row.original.status === "selesai" ? (
+            <IconCircleCheckFilled className="size-4 fill-green-500" />
+          ) : (
+            <IconLoader className="size-4 animate-spin" />
+          )}
+          {row.original.status}
+        </Badge>
+      </div>
     ),
-  },
-  {
-    id: "actions",
-    cell: () => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <IconDotsVertical />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
+    size: 150,
   },
 ];
 
@@ -182,8 +117,6 @@ function DraggableRow({ row }: { row: Row<z.infer<typeof schema>> }) {
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition }}
       data-dragging={isDragging}
-      // --- PERUBAHAN --- 'data-state' untuk seleksi tidak lagi diperlukan
-      // data-state={row.getIsSelected() && "selected"}
       className="relative z-0 data-[dragging=true]:z-10 data-[dragging=true]:opacity-80"
     >
       {row.getVisibleCells().map((cell) => (
@@ -201,8 +134,7 @@ export function DataTable({
   data: z.infer<typeof schema>[];
 }) {
   const [data, setData] = React.useState(initialData);
-  // --- PERUBAHAN --- State untuk 'rowSelection' tidak lagi diperlukan
-  // const [rowSelection, setRowSelection] = React.useState({});
+
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -231,14 +163,10 @@ export function DataTable({
     state: {
       sorting,
       columnVisibility,
-      // --- PERUBAHAN --- 'rowSelection' dihapus dari state tabel
-      // rowSelection,
       columnFilters,
       pagination,
     },
     getRowId: (row) => row.id,
-    // --- PERUBAHAN --- Handler untuk 'rowSelection' dihapus
-    // onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
@@ -315,7 +243,6 @@ export function DataTable({
       </div>
 
       <div className="flex items-center justify-between px-2">
-        {/* --- PERUBAHAN --- Teks jumlah baris terpilih dihapus */}
         <div className="flex-1 text-sm text-muted-foreground">
           Total {table.getFilteredRowModel().rows.length} baris.
         </div>

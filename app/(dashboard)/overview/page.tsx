@@ -38,7 +38,7 @@ export default async function DashboardPage() {
     header: item.namaPelanggan || "",
     ppic: item.namaPpic || "",
     email: item.emailPpic || "",
-    limit: item.noTelp || "",
+    noTelp: item.noTelp || "",
     status: item.status || "pendaftaran",
   }));
 

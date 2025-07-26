@@ -87,6 +87,7 @@ export const schema = z.object({
   header: z.string(),
   ppic: z.string(),
   email: z.string(),
+  noTelp: z.string(),
   status: z.string(),
 });
 
@@ -136,6 +137,7 @@ export function DataTable({
     setIsLoading(true);
     try {
       const minimumDelay = new Promise((resolve) => setTimeout(resolve, 500));
+
       await Promise.all([
         axios.delete(`/api/fpps/${itemToDelete}`),
         minimumDelay,
@@ -144,7 +146,7 @@ export function DataTable({
       toast.success("Data berhasil dihapus!");
 
       setData((currentData) =>
-        currentData.filter((item) => item.id !== itemToDelete)
+        currentData.filter((item) => item.nomorFpps !== itemToDelete)
       );
     } catch (error) {
       console.error("Gagal menghapus data:", error);
@@ -167,12 +169,31 @@ export function DataTable({
           </div>
         );
       },
-      size: 60,
+      size: 50,
     },
     {
       accessorKey: "header",
       header: "Nama Pelanggan",
       cell: ({ row }) => row.original.header,
+      size: 200,
+    },
+    {
+      accessorKey: "ppic",
+      header: "Nama PPIC",
+      cell: ({ row }) => row.original.ppic,
+      size: 180,
+    },
+    {
+      accessorKey: "email",
+      header: "Email PPIC",
+      cell: ({ row }) => row.original.email,
+      size: 220,
+    },
+    {
+      accessorKey: "noTelp",
+      header: "No. Telp",
+      cell: ({ row }) => row.original.noTelp,
+      size: 150,
     },
     {
       accessorKey: "status",
@@ -192,11 +213,10 @@ export function DataTable({
           </Badge>
         </div>
       ),
-      size: 150,
     },
     {
       id: "actions",
-      header: () => null,
+      header: () => <div className="text-right">Aksi</div>,
       cell: ({ row }) => (
         <div className="flex justify-end">
           <DropdownMenu>

@@ -1,5 +1,4 @@
-import connectDB from "@/lib/db";
-import Fpps from "@/models/Fpps";
+import prisma from "@/lib/prisma";
 import { DataTable } from "./components/DataTable";
 import { SectionCards } from "./components/SectionCards";
 import {
@@ -11,20 +10,17 @@ import {
 } from "@/components/ui/card";
 
 export default async function DashboardPage() {
-  await connectDB();
-
-  type FppsDoc = {
-    _id: any;
-    namaPelanggan: string;
-    namaPpic: string;
-    emailPpic: string;
-    noTelp: string;
-    status?: string;
-    target?: string;
-    reviewer?: string;
-  };
-
-  const allData = (await Fpps.find().lean()) as unknown as FppsDoc[];
+  const allData = await prisma.fpps.findMany({
+    select: {
+      id: true,
+      nomorFpps: true,
+      namaPelanggan: true,
+      namaPpic: true,
+      emailPpic: true,
+      noTelp: true,
+      status: true,
+    },
+  });
 
   const totalClients = new Set(allData.map((item) => item.namaPelanggan)).size;
 
@@ -37,20 +33,16 @@ export default async function DashboardPage() {
   ).length;
 
   const dataForTable = allData.map((item) => ({
-    id: item._id.toString(),
-    header: item.namaPelanggan,
-    ppic: item.namaPpic,
-    email: item.emailPpic,
-    limit: item.noTelp,
-    status: item.status || "Pendaftaran",
-    target: item.target || "",
-    reviewer: item.reviewer || "",
+    id: item.id.toString(),
+    nomorFpps: item.nomorFpps,
+    header: item.namaPelanggan || "",
+    status: item.status || "pendaftaran",
   }));
 
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
       <div className="flex items-center">
-        <h1 className="text-lg font-semibold md:text-2xl">Dashboard</h1>
+        <h1 className="text-lg font-semibold md:text-2xl">Tabel Pelanggan</h1>
       </div>
 
       <SectionCards
