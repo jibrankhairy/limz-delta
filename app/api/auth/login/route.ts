@@ -2,16 +2,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import connectDB from "@/lib/db"; // kamu bisa taruh ini nanti
-import User from "@/models/User"; // import mongoose model
+// import prisma dari file inisialisasi (ganti connectDB)
+import prisma from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
-  await connectDB(); // koneksi ke MongoDB
+  // await connectDB() sudah tidak diperlukan lagi
 
   const { email, password } = await req.json();
 
   try {
-    const user = await User.findOne({ email });
+    // Ganti query Mongoose dengan Prisma
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+
     if (!user) {
       return NextResponse.json(
         { message: "Email tidak ditemukan" },
@@ -24,7 +28,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Password salah" }, { status: 401 });
     }
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET!, {
+    // `user.id` sekarang adalah integer, bukan `_id`
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
       expiresIn: "1d",
     });
 
@@ -32,7 +37,7 @@ export async function POST(req: NextRequest) {
       message: "Login berhasil",
       token,
       user: {
-        id: user._id,
+        id: user.id,
         fullName: user.fullName,
         email: user.email,
       },

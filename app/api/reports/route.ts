@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
-import connectToDatabase from "@/lib/db";
-import Report from "@/models/Report";
+import prisma from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 export async function GET() {
   try {
-    await connectToDatabase();
-    const reports = await Report.find({}).sort({ createdAt: -1 });
+    const reports = await prisma.report.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
     return NextResponse.json({ success: true, data: reports });
   } catch (error) {
     return NextResponse.json(
@@ -18,10 +21,10 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    await connectToDatabase();
 
-    const newReport = new Report(body);
-    const savedReport = await newReport.save();
+    const savedReport = await prisma.report.create({
+      data: body,
+    });
 
     return NextResponse.json(
       { success: true, data: savedReport },

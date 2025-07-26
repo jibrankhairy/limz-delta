@@ -211,7 +211,7 @@ export function DataTable({
               </Link>
               <DropdownMenuItem
                 variant="destructive"
-                onSelect={() => setItemToDelete(row.original.id)}
+                onSelect={() => setItemToDelete(row.original.nomorFpps)}
               >
                 Hapus
               </DropdownMenuItem>

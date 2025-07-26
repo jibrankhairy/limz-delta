@@ -1,5 +1,4 @@
-import connectDB from "@/lib/db";
-import Fpps from "@/models/Fpps";
+import prisma from "@/lib/prisma";
 import { DataTable } from "./components/DataTable";
 import { SectionCards } from "./components/SectionCards";
 import {
@@ -11,19 +10,17 @@ import {
 } from "@/components/ui/card";
 
 export default async function DashboardPage() {
-  await connectDB();
-
-  type FppsDoc = {
-    _id: any;
-    nomorFpps: string;
-    namaPelanggan: string;
-    namaPpic: string;
-    emailPpic: string;
-    noTelp: string;
-    status?: string;
-  };
-
-  const allData = (await Fpps.find().lean()) as unknown as FppsDoc[];
+  const allData = await prisma.fpps.findMany({
+    select: {
+      id: true,
+      nomorFpps: true,
+      namaPelanggan: true,
+      namaPpic: true,
+      emailPpic: true,
+      noTelp: true,
+      status: true,
+    },
+  });
 
   const totalClients = new Set(allData.map((item) => item.namaPelanggan)).size;
 
@@ -36,13 +33,13 @@ export default async function DashboardPage() {
   ).length;
 
   const dataForTable = allData.map((item) => ({
-    id: item._id.toString(),
+    id: item.id.toString(),
     nomorFpps: item.nomorFpps,
-    header: item.namaPelanggan,
-    ppic: item.namaPpic,
-    email: item.emailPpic,
-    limit: item.noTelp,
-    status: item.status || "Pendaftaran",
+    header: item.namaPelanggan || "",
+    ppic: item.namaPpic || "",
+    email: item.emailPpic || "",
+    limit: item.noTelp || "",
+    status: item.status || "pendaftaran",
   }));
 
   return (

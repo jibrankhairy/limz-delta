@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import connectToDatabase from "@/lib/db";
-import Report from "@/models/Report";
-import Fpps from "@/models/Fpps";
+import prisma from "@/lib/prisma";
 
 export async function PUT(
   request: Request,
@@ -18,34 +16,34 @@ export async function PUT(
       );
     }
 
-    await connectToDatabase();
+    const updatedReport = await prisma.$transaction(async (tx) => {
+      const report = await tx.report.update({
+        where: { id },
+        data: { status },
+      });
 
-    const updatedReport = await Report.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true }
-    );
+      if (!report) {
+        throw new Error("Laporan tidak ditemukan");
+      }
 
-    if (!updatedReport) {
-      return NextResponse.json(
-        { success: false, error: "Laporan tidak ditemukan" },
-        { status: 404 }
-      );
-    }
+      const coverData = report.coverData as { nomorFpps?: string };
+      const nomorFpps = coverData.nomorFpps;
 
-    if (updatedReport.coverData?.nomorFpps) {
-      await Fpps.findOneAndUpdate(
-        { nomorFpps: updatedReport.coverData.nomorFpps },
-        { status: status },
-        { new: true }
-      );
-    }
+      if (nomorFpps) {
+        await tx.fpps.update({
+          where: { nomorFpps },
+          data: { status },
+        });
+      }
+
+      return report;
+    });
 
     return NextResponse.json({ success: true, data: updatedReport });
-  } catch (error) {
+  } catch (error: any) {
     console.error(`API Status Update Error (id: ${id}):`, error);
     return NextResponse.json(
-      { success: false, error: "Gagal mengupdate status" },
+      { success: false, error: error.message || "Gagal mengupdate status" },
       { status: 500 }
     );
   }

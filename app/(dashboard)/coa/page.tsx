@@ -156,7 +156,7 @@ export default function CoaPage() {
             };
             setCoaData(coverDataWithDates);
             setActiveTemplates(report.activeTemplates);
-            setReportId(report._id);
+            setReportId(report.id);
             setView("dashboard");
           } else {
             toast.error("Gagal memuat laporan.");
@@ -243,7 +243,7 @@ export default function CoaPage() {
       const endpoint = isExisting ? `/api/reports/${reportId}` : "/api/reports";
 
       const payload = {
-        _id: reportId,
+        id: reportId,
         coverData: coaData,
         activeTemplates: activeTemplates,
         status: "sertifikat",

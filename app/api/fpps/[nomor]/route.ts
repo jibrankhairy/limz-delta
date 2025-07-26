@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import connectDB from "@/lib/db";
-import Fpps from "@/models/Fpps";
+import prisma from "@/lib/prisma";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { nomor: string } }
 ) {
-  await connectDB();
+  const { nomor } = params;
   try {
-    const { nomor } = params;
-    const data = await Fpps.findOne({ nomorFpps: nomor });
+    const data = await prisma.fpps.findUnique({
+      where: { nomorFpps: nomor },
+      include: { rincian: true },
+    });
 
     if (!data) {
       return NextResponse.json(
@@ -18,21 +19,11 @@ export async function GET(
       );
     }
 
+    const { rincian, ...formData } = data;
     return NextResponse.json(
       {
-        formData: {
-          nomorFpps: data.nomorFpps,
-          namaPelanggan: data.namaPelanggan,
-          alamatPelanggan: data.alamatPelanggan,
-          noTelp: data.noTelp,
-          tanggalMasuk: data.tanggalMasuk,
-          petugas: data.petugas,
-          emailPpic: data.emailPpic,
-          namaPpic: data.namaPpic,
-          nomorQuotation: data.nomorQuotation,
-          kegiatan: data.kegiatan,
-        },
-        rincian: data.rincian,
+        formData: formData,
+        rincian: rincian.map((r) => ({ ...r, id: r.idRincian })),
       },
       { status: 200 }
     );
@@ -50,43 +41,38 @@ export async function PUT(
   { params }: { params: { nomor: string } }
 ) {
   const { nomor } = params;
-
   try {
-    await connectDB();
     const body = await request.json();
 
     if (body.formData && body.rincian) {
       const { formData, rincian } = body;
-      const updatedFpps = await Fpps.findOneAndUpdate(
-        { nomorFpps: nomor },
-        { ...formData, rincian },
-        { new: true, runValidators: true }
-      );
-
-      if (!updatedFpps) {
-        return NextResponse.json(
-          { message: `Data dengan nomor ${nomor} tidak ditemukan` },
-          { status: 404 }
-        );
-      }
+      const updatedFpps = await prisma.fpps.update({
+        where: { nomorFpps: nomor },
+        data: {
+          ...formData,
+          rincian: {
+            deleteMany: {},
+            create: rincian.map((item: any) => ({
+              idRincian: item.id,
+              area: item.area,
+              matriks: item.matriks,
+              parameter: item.parameter,
+              regulasi: item.regulasi,
+              metode: item.metode,
+            })),
+          },
+        },
+      });
       return NextResponse.json(
         { message: "Data FPPS berhasil diperbarui", data: updatedFpps },
         { status: 200 }
       );
     } else if (body.status) {
       const { status } = body;
-      const updatedFpps = await Fpps.findOneAndUpdate(
-        { nomorFpps: nomor },
-        { status: status },
-        { new: true }
-      );
-
-      if (!updatedFpps) {
-        return NextResponse.json(
-          { message: `FPPS dengan nomor ${nomor} tidak ditemukan` },
-          { status: 404 }
-        );
-      }
+      const updatedFpps = await prisma.fpps.update({
+        where: { nomorFpps: nomor },
+        data: { status },
+      });
       return NextResponse.json(
         { message: "Status FPPS berhasil diperbarui", data: updatedFpps },
         { status: 200 }
@@ -110,29 +96,34 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: { nomor: string } }
 ) {
-  const idToDelete = params.nomor;
-
+  const nomorToDelete = params.nomor;
   try {
-    await connectDB();
+    const result = await prisma.$transaction(async (tx) => {
+      const fpps = await tx.fpps.findUnique({
+        where: { nomorFpps: nomorToDelete },
+        select: { id: true },
+      });
 
-    const deletedFpps = await Fpps.findByIdAndDelete(idToDelete);
+      if (!fpps) {
+        throw new Error(`FPPS dengan nomor ${nomorToDelete} tidak ditemukan.`);
+      }
 
-    if (!deletedFpps) {
-      return NextResponse.json(
-        { message: `Data dengan ID ${idToDelete} tidak ditemukan` },
-        { status: 404 }
-      );
-    }
+      await tx.rincian.deleteMany({
+        where: { fppsId: fpps.id },
+      });
+
+      await tx.fpps.delete({
+        where: { nomorFpps: nomorToDelete },
+      });
+    });
 
     return NextResponse.json(
-      { message: "FPPS berhasil dihapus" },
+      { message: "FPPS dan semua rincian terkait berhasil dihapus" },
       { status: 200 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error("Delete FPPS Error:", error);
-    return NextResponse.json(
-      { message: "Gagal menghapus data FPPS" },
-      { status: 500 }
-    );
+    const errorMessage = error.message || "Gagal menghapus data FPPS";
+    return NextResponse.json({ message: errorMessage }, { status: 500 });
   }
 }

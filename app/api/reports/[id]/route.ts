@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import connectToDatabase from "@/lib/db";
-import Report from "@/models/Report";
+import prisma from "@/lib/prisma";
 
 export async function GET(
   request: Request,
@@ -8,8 +7,9 @@ export async function GET(
 ) {
   const { id } = params;
   try {
-    await connectToDatabase();
-    const report = await Report.findById(id);
+    const report = await prisma.report.findUnique({
+      where: { id },
+    });
 
     if (!report) {
       return NextResponse.json(
@@ -33,18 +33,11 @@ export async function PUT(
   const { id } = params;
   try {
     const body = await request.json();
-    await connectToDatabase();
-    const updatedReport = await Report.findByIdAndUpdate(id, body, {
-      new: true,
-      runValidators: true,
+    const updatedReport = await prisma.report.update({
+      where: { id },
+      data: body,
     });
 
-    if (!updatedReport) {
-      return NextResponse.json(
-        { success: false, error: "Laporan tidak ditemukan" },
-        { status: 404 }
-      );
-    }
     return NextResponse.json({ success: true, data: updatedReport });
   } catch (error) {
     return NextResponse.json(
@@ -60,15 +53,10 @@ export async function DELETE(
 ) {
   const { id } = params;
   try {
-    await connectToDatabase();
-    const deletedReport = await Report.findByIdAndDelete(id);
+    await prisma.report.delete({
+      where: { id },
+    });
 
-    if (!deletedReport) {
-      return NextResponse.json(
-        { success: false, error: "Laporan tidak ditemukan" },
-        { status: 404 }
-      );
-    }
     return NextResponse.json({
       success: true,
       message: "Laporan berhasil dihapus.",

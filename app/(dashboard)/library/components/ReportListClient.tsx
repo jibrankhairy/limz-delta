@@ -23,9 +23,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 
-// PERUBAHAN: Default status diubah menjadi "Analisis"
 const formatStatusText = (status: string) => {
-  if (!status) return "Analisis"; // Diubah dari "Process"
+  if (!status) return "Analisis";
   return status.charAt(0).toUpperCase() + status.slice(1);
 };
 
@@ -65,7 +64,7 @@ export function ReportListClient({
       }
 
       setReports((prevReports: any[]) =>
-        prevReports.filter((report) => report._id !== reportId)
+        prevReports.filter((report) => report.id !== reportId)
       );
       toast.success("Laporan berhasil dihapus.");
     } catch (err: any) {
@@ -75,7 +74,6 @@ export function ReportListClient({
     }
   };
 
-  // PERUBAHAN: Tipe status diubah menjadi "analisis" | "selesai"
   const handleStatusChange = async (
     reportId: string,
     newStatus: "analisis" | "selesai"
@@ -95,7 +93,7 @@ export function ReportListClient({
 
       setReports((prevReports: any[]) =>
         prevReports.map((report) =>
-          report._id === reportId ? { ...report, status: newStatus } : report
+          report.id === reportId ? { ...report, status: newStatus } : report
         )
       );
       toast.success(
@@ -142,13 +140,12 @@ export function ReportListClient({
             <TableBody>
               {reports.length > 0 ? (
                 reports.map((report: any) => (
-                  <TableRow key={report._id}>
+                  <TableRow key={report.id}>
                     <TableCell className="font-medium">
                       {report.coverData?.customer || "-"}
                     </TableCell>
                     <TableCell>{report.coverData?.nomorFpps || "-"}</TableCell>
                     <TableCell>
-                      {/* PERUBAHAN: Kondisi badge disesuaikan menjadi 'selesai' */}
                       <Badge
                         variant={
                           report.status === "selesai" ? "default" : "secondary"
@@ -158,28 +155,26 @@ export function ReportListClient({
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right space-x-1">
-                      {loadingId === report._id ? (
+                      {loadingId === report.id ? (
                         <Loader2 className="h-4 w-4 animate-spin inline-block mr-2" />
                       ) : (
                         <>
-                          {/* PERUBAHAN: Teks, kondisi, dan fungsi onClick untuk tombol 'Selesai' */}
                           {report.status !== "selesai" && (
                             <Button
                               size="sm"
                               onClick={() =>
-                                handleStatusChange(report._id, "selesai")
+                                handleStatusChange(report.id, "selesai")
                               }
                             >
                               Selesai
                             </Button>
                           )}
-                          {/* PERUBAHAN: Teks, kondisi, dan fungsi onClick untuk tombol 'Analisis' */}
                           {report.status === "selesai" && (
                             <Button
                               size="sm"
                               variant="outline"
                               onClick={() =>
-                                handleStatusChange(report._id, "analisis")
+                                handleStatusChange(report.id, "analisis")
                               }
                             >
                               Analisis
@@ -188,14 +183,14 @@ export function ReportListClient({
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleEdit(report._id)}
+                            onClick={() => handleEdit(report.id)}
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleDelete(report._id)}
+                            onClick={() => handleDelete(report.id)}
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
@@ -206,7 +201,11 @@ export function ReportListClient({
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center h-24">
+                  <TableCell
+                    key="empty-row"
+                    colSpan={4}
+                    className="text-center h-24"
+                  >
                     Belum ada laporan yang tersimpan.
                   </TableCell>
                 </TableRow>
