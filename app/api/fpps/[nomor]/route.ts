@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
+// MENGAMBIL DATA FPPS TERTENTU
 export async function GET(
-  req: NextRequest,
+  req: Request, // <-- TAMBAHKAN KEMBALI TIPE DATA `Request`
   { params }: { params: { nomor: string } }
 ) {
   const { nomor } = params;
@@ -36,8 +37,9 @@ export async function GET(
   }
 }
 
+// UPDATE DATA FPPS
 export async function PUT(
-  request: NextRequest,
+  request: Request, // <-- TAMBAHKAN KEMBALI TIPE DATA `Request`
   { params }: { params: { nomor: string } }
 ) {
   const { nomor } = params;
@@ -92,38 +94,26 @@ export async function PUT(
   }
 }
 
+// MENGHAPUS DATA FPPS
 export async function DELETE(
-  req: NextRequest,
+  req: Request, // <-- TAMBAHKAN KEMBALI TIPE DATA `Request`
   { params }: { params: { nomor: string } }
 ) {
   const nomorToDelete = params.nomor;
   try {
-    const result = await prisma.$transaction(async (tx) => {
-      const fpps = await tx.fpps.findUnique({
-        where: { nomorFpps: nomorToDelete },
-        select: { id: true },
-      });
-
-      if (!fpps) {
-        throw new Error(`FPPS dengan nomor ${nomorToDelete} tidak ditemukan.`);
-      }
-
-      await tx.rincian.deleteMany({
-        where: { fppsId: fpps.id },
-      });
-
-      await tx.fpps.delete({
-        where: { nomorFpps: nomorToDelete },
-      });
+    await prisma.fpps.delete({
+      where: { nomorFpps: nomorToDelete },
     });
 
     return NextResponse.json(
-      { message: "FPPS dan semua rincian terkait berhasil dihapus" },
+      { message: "FPPS berhasil dihapus" },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error("Delete FPPS Error:", error);
-    const errorMessage = error.message || "Gagal menghapus data FPPS";
-    return NextResponse.json({ message: errorMessage }, { status: 500 });
+    return NextResponse.json(
+      { message: "Gagal menghapus data FPPS" },
+      { status: 500 }
+    );
   }
 }
