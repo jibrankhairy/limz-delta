@@ -10,12 +10,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-
-  // --- TAMBAHKAN BLOK INI ---
-  eslint: {
-    // Abaikan error ESLint saat proses build di Vercel
-    ignoreDuringBuilds: true,
-  },
 };
 
 export default nextConfig;

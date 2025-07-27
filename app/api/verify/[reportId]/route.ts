@@ -1,18 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { NextResponse } from "next/server";
+import connectToDatabase from "@/lib/db";
+import Report from "@/models/Report";
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { reportId: string } }
+  request: Request,
+  { params }: { params: { id: string } }
 ) {
-  const { reportId } = params;
+  const { id } = params;
 
   try {
-    const report = await prisma.report.findUnique({
-      where: {
-        id: reportId,
-      },
-    });
+    await connectToDatabase();
+
+    const report = await Report.findById(id);
 
     if (!report) {
       return NextResponse.json(
@@ -21,12 +20,11 @@ export async function GET(
       );
     }
 
-    const coverData = report.coverData as any;
     const verificationData = {
-      certificateNo: coverData?.certificateNo || "-",
-      customer: coverData?.customer || "-",
-      reportDate: coverData?.reportDate || "-",
-      nomorFpps: coverData?.nomorFpps || "-",
+      certificateNo: report.coverData?.certificateNo || "-",
+      customer: report.coverData?.customer || "-",
+      reportDate: report.coverData?.reportDate || "-",
+      nomorFpps: report.coverData?.nomorFpps || "-",
     };
 
     return NextResponse.json({ success: true, data: verificationData });
