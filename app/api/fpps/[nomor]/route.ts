@@ -1,12 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
+// Definisikan tipe untuk parameter konteks
+type RouteContext = {
+  params: {
+    nomor: string;
+  };
+};
+
 // MENGAMBIL DATA FPPS TERTENTU
-export async function GET(
-  req: Request, // <-- TAMBAHKAN KEMBALI TIPE DATA `Request`
-  { params }: { params: { nomor: string } }
-) {
-  const { nomor } = params;
+export async function GET(req: NextRequest, context: RouteContext) {
+  const { nomor } = context.params;
   try {
     const data = await prisma.fpps.findUnique({
       where: { nomorFpps: nomor },
@@ -38,11 +42,8 @@ export async function GET(
 }
 
 // UPDATE DATA FPPS
-export async function PUT(
-  request: Request, // <-- TAMBAHKAN KEMBALI TIPE DATA `Request`
-  { params }: { params: { nomor: string } }
-) {
-  const { nomor } = params;
+export async function PUT(request: NextRequest, context: RouteContext) {
+  const { nomor } = context.params;
   try {
     const body = await request.json();
 
@@ -95,11 +96,8 @@ export async function PUT(
 }
 
 // MENGHAPUS DATA FPPS
-export async function DELETE(
-  req: Request, // <-- TAMBAHKAN KEMBALI TIPE DATA `Request`
-  { params }: { params: { nomor: string } }
-) {
-  const nomorToDelete = params.nomor;
+export async function DELETE(req: NextRequest, context: RouteContext) {
+  const nomorToDelete = context.params.nomor;
   try {
     await prisma.fpps.delete({
       where: { nomorFpps: nomorToDelete },
