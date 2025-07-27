@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import * as React from "react";
+import Image from "next/image";
 import {
   IconCertificate2,
   IconDashboard,
   IconDatabase,
   IconNews,
 } from "@tabler/icons-react";
+import { FileText, FormInput, UserPlus } from "lucide-react";
 
 import { NavDocuments } from "@/components/nav-documents";
 import { NavMain } from "@/components/nav-main";
@@ -21,74 +23,69 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import Image from "next/image";
-import { FileText, FormInput, UserPlus } from "lucide-react";
-
-const defaultUser = {
-  name: "shadcn",
-  email: "m@example.com",
-  avatar: "/avatars/shadcn.jpg",
-};
+import { useAuth } from "./context/AuthContext";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const [user, setUser] = React.useState(defaultUser);
+  // Ambil data user yang sedang login dari context
+  const { user } = useAuth();
 
-  React.useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      try {
-        const parsed = JSON.parse(storedUser);
-        setUser({
-          name: parsed.fullName || "User",
-          email: parsed.email || "email@example.com",
-          avatar: "/images/avatars/user.png",
-        });
-      } catch (e) {
-        console.error("Failed to parse user data:", e);
-      }
-    }
-  }, []);
-
-  const navMain = [
+  // Definisikan SEMUA kemungkinan menu beserta role yang diizinkan
+  const allNavMain = [
     {
       title: "Dashboard",
       url: "/overview",
       icon: IconDashboard as any,
+      roles: ["SUPER_ADMIN"], // Hanya bisa dilihat oleh SUPER_ADMIN
     },
     {
       title: "Form Pendaftaran",
       url: "/registration",
       icon: FormInput as any,
+      roles: ["SUPER_ADMIN"],
     },
     {
       title: "Surat Tugas",
       url: "/surat",
       icon: UserPlus as any,
+      roles: ["SUPER_ADMIN"],
     },
     {
       title: "Surat Tugas Pengujian",
       url: "/pengujian",
       icon: FileText as any,
+      roles: ["SUPER_ADMIN"],
     },
     {
       title: "Berita Acara",
       url: "/berita",
       icon: IconNews as any,
+      roles: ["SUPER_ADMIN"],
     },
   ];
 
-  const documents = [
+  const allDocuments = [
     {
       name: "Data Library",
       url: "/library",
       icon: IconDatabase as any,
+      roles: ["SUPER_ADMIN", "ANALIS"], // Bisa dilihat SUPER_ADMIN dan ANALIS
     },
     {
-      name: "Certificates Of Analysys",
+      name: "Certificates Of Analysis",
       url: "/coa",
       icon: IconCertificate2 as any,
+      roles: ["SUPER_ADMIN", "ANALIS"],
     },
   ];
+
+  // Filter menu berdasarkan role user yang sedang login
+  const navMain = allNavMain.filter((item) =>
+    item.roles.includes(user?.role || "")
+  );
+
+  const documents = allDocuments.filter((item) =>
+    item.roles.includes(user?.role || "")
+  );
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -117,13 +114,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
 
       <SidebarContent>
-        <NavMain items={navMain} />
-        <div className="my-2 border-t border-border" />
-        <NavDocuments items={documents} />
+        {/* Tampilkan grup menu hanya jika ada item yang boleh dilihat */}
+        {navMain.length > 0 && <NavMain items={navMain} />}
+
+        {/* Tampilkan garis pemisah hanya jika kedua grup menu ada */}
+        {navMain.length > 0 && documents.length > 0 && (
+          <div className="my-2 border-t border-border" />
+        )}
+
+        {documents.length > 0 && <NavDocuments items={documents} />}
       </SidebarContent>
 
       <SidebarFooter>
-        <NavUser user={user} />
+        {/* NavUser sekarang akan mengambil data dari useAuth secara internal */}
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );

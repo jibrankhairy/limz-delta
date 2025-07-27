@@ -1,11 +1,11 @@
 "use client";
 
+import * as React from "react";
 import {
   IconLogout,
   IconUserCircle,
   IconDotsVertical,
 } from "@tabler/icons-react";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -22,20 +22,30 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "./context/AuthContext";
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string;
-    email: string;
-    avatar?: string;
-  };
-}) {
+export function NavUser() {
   const { isMobile } = useSidebar();
-  const router = useRouter();
+  const { user, logout } = useAuth();
+
+  if (!user) {
+    return (
+      <div className="flex items-center gap-2 p-2.5">
+        <Skeleton className="h-8 w-8 rounded-lg" />
+        <div className="flex flex-col gap-1">
+          <Skeleton className="h-4 w-20" />
+          <Skeleton className="h-3 w-28" />
+        </div>
+      </div>
+    );
+  }
+
+  const fallback = user.fullName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
 
   return (
     <SidebarMenu>
@@ -46,18 +56,17 @@ export function NavUser({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg grayscale">
+              <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage
-                  src={user.avatar ? user.avatar : "/images/avatar/user.png"}
-                  alt={user.name}
+                  src={"/images/avatars/user.png"}
+                  alt={user.fullName}
                 />
-
                 <AvatarFallback className="rounded-lg">
-                  {user.name?.charAt(0)?.toUpperCase() || "U"}
+                  {fallback}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate font-medium">{user.fullName}</span>
                 <span className="text-muted-foreground truncate text-xs">
                   {user.email}
                 </span>
@@ -75,15 +84,15 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage
-                    src={user.avatar || "/avatars/default.jpg"}
-                    alt={user.name}
+                    src={"/images/avatars/user.png"}
+                    alt={user.fullName}
                   />
                   <AvatarFallback className="rounded-lg">
-                    {user.name?.charAt(0)?.toUpperCase() || "U"}
+                    {fallback}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
+                  <span className="truncate font-medium">{user.fullName}</span>
                   <span className="text-muted-foreground truncate text-xs">
                     {user.email}
                   </span>
@@ -91,20 +100,14 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
+            {/* <DropdownMenuGroup>
+              <DropdownMenuItem disabled>
+                {" "}
                 <IconUserCircle />
                 Account
               </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuItem
-              onClick={() => {
-                localStorage.removeItem("token");
-                localStorage.removeItem("user");
-                router.push("/");
-                toast.success("You’ve been logged out!");
-              }}
-            >
+            </DropdownMenuGroup> */}
+            <DropdownMenuItem onClick={logout}>
               <IconLogout />
               Log out
             </DropdownMenuItem>

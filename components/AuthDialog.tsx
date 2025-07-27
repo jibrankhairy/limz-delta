@@ -42,9 +42,18 @@ export const AuthDialog = () => {
     try {
       const res = await axios.post("/api/auth/login", { email, password });
       toast.success("Sign In successful!");
+
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
-      router.push("/overview");
+
+      const userRole = res.data.user.role;
+
+      if (userRole === "ANALIS") {
+        router.push("/library");
+      } else {
+        router.push("/overview");
+      }
+
       setOpen(false);
     } catch (err: any) {
       console.error("Auth error:", err);

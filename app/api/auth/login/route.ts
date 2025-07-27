@@ -1,19 +1,17 @@
-// app/api/auth/login/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-// import prisma dari file inisialisasi (ganti connectDB)
 import prisma from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
-  // await connectDB() sudah tidak diperlukan lagi
-
   const { email, password } = await req.json();
 
   try {
-    // Ganti query Mongoose dengan Prisma
     const user = await prisma.user.findUnique({
       where: { email },
+      include: {
+        role: true,
+      },
     });
 
     if (!user) {
@@ -28,10 +26,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Password salah" }, { status: 401 });
     }
 
-    // `user.id` sekarang adalah integer, bukan `_id`
-    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
-      expiresIn: "1d",
-    });
+    const token = jwt.sign(
+      { userId: user.id, role: user.role.name },
+      process.env.JWT_SECRET!,
+      { expiresIn: "1d" }
+    );
 
     return NextResponse.json({
       message: "Login berhasil",
@@ -40,6 +39,7 @@ export async function POST(req: NextRequest) {
         id: user.id,
         fullName: user.fullName,
         email: user.email,
+        role: user.role.name,
       },
     });
   } catch (err) {
